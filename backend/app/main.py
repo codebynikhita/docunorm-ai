@@ -8,6 +8,7 @@ from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.v1.api import api_router
 from app.core.config import get_settings
 from app.core.db import get_session, init_db
 
@@ -64,6 +65,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register API v1 Endpoints (Documents, Search, Audit, Chat)
+app.include_router(api_router)
 
 
 @app.get(
