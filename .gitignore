@@ -68,6 +68,8 @@ pnpm-debug.log*
 # Docker & Local Data Persistence
 docker-data/
 *.log
+storage/
+backend/storage/
 
 # IDE & Editors
 .vscode/
