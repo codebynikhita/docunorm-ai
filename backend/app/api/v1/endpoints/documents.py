@@ -12,6 +12,7 @@ from app.models.tenant import Tenant
 from app.models.user import User, UserRole
 from app.schemas.document import DocumentRead, DocumentUploadResponse
 from app.services.parser import PDFParserService
+from app.services.privacy import privacy_firewall
 from app.services.storage import storage_service
 from app.services.validator import validate_pdf_metadata
 
@@ -138,8 +139,13 @@ async def upload_document(
     )
     db.add(new_document)
 
-    # 7. Insert extracted chunks with page numbers and bounding boxes
+    # 7. Insert extracted chunks with page numbers, bounding boxes, and GDPR redaction
+    total_pii_masked = 0
     for block in parse_result.blocks:
+        anonymized = privacy_firewall.anonymize_text(block.text)
+        if anonymized.has_pii:
+            total_pii_masked += len(anonymized.entities)
+
         chunk = DocumentChunk(
             id=uuid4(),
             document_id=new_document.id,
@@ -147,9 +153,9 @@ async def upload_document(
             chunk_index=block.block_index,
             page_number=block.page_number,
             bounding_box=block.bounding_box,
-            content=block.text,
-            raw_content_masked=False,
-            token_count=len(block.text.split()),
+            content=anonymized.sanitized_text,
+            raw_content_masked=anonymized.has_pii,
+            token_count=len(anonymized.sanitized_text.split()),
         )
         db.add(chunk)
 
@@ -167,6 +173,7 @@ async def upload_document(
             "file_size_bytes": file_size,
             "total_pages": parse_result.total_pages,
             "chunks_extracted": len(parse_result.blocks),
+            "pii_entities_neutralized": total_pii_masked,
         },
     )
     db.add(audit_entry)
