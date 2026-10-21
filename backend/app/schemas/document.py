@@ -33,3 +33,36 @@ class DocumentUploadResponse(BaseModel):
     message: str
     is_duplicate: bool
     document: DocumentRead
+
+
+class SearchQuery(BaseModel):
+    """
+    Inbound search query payload for hybrid and semantic vector retrieval.
+    """
+
+    query: str
+    limit: int = 5
+
+
+class SearchResultChunk(BaseModel):
+    """
+    Individual retrieved document chunk with relevance score and bounding-box coordinates.
+    """
+
+    chunk_id: UUID
+    document_id: UUID
+    page_number: int
+    bounding_box: list[float] | None = None
+    content: str
+    similarity_score: float
+
+
+class SearchResponse(BaseModel):
+    """
+    Complete response containing ranked search results and query metadata.
+    """
+
+    query: str
+    document_id: UUID
+    total_results: int
+    results: list[SearchResultChunk]

@@ -10,7 +10,14 @@ from app.models.audit import AuditLog
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
-from app.schemas.document import DocumentRead, DocumentUploadResponse
+from app.schemas.document import (
+    DocumentRead,
+    DocumentUploadResponse,
+    SearchQuery,
+    SearchResponse,
+    SearchResultChunk,
+)
+from app.services.embedding import embedding_service
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
 from app.services.storage import storage_service
@@ -139,12 +146,15 @@ async def upload_document(
     )
     db.add(new_document)
 
-    # 7. Insert extracted chunks with page numbers, bounding boxes, and GDPR redaction
+    # 7. Insert extracted chunks with page numbers, bounding boxes, and embeddings
     total_pii_masked = 0
     for block in parse_result.blocks:
         anonymized = privacy_firewall.anonymize_text(block.text)
         if anonymized.has_pii:
             total_pii_masked += len(anonymized.entities)
+
+        # Generate 1024-dimensional dense semantic embedding vector
+        vector = embedding_service.generate_embedding(anonymized.sanitized_text)
 
         chunk = DocumentChunk(
             id=uuid4(),
@@ -156,6 +166,7 @@ async def upload_document(
             content=anonymized.sanitized_text,
             raw_content_masked=anonymized.has_pii,
             token_count=len(anonymized.sanitized_text.split()),
+            embedding=vector,
         )
         db.add(chunk)
 
@@ -256,3 +267,64 @@ async def get_document_chunks(
         }
         for c in chunks
     ]
+
+
+@router.post(
+    "/{document_id}/search",
+    response_model=SearchResponse,
+    summary="Semantic Vector Search Over Document Chunks (pgvector)",
+)
+async def search_document(
+    document_id: UUID,
+    payload: SearchQuery,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> SearchResponse:
+    """
+    High-performance semantic vector search powered by pgvector:
+    1. Converts natural language question into 1024-dim dense vector.
+    2. Executes cosine distance query in PostgreSQL (<=> operator).
+    3. Returns top-k matching chunks with similarity scores and visual bounding boxes.
+    """
+    tenant, _ = await get_or_create_default_tenant_and_user(db)
+
+    # 1. Generate 1024-dimensional query vector
+    query_vector = embedding_service.generate_embedding(payload.query)
+
+    # 2. Query PostgreSQL pgvector with cosine distance
+    distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label(
+        "distance"
+    )
+    stmt = (
+        select(DocumentChunk, distance_expr)
+        .where(
+            DocumentChunk.document_id == document_id,
+            DocumentChunk.tenant_id == tenant.id,
+            DocumentChunk.embedding.is_not(None),
+        )
+        .order_by(distance_expr.asc())
+        .limit(payload.limit)
+    )
+    result = await db.execute(stmt)
+    rows = result.all()
+
+    matches: list[SearchResultChunk] = []
+    for chunk, distance in rows:
+        # Distance is in range [0, 2]. Cosine similarity = 1 - distance
+        similarity = round(max(0.0, 1.0 - float(distance)), 4)
+        matches.append(
+            SearchResultChunk(
+                chunk_id=chunk.id,
+                document_id=chunk.document_id,
+                page_number=chunk.page_number,
+                bounding_box=chunk.bounding_box,
+                content=chunk.content,
+                similarity_score=similarity,
+            )
+        )
+
+    return SearchResponse(
+        query=payload.query,
+        document_id=document_id,
+        total_results=len(matches),
+        results=matches,
+    )
