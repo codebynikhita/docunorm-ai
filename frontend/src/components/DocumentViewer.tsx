@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { UploadCloud, FileText, ZoomIn, ZoomOut, CheckCircle2, AlertCircle } from "lucide-react";
+import React, { useState, useRef } from "react";
+import { UploadCloud, FileText, ZoomIn, ZoomOut, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 
 interface BoundingBoxHighlight {
   page_number: number;
@@ -13,6 +13,7 @@ interface DocumentViewerProps {
   documentName?: string;
   currentPage: number;
   totalPages: number;
+  isUploading?: boolean;
   activeHighlight?: BoundingBoxHighlight | null;
   onUploadFile?: (file: File) => void;
   onPageChange?: (newPage: number) => void;
@@ -22,11 +23,20 @@ export function DocumentViewer({
   documentName = "Siemens_Master_ICT_Agreement_2026.pdf",
   currentPage = 1,
   totalPages = 4,
+  isUploading = false,
   activeHighlight,
   onUploadFile,
   onPageChange,
 }: DocumentViewerProps) {
   const [zoom, setZoom] = useState(100);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onUploadFile) {
+      onUploadFile(file);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full bg-slate-900 border-r border-slate-800">
@@ -42,8 +52,28 @@ export function DocumentViewer({
           </span>
         </div>
 
-        {/* Page & Zoom Controls */}
+        {/* Upload Button + Page & Zoom Controls */}
         <div className="flex items-center gap-3 text-xs text-slate-400">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept=".pdf"
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium px-2.5 py-1 rounded transition-colors"
+          >
+            {isUploading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <UploadCloud className="w-3.5 h-3.5" />
+            )}
+            <span>{isUploading ? "Uploading..." : "Upload PDF"}</span>
+          </button>
+
           <div className="flex items-center gap-1 bg-slate-800 px-2 py-1 rounded">
             <button
               onClick={() => onPageChange && onPageChange(Math.max(1, currentPage - 1))}

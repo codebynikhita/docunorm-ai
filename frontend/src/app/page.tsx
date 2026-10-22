@@ -4,9 +4,15 @@ import React, { useState } from "react";
 import { Header } from "@/components/Header";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { AuditPanel, CitationItem } from "@/components/AuditorPanel";
+import { uploadDocument } from "@/lib/api";
 
 export default function Home() {
+  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [documentName, setDocumentName] = useState("Siemens_Master_ICT_Agreement_2026.pdf");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(4);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [activeHighlight, setActiveHighlight] = useState<{
     page_number: number;
     box: [number, number, number, number];
@@ -22,19 +28,51 @@ export default function Home() {
     });
   };
 
+  const handleUploadFile = async (file: File) => {
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const res = await uploadDocument(file);
+      setDocumentId(res.document.id);
+      setDocumentName(res.document.filename);
+      setTotalPages(res.document.total_pages || 1);
+      setCurrentPage(1);
+      setActiveHighlight(null);
+    } catch (err: any) {
+      setUploadError(err.message || "Failed to upload document");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-950">
       {/* 1. Top Enterprise Header */}
       <Header />
 
+      {/* Upload Error Banner if present */}
+      {uploadError && (
+        <div className="bg-rose-900/80 border-b border-rose-700 px-6 py-2 text-xs text-rose-200 flex items-center justify-between">
+          <span>Error: {uploadError}</span>
+          <button
+            onClick={() => setUploadError(null)}
+            className="text-rose-400 hover:text-white font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* 2. Dual-Pane Workbench Layout */}
       <main className="flex-1 flex overflow-hidden">
         {/* Left Pane: Document Viewer with Bounding Box Highlights */}
         <DocumentViewer
-          documentName="Siemens_Master_ICT_Agreement_2026.pdf"
+          documentName={documentName}
           currentPage={currentPage}
-          totalPages={4}
+          totalPages={totalPages}
+          isUploading={isUploading}
           activeHighlight={activeHighlight}
+          onUploadFile={handleUploadFile}
           onPageChange={(page) => setCurrentPage(page)}
         />
 
