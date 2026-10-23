@@ -66,3 +66,33 @@ class SearchResponse(BaseModel):
     document_id: UUID
     total_results: int
     results: list[SearchResultChunk]
+
+class AuditRequest(BaseModel):
+    """
+    Inbound request for auditing a document against European regulations.
+    """
+    query: str
+    framework: str = "DORA"  # DORA, LkSG, ZUGFeRD
+
+
+class AuditCitation(BaseModel):
+    """
+    Individual cited source with page number and visual bounding box.
+    """
+    source_tag: str
+    chunk_id: str | None = None
+    page_number: int
+    bounding_box: list[float] | None = None
+    content: str | None = None
+
+
+class AuditResponse(BaseModel):
+    """
+    Grounded regulatory audit finding returned to the enterprise workbench.
+    """
+    document_id: UUID
+    query: str
+    framework: str
+    status: str  # "COMPLIANT", "FLAGGED", "INCONCLUSIVE"
+    finding_summary: str
+    citations: list[AuditCitation]

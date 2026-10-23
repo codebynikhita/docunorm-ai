@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { DocumentViewer } from "@/components/DocumentViewer";
 import { AuditPanel, CitationItem } from "@/components/AuditorPanel";
-import { uploadDocument } from "@/lib/api";
+import { uploadDocument, listDocuments } from "@/lib/api";
 
 export default function Home() {
   const [documentId, setDocumentId] = useState<string | null>(null);
@@ -18,6 +18,20 @@ export default function Home() {
     box: [number, number, number, number];
     label?: string;
   } | null>(null);
+
+  // Auto-load most recently uploaded document from database
+  useEffect(() => {
+    async function initLatestDocument() {
+      const docs = await listDocuments();
+      if (docs && docs.length > 0) {
+        const latest = docs[0];
+        setDocumentId(latest.id);
+        setDocumentName(latest.filename);
+        setTotalPages(latest.total_pages || 1);
+      }
+    }
+    initLatestDocument();
+  }, []);
 
   const handleSelectCitation = (citation: CitationItem) => {
     setCurrentPage(citation.page_number);
@@ -33,6 +47,7 @@ export default function Home() {
     setUploadError(null);
     try {
       const res = await uploadDocument(file);
+      console.log("Uploaded successfully, document ID:", res.document.id);
       setDocumentId(res.document.id);
       setDocumentName(res.document.filename);
       setTotalPages(res.document.total_pages || 1);
@@ -67,6 +82,7 @@ export default function Home() {
       <main className="flex-1 flex overflow-hidden">
         {/* Left Pane: Document Viewer with Bounding Box Highlights */}
         <DocumentViewer
+          documentId={documentId}
           documentName={documentName}
           currentPage={currentPage}
           totalPages={totalPages}
@@ -77,7 +93,7 @@ export default function Home() {
         />
 
         {/* Right Pane: Regulatory Auditor Assistant */}
-        <AuditPanel onSelectCitation={handleSelectCitation} />
+        <AuditPanel documentId={documentId} onSelectCitation={handleSelectCitation} />
       </main>
     </div>
   );
