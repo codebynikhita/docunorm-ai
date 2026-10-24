@@ -331,8 +331,8 @@ def fallback_translate_german_text(text: str) -> str:
     ]
 
     for de_clause, en_clause in CLAUSE_MAP:
-        de_normalized = " ".join(de_clause.split()).lower()
-        t_normalized = t_clean.lower()
+        de_normalized = " ".join(de_clause.replace("•", " ").replace("·", " ").replace("-", " ").split()).lower()
+        t_normalized = " ".join(t_clean.replace("•", " ").replace("·", " ").replace("-", " ").split()).lower()
         if de_normalized in t_normalized or t_normalized in de_normalized:
             return en_clause
 
