@@ -48,13 +48,16 @@ export function LandingPage({
         </div>
 
         {/* Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-mono tracking-tight max-w-4xl mx-auto leading-[1.15]">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-sans tracking-tight max-w-4xl mx-auto leading-[1.12]">
           {t.landing_hero_h1_pre}{" "}
           <span className="text-[var(--accent-tangerine)]">{t.landing_hero_h1_accent}</span>
         </h1>
 
         {/* Subtitle */}
-        <p className="text-sm sm:text-base text-[var(--foreground)] opacity-70 max-w-2xl mx-auto leading-relaxed font-sans">
+        <p
+          spellCheck={false}
+          className="text-sm sm:text-base text-[var(--foreground)] opacity-75 max-w-2xl mx-auto leading-relaxed font-sans"
+        >
           {t.landing_hero_sub}
         </p>
 
@@ -115,7 +118,7 @@ export function LandingPage({
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--accent-tangerine)]">
             {t.landing_modules_tag}
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black font-mono">
+          <h2 className="text-2xl sm:text-3xl font-black font-sans tracking-tight">
             {t.landing_modules_title}
           </h2>
         </div>

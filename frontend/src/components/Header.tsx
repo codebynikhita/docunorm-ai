@@ -78,6 +78,19 @@ export function Header({
       {/* 2. Middle: Navigation & Layout Switcher */}
       <div className="flex items-center gap-1 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 font-mono text-[11px] shadow-sm">
         <button
+          onClick={() => onLayoutChange("portal")}
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
+            layoutMode === "portal"
+              ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
+              : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+          }`}
+          title="Public Portal & Institutional Overview"
+        >
+          <Building2 className="w-3.5 h-3.5 stroke-[2.5]" />
+          <span className="hidden md:inline">{lang === "DE" ? "Portal" : "Overview"}</span>
+        </button>
+
+        <button
           onClick={() => onLayoutChange("workbench")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "workbench"
