@@ -64,7 +64,7 @@ export function Header({
           onClick={() => onLayoutChange("workbench")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "workbench"
-              ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
+              ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
               : "text-[var(--foreground)] opacity-70 hover:opacity-100"
           }`}
           title="Split View: PDF Viewer + Auditor"
@@ -77,7 +77,7 @@ export function Header({
           onClick={() => onLayoutChange("executive")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "executive"
-              ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
+              ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
               : "text-[var(--foreground)] opacity-70 hover:opacity-100"
           }`}
           title="Executive Compliance Cockpit & Metrics"
@@ -90,7 +90,7 @@ export function Header({
           onClick={() => onLayoutChange("focus")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "focus"
-              ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
+              ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
               : "text-[var(--foreground)] opacity-70 hover:opacity-100"
           }`}
           title="Full-Screen Document Focus Canvas"
@@ -105,7 +105,7 @@ export function Header({
         {/* Official Certificate Export Button */}
         <button
           onClick={onOpenCertificate}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-black font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider"
+          className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider"
           title="Official BaFin / DIN 66399 Compliance Certificate"
         >
           <Award className="w-3.5 h-3.5 stroke-[2.5]" />

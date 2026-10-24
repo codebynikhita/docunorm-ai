@@ -56,7 +56,7 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
   ];
 
   return (
-    <aside className="w-64 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none">
+    <aside className="w-56 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none transition-all duration-200">
       <div className="p-3.5 space-y-5">
         {/* Navigation Category */}
         <div className="space-y-1">

@@ -39,6 +39,7 @@ interface AuditPanelProps {
   documentId?: string | null;
   onSelectCitation: (citation: CitationItem) => void;
   floating?: boolean;
+  onClose?: () => void;
 }
 
 export function AuditPanel({
@@ -46,6 +47,7 @@ export function AuditPanel({
   documentId,
   onSelectCitation,
   floating = false,
+  onClose,
 }: AuditPanelProps) {
   const t = translations[lang];
   const [mode, setMode] = useState<"DORA" | "LkSG" | "ZUGFeRD">("DORA");
@@ -112,8 +114,8 @@ export function AuditPanel({
   };
 
   const panelClasses = floating
-    ? "w-[440px] max-h-[600px] flex flex-col rounded-2xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-2xl overflow-hidden backdrop-blur-xl"
-    : "w-[460px] flex flex-col h-full bg-[var(--surface-dark)] border-l border-[var(--surface-border)]";
+    ? "w-[400px] max-h-[600px] flex flex-col rounded-2xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-2xl overflow-hidden backdrop-blur-xl"
+    : "w-[340px] xl:w-[380px] shrink-0 flex flex-col h-full bg-[var(--surface-dark)] border-l border-[var(--surface-border)] overflow-hidden transition-all duration-200";
 
   return (
     <div className={panelClasses}>
@@ -128,11 +130,17 @@ export function AuditPanel({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-[9px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold flex items-center gap-1">
-              <Languages className="w-3 h-3" /> DE/EN AI
+              <Languages className="w-3 h-3" /> DE/EN
             </span>
-            <span className="text-[9px] font-mono bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] px-2 py-0.5 rounded border border-[var(--accent-cyan)]/30 font-semibold">
-              pgvector-RRF
-            </span>
+            {onClose && (
+              <button
+                onClick={onClose}
+                title="Collapse Auditor Panel"
+                className="w-5 h-5 rounded hover:bg-[var(--surface-card)] flex items-center justify-center text-[var(--foreground)] opacity-60 hover:opacity-100 font-mono text-xs cursor-pointer ml-1"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 

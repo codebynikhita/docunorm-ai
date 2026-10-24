@@ -6,6 +6,7 @@
   --background: #05070b;
   --foreground: #f3f4f8;
   --accent-tangerine: #ff5500;
+  --accent-contrast: #000000;
   --accent-lime: #c6f000;
   --accent-cyan: #00e5ff;
   --surface-dark: #0a0e17;
@@ -17,24 +18,26 @@
 
 /* 2. Bauhaus Paper (Prestigious German Architectural Light Mode) */
 [data-theme="bauhaus"] {
-  --background: #f6f4ee;
+  --background: #f7f6f2;
   --foreground: #0f172a;
   --accent-tangerine: #dc2626; /* Bauhaus Bold Crimson */
+  --accent-contrast: #ffffff;
   --accent-lime: #16a34a;
   --accent-cyan: #2563eb;
-  --surface-dark: #ece9e0;
+  --surface-dark: #eeebe2;
   --surface-card: #ffffff;
-  --surface-border: #dcd7cb;
-  --canvas-bg: #f0eee6;
-  --grid-line: rgba(0, 0, 0, 0.05);
+  --surface-border: #e2ddd4;
+  --canvas-bg: #f2efe7;
+  --grid-line: rgba(0, 0, 0, 0.04);
 }
 
 /* 3. Prussian Blueprint (Deep Midnight Oceanic Navy & Electric Cyber Cyan) */
 [data-theme="terminal"],
 [data-theme="blueprint"] {
-  --background: #050c1e; /* Rich Dark Prussian Navy, unmistakable from black */
+  --background: #050c1e; /* Rich Dark Prussian Navy */
   --foreground: #e0f2fe; /* Ice Crystal */
   --accent-tangerine: #00f0ff; /* Electric Cyber Cyan Hero */
+  --accent-contrast: #000000;
   --accent-lime: #38bdf8;
   --accent-cyan: #60a5fa;
   --surface-dark: #09142e;

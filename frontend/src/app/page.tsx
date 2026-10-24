@@ -33,6 +33,7 @@ export default function Home() {
   const [isZugferdModalOpen, setIsZugferdModalOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
+  const [isAuditorOpen, setIsAuditorOpen] = useState(true);
   const [activeHighlight, setActiveHighlight] = useState<{
     page_number: number;
     box: [number, number, number, number];
@@ -222,11 +223,27 @@ export default function Home() {
               onPageChange={(page) => setCurrentPage(page)}
             />
 
-            <AuditPanel
-              lang={lang}
-              documentId={documentId}
-              onSelectCitation={handleSelectCitation}
-            />
+            {isAuditorOpen ? (
+              <AuditPanel
+                lang={lang}
+                documentId={documentId}
+                onSelectCitation={handleSelectCitation}
+                onClose={() => setIsAuditorOpen(false)}
+              />
+            ) : (
+              <div className="w-10 shrink-0 bg-[var(--surface-dark)] border-l border-[var(--surface-border)] flex flex-col items-center py-4 select-none">
+                <button
+                  onClick={() => setIsAuditorOpen(true)}
+                  title="Open Auditor Panel"
+                  className="flex flex-col items-center gap-3 text-[var(--foreground)] opacity-60 hover:opacity-100 hover:text-[var(--accent-tangerine)] transition-all cursor-pointer p-1"
+                >
+                  <Bot className="w-4 h-4 text-[var(--accent-tangerine)]" />
+                  <span className="font-mono text-[9px] font-bold uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
+                    Revisionsprüfer
+                  </span>
+                </button>
+              </div>
+            )}
           </main>
         )}
       </div>
