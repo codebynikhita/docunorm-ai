@@ -1,8 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID, uuid4
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -32,6 +32,7 @@ from app.services.embedding import embedding_service
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
 from app.services.storage import storage_service
+from app.services.tasks import get_task_progress, process_document_background, set_task_progress
 from app.services.validator import validate_pdf_metadata
 
 router = APIRouter(prefix="/documents", tags=["Document Management"])
@@ -84,11 +85,13 @@ async def get_or_create_default_tenant_and_user(
     "/upload",
     response_model=DocumentUploadResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Upload, Fingerprint & Automatically Parse Corporate PDF",
+    summary="Upload, Fingerprint & Automatically Ingest Corporate PDF (Async Background Queue)",
 )
 async def upload_document(
     file: Annotated[UploadFile, File(description="Corporate PDF document (max 50 MB)")],
+    background_tasks: BackgroundTasks,
     db: Annotated[AsyncSession, Depends(get_session)],
+    sync_mode: Annotated[bool, Query(description="Force synchronous ingestion instead of background queue")] = False,
 ) -> DocumentUploadResponse:
     """
     Enterprise Document Ingestion Pipeline:
@@ -96,9 +99,8 @@ async def upload_document(
     2. Streams file to compute cryptographic SHA-256 fingerprint.
     3. Enforces cryptographic deduplication (returns existing record if hash matches).
     4. Persists raw PDF to content-addressable storage.
-    5. Structural parsing via PyMuPDF (extracts pages, paragraphs, bounding boxes).
-    6. Persists document record and atomic chunks into PostgreSQL.
-    7. Logs immutable GDPR audit trail.
+    5. Dispatches asynchronous worker task (or executes synchronously if sync_mode=True).
+    6. Logs immutable GDPR audit trail.
     """
     filename = file.filename or "unnamed_document.pdf"
 
@@ -139,10 +141,75 @@ async def upload_document(
         content=content,
     )
 
-    # 5. Structural PDF Parsing (Extract text and bounding-box coordinates)
-    parse_result = pdf_parser.parse_pdf(target_path)
+    if sync_mode:
+        # Synchronous execution path (useful for testing or small documents)
+        parse_result = pdf_parser.parse_pdf(target_path)
+        new_document = Document(
+            id=uuid4(),
+            tenant_id=tenant.id,
+            uploaded_by=user.id,
+            filename=filename,
+            file_path=str(target_path),
+            file_size_bytes=file_size,
+            mime_type=file.content_type or "application/pdf",
+            sha256_hash=sha256_hash,
+            total_pages=parse_result.total_pages,
+            status=DocumentStatus.READY,
+        )
+        db.add(new_document)
 
-    # 6. Insert new Document entry in PostgreSQL
+        total_pii_masked = 0
+        for block in parse_result.blocks:
+            anonymized = privacy_firewall.anonymize_text(block.text)
+            if anonymized.has_pii:
+                total_pii_masked += len(anonymized.entities)
+
+            vector = embedding_service.generate_embedding(anonymized.sanitized_text)
+
+            chunk = DocumentChunk(
+                id=uuid4(),
+                document_id=new_document.id,
+                tenant_id=tenant.id,
+                chunk_index=block.block_index,
+                page_number=block.page_number,
+                bounding_box=block.bounding_box,
+                content=anonymized.sanitized_text,
+                raw_content_masked=anonymized.has_pii,
+                token_count=len(anonymized.sanitized_text.split()),
+                embedding=vector,
+            )
+            db.add(chunk)
+
+        audit_entry = AuditLog(
+            id=uuid4(),
+            tenant_id=tenant.id,
+            user_id=user.id,
+            action="DOCUMENT_INGEST",
+            resource_type="DOCUMENT",
+            resource_id=str(new_document.id),
+            details={
+                "filename": new_document.filename,
+                "sha256_hash": sha256_hash,
+                "file_size_bytes": file_size,
+                "total_pages": parse_result.total_pages,
+                "chunks_extracted": len(parse_result.blocks),
+                "pii_entities_neutralized": total_pii_masked,
+            },
+        )
+        db.add(audit_entry)
+        await db.commit()
+        await db.refresh(new_document)
+
+        return DocumentUploadResponse(
+            message=(
+                f"Document uploaded and parsed synchronously. "
+                f"Extracted {len(parse_result.blocks)} chunks across {parse_result.total_pages} pages."
+            ),
+            is_duplicate=False,
+            document=DocumentRead.model_validate(new_document),
+        )
+
+    # 5. Production Asynchronous Background Task Queue Path
     new_document = Document(
         id=uuid4(),
         tenant_id=tenant.id,
@@ -152,66 +219,60 @@ async def upload_document(
         file_size_bytes=file_size,
         mime_type=file.content_type or "application/pdf",
         sha256_hash=sha256_hash,
-        total_pages=parse_result.total_pages,
-        status=DocumentStatus.READY,
+        total_pages=0,
+        status=DocumentStatus.PROCESSING,
     )
     db.add(new_document)
-
-    # 7. Insert extracted chunks with page numbers, bounding boxes, and embeddings
-    total_pii_masked = 0
-    for block in parse_result.blocks:
-        anonymized = privacy_firewall.anonymize_text(block.text)
-        if anonymized.has_pii:
-            total_pii_masked += len(anonymized.entities)
-
-        # Generate 1024-dimensional dense semantic embedding vector
-        vector = embedding_service.generate_embedding(anonymized.sanitized_text)
-
-        chunk = DocumentChunk(
-            id=uuid4(),
-            document_id=new_document.id,
-            tenant_id=tenant.id,
-            chunk_index=block.block_index,
-            page_number=block.page_number,
-            bounding_box=block.bounding_box,
-            content=anonymized.sanitized_text,
-            raw_content_masked=anonymized.has_pii,
-            token_count=len(anonymized.sanitized_text.split()),
-            embedding=vector,
-        )
-        db.add(chunk)
-
-    # 8. Create immutable GDPR audit log entry
-    audit_entry = AuditLog(
-        id=uuid4(),
-        tenant_id=tenant.id,
-        user_id=user.id,
-        action="DOCUMENT_INGEST",
-        resource_type="DOCUMENT",
-        resource_id=str(new_document.id),
-        details={
-            "filename": new_document.filename,
-            "sha256_hash": sha256_hash,
-            "file_size_bytes": file_size,
-            "total_pages": parse_result.total_pages,
-            "chunks_extracted": len(parse_result.blocks),
-            "pii_entities_neutralized": total_pii_masked,
-        },
-    )
-    db.add(audit_entry)
-
-    # Atomic transaction commit
     await db.commit()
     await db.refresh(new_document)
 
+    # Initial progress registration in Redis
+    await set_task_progress(
+        document_id=new_document.id,
+        status="processing",
+        progress=5,
+        stage="task_queued_in_worker",
+    )
+
+    # Dispatch to background task worker
+    background_tasks.add_task(
+        process_document_background,
+        document_id=new_document.id,
+        target_path=target_path,
+        tenant_id=tenant.id,
+        user_id=user.id,
+    )
+
     return DocumentUploadResponse(
-        message=(
-            f"Document uploaded and parsed successfully. "
-            f"Extracted {len(parse_result.blocks)} chunks across {parse_result.total_pages} pages."
-        ),
+        message="Document uploaded successfully. Background ingestion worker queued.",
         is_duplicate=False,
         document=DocumentRead.model_validate(new_document),
     )
+
+
+@router.get(
+    "/{document_id}/task-progress",
+    summary="Get Asynchronous Document Ingestion Progress",
+)
+async def get_document_progress_endpoint(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> dict[str, Any]:
+    """
+    Poll the real-time background task ingestion status from Redis and PostgreSQL.
+    """
+    task_info = await get_task_progress(document_id)
+    if task_info.get("status") in ("unknown", None):
+        doc = await db.get(Document, document_id)
+        if doc:
+            task_info = {
+                "document_id": str(document_id),
+                "status": doc.status.value,
+                "progress": 100 if doc.status == DocumentStatus.READY else 0,
+                "stage": "completed" if doc.status == DocumentStatus.READY else "pending",
+                "error": None,
+            }
+    return task_info
 
 
 @router.get(

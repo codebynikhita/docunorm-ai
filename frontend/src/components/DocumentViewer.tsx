@@ -20,7 +20,7 @@ import {
 
 import { Language, translations } from "@/lib/i18n";
 import { translateGermanToEnglish } from "@/lib/translator";
-import { getDocumentChunks, getTranslatedDocumentChunks } from "@/lib/api";
+import { getDocumentChunks, getTranslatedDocumentChunks, getDocumentTaskProgress } from "@/lib/api";
 
 interface BoundingBoxHighlight {
   page_number: number;
@@ -65,6 +65,11 @@ export function DocumentViewer({
   const [docViewMode, setDocViewMode] = useState<"canvas" | "dual" | "english">("canvas");
   const [allChunks, setAllChunks] = useState<any[]>([]);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
+  const [taskProgress, setTaskProgress] = useState<{
+    status: string;
+    progress: number;
+    stage: string;
+  } | null>(null);
 
   const [canvasDimensions, setCanvasDimensions] = useState<{ width: number; height: number }>({
     width: 600,
@@ -74,6 +79,61 @@ export function DocumentViewer({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pdfDocRef = useRef<any>(null);
+
+  // Poll background task progress if document is in processing
+  useEffect(() => {
+    if (!documentId) {
+      setTaskProgress(null);
+      return;
+    }
+
+    let intervalId: any;
+    let isCancelled = false;
+
+    async function checkProgress() {
+      const info = await getDocumentTaskProgress(documentId!);
+      if (!isCancelled && info) {
+        if (info.status === "processing") {
+          setTaskProgress({
+            status: info.status,
+            progress: info.progress,
+            stage: info.stage,
+          });
+        } else if (info.status === "ready") {
+          setTaskProgress((prev) => {
+            if (prev && prev.status === "processing") {
+              return {
+                status: "ready",
+                progress: 100,
+                stage: "ingestion_complete",
+              };
+            }
+            return null;
+          });
+
+          // Reload chunks once ready
+          getTranslatedDocumentChunks(documentId!).then((chunks) => {
+            if (!isCancelled && chunks && chunks.length > 0) {
+              setAllChunks(chunks);
+            }
+          });
+
+          clearInterval(intervalId);
+          setTimeout(() => {
+            if (!isCancelled) setTaskProgress(null);
+          }, 3500);
+        }
+      }
+    }
+
+    checkProgress();
+    intervalId = setInterval(checkProgress, 1200);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [documentId]);
 
   // Fetch document chunks for translation
   useEffect(() => {
@@ -342,6 +402,46 @@ export function DocumentViewer({
           </div>
         </div>
       </div>
+
+      {/* Background Task Queue Real-Time Ingestion Progress Banner */}
+      {taskProgress && (
+        <div
+          className={`border-b px-4 py-2 flex items-center justify-between text-xs transition-colors duration-300 ${
+            taskProgress.status === "ready"
+              ? "bg-emerald-950/60 border-emerald-500/40 text-emerald-300"
+              : "bg-[var(--surface-dark)]/90 border-[var(--accent-tangerine)]/30 text-[var(--foreground)]"
+          }`}
+        >
+          <div className="flex items-center gap-2.5">
+            {taskProgress.status === "ready" ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            ) : (
+              <Loader2 className="w-4 h-4 text-[var(--accent-tangerine)] animate-spin shrink-0" />
+            )}
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-[var(--surface-card)] border border-[var(--surface-border)]">
+                {taskProgress.status === "ready" ? "Worker Complete" : "Redis Worker Queue"}
+              </span>
+              <span className="font-mono text-xs text-[var(--foreground)] opacity-90">
+                {taskProgress.stage.replace(/_/g, " ")} ({taskProgress.progress}%)
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-mono opacity-60 hidden md:inline">
+              BDSG PII Redaction & 1024-dim pgvector
+            </span>
+            <div className="w-28 sm:w-36 bg-[var(--surface-card)] rounded-full h-1.5 overflow-hidden border border-[var(--surface-border)]">
+              <div
+                className={`h-full transition-all duration-300 rounded-full ${
+                  taskProgress.status === "ready" ? "bg-emerald-400" : "bg-[var(--accent-tangerine)]"
+                }`}
+                style={{ width: `${taskProgress.progress}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Viewport: Canvas / Dual-View / English Dossier */}
       <div className="flex-1 overflow-hidden flex">
