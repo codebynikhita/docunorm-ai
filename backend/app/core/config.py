@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     ]
 
     # AI & Retrieval Models
+    GEMINI_API_KEY: str | None = None
     EMBEDDING_MODEL_NAME: str = "BAAI/bge-m3"
     RERANKER_MODEL_NAME: str = "BAAI/bge-reranker-large"
     STORAGE_DIR: str = "./storage"

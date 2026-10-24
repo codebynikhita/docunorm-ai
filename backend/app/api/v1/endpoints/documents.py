@@ -22,7 +22,12 @@ from app.schemas.document import (
     SearchResponse,
     SearchResultChunk,
 )
-from app.services.auditor import build_audit_prompt, parse_citations_from_response
+from app.services.auditor import (
+    build_audit_prompt,
+    generate_llm_audit_finding,
+    parse_citations_from_response,
+    translate_chunks_to_english,
+)
 from app.services.embedding import embedding_service
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
@@ -281,6 +286,52 @@ async def get_document_chunks(
 
 
 @router.get(
+    "/{document_id}/translated-chunks",
+    summary="Retrieve Extracted Chunks with Dynamic English Translation",
+)
+async def get_translated_chunks(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> list[dict]:
+    """
+    Retrieves all text chunks of any document translated to English
+    for the Dual-View / English Dossier reader.
+    """
+    tenant, _ = await get_or_create_default_tenant_and_user(db)
+
+    stmt = (
+        select(DocumentChunk)
+        .where(
+            DocumentChunk.document_id == document_id,
+            DocumentChunk.tenant_id == tenant.id,
+        )
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    result = await db.execute(stmt)
+    chunks = result.scalars().all()
+
+    if not chunks:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No chunks found for document '{document_id}'.",
+        )
+
+    raw_chunks = [
+        {
+            "id": str(c.id),
+            "chunk_index": c.chunk_index,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+            "content": c.content,
+            "token_count": c.token_count,
+        }
+        for c in chunks
+    ]
+
+    return await translate_chunks_to_english(raw_chunks)
+
+
+@router.get(
     "/{document_id}/file",
     summary="Stream Raw PDF Binary for Interactive Canvas Rendering",
 )
@@ -393,6 +444,39 @@ async def audit_document(
     """
     tenant, user = await get_or_create_default_tenant_and_user(db)
 
+    # 0. Self-healing: if document has 0 chunks, parse and ingest on-the-fly
+    count_stmt = select(DocumentChunk).where(DocumentChunk.document_id == document_id)
+    existing_chunks = (await db.execute(count_stmt)).scalars().all()
+
+    if not existing_chunks:
+        doc_stmt = select(Document).where(Document.id == document_id)
+        target_doc = (await db.execute(doc_stmt)).scalar_one_or_none()
+        if target_doc and target_doc.file_path and Path(target_doc.file_path).exists():
+            parse_res = pdf_parser.parse_pdf(target_doc.file_path)
+            for blk in parse_res.blocks:
+                anon = privacy_firewall.anonymize_text(blk.text)
+                vec = embedding_service.generate_embedding(anon.sanitized_text)
+                c = DocumentChunk(
+                    id=uuid4(),
+                    document_id=target_doc.id,
+                    tenant_id=tenant.id,
+                    chunk_index=blk.block_index,
+                    page_number=blk.page_number,
+                    bounding_box=blk.bounding_box,
+                    content=anon.sanitized_text,
+                    raw_content_masked=anon.has_pii,
+                    token_count=len(anon.sanitized_text.split()),
+                    embedding=vec,
+                )
+                db.add(c)
+            await db.flush()
+    else:
+        # Backfill any null embeddings
+        for c in existing_chunks:
+            if c.embedding is None:
+                c.embedding = embedding_service.generate_embedding(c.content)
+        await db.flush()
+
     # 1. Retrieve top matching chunks via pgvector
     query_vector = embedding_service.generate_embedding(payload.query)
     distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label("distance")
@@ -435,18 +519,14 @@ async def audit_document(
         retrieved_chunks.append(chunk_data)
         chunk_map[source_key] = chunk_data
 
-    # 3. Build strictly grounded prompt
-    prompt = build_audit_prompt(query=payload.query, retrieved_chunks=retrieved_chunks)
-
-    # 4. Generate grounded finding citing top sources
-    primary_chunk = retrieved_chunks[0]
-    finding_summary = (
-        f"Under {payload.framework} audit standards, analysis of [SOURCE_1] (Page {primary_chunk['page_number']}) "
-        f"indicates regulatory alignment with applicable compliance mandates. "
-        f"Verified content: \"{primary_chunk['content'][:140]}...\""
+    # 3. Generate grounded regulatory LLM finding (Gemini 1.5 with deterministic fallback)
+    finding_summary = await generate_llm_audit_finding(
+        query=payload.query,
+        retrieved_chunks=retrieved_chunks,
+        framework=payload.framework,
     )
 
-    # 5. Extract citations and bounding boxes
+    # 4. Extract citations and bounding boxes
     parsed_citations = parse_citations_from_response(finding_summary, chunk_map)
 
     citations = [

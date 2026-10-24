@@ -1,8 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
-import { Shield, Sparkles, Send, CheckCircle, ExternalLink, Scale, Loader2, AlertCircle } from "lucide-react";
-import { auditDocument, AuditApiResponse } from "@/lib/api";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  Send,
+  CheckCircle,
+  ExternalLink,
+  Scale,
+  Loader2,
+  AlertCircle,
+  User,
+  Bot,
+  Sparkles,
+  Languages,
+} from "lucide-react";
+import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
+import { Language, translations } from "@/lib/i18n";
+import { translateGermanToEnglish } from "@/lib/translator";
 
 export interface CitationItem {
   id: string;
@@ -12,33 +25,77 @@ export interface CitationItem {
   snippet: string;
 }
 
-interface AuditPanelProps {
-  documentId?: string | null;
-  onSelectCitation: (citation: CitationItem) => void;
+interface AuditMessage {
+  id: string;
+  question: string;
+  framework: string;
+  finding_summary: string;
+  citations: AuditCitationResponse[];
+  timestamp: string;
 }
 
-export function AuditPanel({ documentId, onSelectCitation }: AuditPanelProps) {
+interface AuditPanelProps {
+  lang?: Language;
+  documentId?: string | null;
+  onSelectCitation: (citation: CitationItem) => void;
+  floating?: boolean;
+}
+
+export function AuditPanel({
+  lang = "DE",
+  documentId,
+  onSelectCitation,
+  floating = false,
+}: AuditPanelProps) {
+  const t = translations[lang];
   const [mode, setMode] = useState<"DORA" | "LkSG" | "ZUGFeRD">("DORA");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [auditResult, setAuditResult] = useState<AuditApiResponse | null>(null);
+  const [messages, setMessages] = useState<AuditMessage[]>([]);
   const [auditError, setAuditError] = useState<string | null>(null);
+  const [translatedMap, setTranslatedMap] = useState<Record<string, boolean>>({});
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, loading]);
+
+  const toggleTranslate = (msgId: string) => {
+    setTranslatedMap((prev) => ({
+      ...prev,
+      [msgId]: !prev[msgId],
+    }));
+  };
 
   const executeAudit = async (searchQuery: string) => {
-    console.log("Auditing query:", searchQuery, "with documentId:", documentId);
     if (!searchQuery.trim()) return;
     if (!documentId) {
-      setAuditError("Please click 'Upload PDF' to load your document first.");
+      setAuditError(
+        lang === "DE"
+          ? "Bitte zuerst ein Dokument hochladen oder aus der Liste wählen."
+          : "Please upload or select a PDF document first."
+      );
       return;
     }
 
     setLoading(true);
     setAuditError(null);
+    const userQuestion = searchQuery.trim();
+    setQuery("");
 
     try {
-      const result = await auditDocument(documentId, searchQuery, mode);
-      console.log("Audit result received:", result);
-      setAuditResult(result);
+      const result = await auditDocument(documentId, userQuestion, mode);
+      const newMessage: AuditMessage = {
+        id: `msg-${Date.now()}`,
+        question: userQuestion,
+        framework: result.framework,
+        finding_summary: result.finding_summary,
+        citations: result.citations,
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      };
+      setMessages((prev) => [...prev, newMessage]);
     } catch (err: any) {
       console.error("Audit error:", err);
       setAuditError(err.message || "Failed to execute audit inquiry.");
@@ -54,144 +111,199 @@ export function AuditPanel({ documentId, onSelectCitation }: AuditPanelProps) {
     }
   };
 
+  const panelClasses = floating
+    ? "w-[440px] max-h-[600px] flex flex-col rounded-2xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-2xl overflow-hidden backdrop-blur-xl"
+    : "w-[460px] flex flex-col h-full bg-[var(--surface-dark)] border-l border-[var(--surface-border)]";
+
   return (
-    <div className="w-[480px] flex flex-col h-full bg-slate-950">
+    <div className={panelClasses}>
       {/* Panel Header & Mode Selector */}
-      <div className="p-4 border-b border-slate-800 bg-slate-900/40">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-3.5 border-b border-[var(--surface-border)] bg-[var(--surface-dark)]">
+        <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
-            <Scale className="w-4 h-4 text-cyan-400" />
-            <h3 className="font-semibold text-xs tracking-wider uppercase text-slate-200">
-              Regulatory Audit Engine
+            <Scale className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+            <h3 className="font-extrabold text-xs tracking-wider uppercase text-[var(--foreground)] font-mono">
+              {t.audit_engine_title}
             </h3>
           </div>
-          <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-700">
-            Zero-Hallucination
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold flex items-center gap-1">
+              <Languages className="w-3 h-3" /> DE/EN AI
+            </span>
+            <span className="text-[9px] font-mono bg-[var(--accent-cyan)]/10 text-[var(--accent-cyan)] px-2 py-0.5 rounded border border-[var(--accent-cyan)]/30 font-semibold">
+              pgvector-RRF
+            </span>
+          </div>
         </div>
 
         {/* Framework Tabs */}
-        <div className="grid grid-cols-3 gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
-          <button
-            onClick={() => setMode("DORA")}
-            className={`py-1.5 text-xs font-medium rounded-md transition-all ${
-              mode === "DORA"
-                ? "bg-indigo-600 text-white shadow"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            DORA (ICT)
-          </button>
-          <button
-            onClick={() => setMode("LkSG")}
-            className={`py-1.5 text-xs font-medium rounded-md transition-all ${
-              mode === "LkSG"
-                ? "bg-indigo-600 text-white shadow"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            LkSG (Supply)
-          </button>
-          <button
-            onClick={() => setMode("ZUGFeRD")}
-            className={`py-1.5 text-xs font-medium rounded-md transition-all ${
-              mode === "ZUGFeRD"
-                ? "bg-indigo-600 text-white shadow"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            ZUGFeRD (XML)
-          </button>
+        <div className="grid grid-cols-3 gap-1 bg-[var(--surface-card)] p-1 rounded-md border border-[var(--surface-border)]">
+          {(["DORA", "LkSG", "ZUGFeRD"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setMode(tab)}
+              className={`py-1 text-xs font-mono font-bold rounded transition-all cursor-pointer ${
+                mode === tab
+                  ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
+                  : "text-[var(--foreground)] opacity-60 hover:opacity-100"
+              }`}
+            >
+              {tab === "DORA" ? "DORA (ICT)" : tab === "LkSG" ? "LkSG (Supply)" : "ZUGFeRD"}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Audit Findings Trail */}
-      <div className="flex-1 overflow-auto p-4 space-y-4">
-        {/* Error notice */}
+      {/* Audit Findings Thread */}
+      <div ref={scrollRef} className="flex-1 overflow-auto p-4 space-y-4">
         {auditError && (
-          <div className="p-3 rounded-lg bg-rose-950/60 border border-rose-800 text-xs text-rose-300 flex items-center gap-2">
+          <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-xs text-rose-500 flex items-center gap-2 font-mono">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{auditError}</span>
           </div>
         )}
 
+        {/* Empty State Welcome */}
+        {messages.length === 0 && !loading && (
+          <div className="p-6 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs text-[var(--foreground)] opacity-75 text-center space-y-2.5 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-[var(--accent-tangerine)]/10 border border-[var(--accent-tangerine)]/30 flex items-center justify-center mx-auto text-[var(--accent-tangerine)] shadow-sm">
+              <Bot className="w-5 h-5 text-[var(--accent-tangerine)]" />
+            </div>
+            <p className="font-bold text-[var(--foreground)] font-mono text-xs uppercase tracking-wide">
+              {t.audit_ready_title}
+            </p>
+            <p className="text-[11px] opacity-70 leading-relaxed max-w-[300px] mx-auto font-sans">
+              {t.audit_ready_desc}
+            </p>
+          </div>
+        )}
+
+        {/* Conversation History */}
+        {messages.map((msg) => {
+          // If lang is EN, default to English unless toggled. If lang is DE, default to German.
+          const isTranslated =
+            translatedMap[msg.id] !== undefined
+              ? translatedMap[msg.id]
+              : lang === "EN";
+
+          const displayedSummary = isTranslated
+            ? translateGermanToEnglish(msg.finding_summary)
+            : msg.finding_summary;
+
+          return (
+            <div key={msg.id} className="space-y-2.5 animate-in fade-in duration-200">
+              {/* User Question */}
+              <div className="flex items-start gap-2 justify-end">
+                <div className="bg-[var(--surface-card)] border border-[var(--accent-tangerine)]/40 text-[var(--foreground)] font-medium rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-xs max-w-[85%] shadow-sm leading-relaxed">
+                  <p>{msg.question}</p>
+                  <span className="text-[9px] font-mono opacity-50 block text-right mt-1">
+                    {msg.timestamp}
+                  </span>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/40 flex items-center justify-center flex-shrink-0">
+                  <User className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+                </div>
+              </div>
+
+              {/* AI Audit Finding Card */}
+              <div className="flex items-start gap-2">
+                <div className="w-6 h-6 rounded-full bg-[var(--surface-card)] border border-[var(--surface-border)] flex items-center justify-center flex-shrink-0 mt-1">
+                  <Bot className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+                </div>
+                <div className="flex-1 p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] border-l-2 border-l-[var(--accent-tangerine)] space-y-2.5 shadow-md">
+                  <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-2">
+                    <span className="text-xs font-bold text-[var(--accent-lime)] flex items-center gap-1.5 font-mono">
+                      <CheckCircle className="w-3.5 h-3.5 text-[var(--accent-lime)]" /> {msg.framework} Verified
+                    </span>
+
+                    {/* Instant German <-> English Translation Toggle */}
+                    <button
+                      onClick={() => toggleTranslate(msg.id)}
+                      className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] text-[var(--accent-tangerine)] font-bold transition-all cursor-pointer shadow-sm"
+                      title="Convert German legal text to English for international compliance"
+                    >
+                      <Languages className="w-3 h-3" />
+                      <span>{isTranslated ? "Auf Deutsch 🇩🇪" : "Translate to English 🇬🇧"}</span>
+                    </button>
+                  </div>
+
+                  <p className="text-xs text-[var(--foreground)] leading-relaxed whitespace-pre-line font-sans">
+                    {displayedSummary}
+                  </p>
+
+                  {/* Interactive Citations */}
+                  {msg.citations && msg.citations.length > 0 && (
+                    <div className="pt-2 space-y-1.5 border-t border-[var(--surface-border)]">
+                      <div className="flex items-center justify-between text-[10px] font-mono font-bold text-[var(--foreground)] opacity-60 uppercase tracking-wider">
+                        <span>
+                          {lang === "DE" ? "GEPRÜFTE BELEGE (AUDIT EVIDENCE)" : "VERIFIED AUDIT EVIDENCE"}
+                        </span>
+                        <span className="text-[9px] text-[var(--accent-cyan)] font-mono">
+                          {isTranslated ? "EN Translated" : "DE Original"}
+                        </span>
+                      </div>
+
+                      {msg.citations.map((citation, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() =>
+                            onSelectCitation({
+                              id: citation.chunk_id || `cit-${idx}`,
+                              source_tag: citation.source_tag,
+                              page_number: citation.page_number,
+                              box:
+                                (citation.bounding_box as [number, number, number, number]) || [
+                                  40, 160, 560, 220,
+                                ],
+                              snippet: citation.content || "",
+                            })
+                          }
+                          className="group flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--accent-tangerine)]/10 border border-[var(--accent-tangerine)]/30 hover:border-[var(--accent-tangerine)] hover:bg-[var(--accent-tangerine)]/20 text-[var(--accent-tangerine)] text-xs transition-all w-full text-left shadow-sm cursor-pointer"
+                        >
+                          <span className="font-black font-mono text-[9px] bg-[var(--accent-tangerine)] text-black px-1.5 py-0.5 rounded shadow">
+                            {citation.source_tag}
+                          </span>
+                          <span className="truncate flex-1 text-[11px] text-[var(--foreground)] opacity-80 group-hover:opacity-100 font-mono">
+                            Page {citation.page_number} • Reveal Laser Bounding Box
+                          </span>
+                          <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-tangerine)] opacity-70 group-hover:opacity-100" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
         {/* Loading Spinner */}
         {loading && (
-          <div className="p-6 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center gap-3 text-slate-400">
-            <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
-            <p className="text-xs font-medium">Querying pgvector & grounding citations...</p>
-          </div>
-        )}
-
-        {/* Live Audit Finding Result */}
-        {auditResult && !loading && (
-          <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5" /> {auditResult.framework} Compliant
-              </span>
-              <span className="text-[10px] font-mono text-slate-500">Live pgvector</span>
-            </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              {auditResult.finding_summary}
+          <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] flex items-center gap-3 text-[var(--foreground)]">
+            <Loader2 className="w-4 h-4 animate-spin text-[var(--accent-tangerine)]" />
+            <p className="text-xs font-mono opacity-80">
+              {lang === "DE"
+                ? "Führe pgvector-Kosinus-Prüfung durch..."
+                : "pgvector Cosine Search in progress..."}
             </p>
-
-            {/* Interactive Citations */}
-            <div className="pt-2 space-y-1.5">
-              {auditResult.citations.map((citation, idx) => (
-                <button
-                  key={idx}
-                  onClick={() =>
-                    onSelectCitation({
-                      id: citation.chunk_id || `cit-${idx}`,
-                      source_tag: citation.source_tag,
-                      page_number: citation.page_number,
-                      box: (citation.bounding_box as [number, number, number, number]) || [40, 160, 560, 220],
-                      snippet: citation.content || "",
-                    })
-                  }
-                  className="group flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:border-amber-500/70 text-amber-300 text-xs transition-all w-full text-left"
-                >
-                  <span className="font-bold font-mono text-[10px] bg-amber-500 text-slate-950 px-1 py-0.5 rounded">
-                    {citation.source_tag}
-                  </span>
-                  <span className="truncate flex-1 text-[11px] text-slate-300 group-hover:text-amber-200">
-                    Page {citation.page_number} • Click to reveal bounding box
-                  </span>
-                  <ExternalLink className="w-3 h-3 text-amber-400 opacity-60 group-hover:opacity-100" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Default prompt when no audit yet */}
-        {!auditResult && !loading && (
-          <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-xs text-slate-400 text-center">
-            Upload a document and ask an audit query or click a suggested check below to evaluate compliance.
           </div>
         )}
 
         {/* Quick Audit Prompt Suggestions */}
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            Suggested BaFin/DORA Checks:
+        <div className="pt-2 space-y-2">
+          <p className="text-[10px] font-mono font-bold text-[var(--foreground)] opacity-60 uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-[var(--accent-tangerine)]" />
+            {t.suggested_checks_title}
           </p>
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              "Are exit clauses defined under Art 30?",
-              "What is the maximum delay penalty rate?",
-              "Are sub-outsourcing approvals required?",
-            ].map((suggested, idx) => (
+          <div className="space-y-1.5">
+            {[t.suggested_1, t.suggested_2, t.suggested_3].map((suggested, idx) => (
               <button
                 key={idx}
-                onClick={() => {
-                  setQuery(suggested);
-                  executeAudit(suggested);
-                }}
-                className="text-[11px] text-slate-400 hover:text-cyan-300 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md px-2.5 py-1 text-left transition-colors"
+                onClick={() => executeAudit(suggested)}
+                className="w-full text-[11px] text-[var(--foreground)] opacity-80 hover:opacity-100 bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/60 rounded-md px-3 py-2 text-left transition-all font-mono shadow-sm flex items-center justify-between cursor-pointer group"
               >
-                {suggested}
+                <span className="truncate">{suggested}</span>
+                <span className="text-[var(--accent-tangerine)] opacity-0 group-hover:opacity-100 font-bold ml-2">→</span>
               </button>
             ))}
           </div>
@@ -199,25 +311,25 @@ export function AuditPanel({ documentId, onSelectCitation }: AuditPanelProps) {
       </div>
 
       {/* Query Input Box */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/60">
+      <div className="p-3.5 border-t border-[var(--surface-border)] bg-[var(--surface-dark)]">
         <div className="relative">
           <textarea
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask compliance query (e.g. 'Audit exit penalty terms')..."
+            placeholder={t.input_placeholder}
             rows={3}
-            className="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none resize-none transition-colors"
+            className="w-full bg-[var(--surface-card)] border border-[var(--surface-border)] focus:border-[var(--accent-tangerine)] rounded-lg px-3 py-2.5 text-xs text-[var(--foreground)] placeholder:opacity-40 focus:outline-none resize-none transition-colors font-mono leading-relaxed"
           />
           <button
             onClick={() => executeAudit(query)}
             disabled={!query.trim() || loading}
-            className="absolute right-2.5 bottom-3.5 p-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 text-slate-950 transition-colors"
+            className="absolute right-2.5 bottom-3.5 p-2 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-40 text-black font-black transition-all shadow-sm cursor-pointer"
           >
             {loading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-3.5 h-3.5 stroke-[2.5]" />
             )}
           </button>
         </div>

@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* 1. Cyber-Noir (High-Voltage Obsidian Black & Blazing Tangerine) */
+:root,
+[data-theme="cyber"] {
+  --background: #05070b;
+  --foreground: #f3f4f8;
+  --accent-tangerine: #ff5500;
+  --accent-lime: #c6f000;
+  --accent-cyan: #00e5ff;
+  --surface-dark: #0a0e17;
+  --surface-card: #0f1422;
+  --surface-border: #1e263d;
+  --canvas-bg: #07090f;
+  --grid-line: rgba(255, 85, 0, 0.05);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 2. Bauhaus Paper (Prestigious German Architectural Light Mode) */
+[data-theme="bauhaus"] {
+  --background: #f6f4ee;
+  --foreground: #0f172a;
+  --accent-tangerine: #dc2626; /* Bauhaus Bold Crimson */
+  --accent-lime: #16a34a;
+  --accent-cyan: #2563eb;
+  --surface-dark: #ece9e0;
+  --surface-card: #ffffff;
+  --surface-border: #dcd7cb;
+  --canvas-bg: #f0eee6;
+  --grid-line: rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 3. Prussian Blueprint (Deep Midnight Oceanic Navy & Electric Cyber Cyan) */
+[data-theme="terminal"],
+[data-theme="blueprint"] {
+  --background: #050c1e; /* Rich Dark Prussian Navy, unmistakable from black */
+  --foreground: #e0f2fe; /* Ice Crystal */
+  --accent-tangerine: #00f0ff; /* Electric Cyber Cyan Hero */
+  --accent-lime: #38bdf8;
+  --accent-cyan: #60a5fa;
+  --surface-dark: #09142e;
+  --surface-card: #0e1e44;
+  --surface-border: #1d3368;
+  --canvas-bg: #060e24;
+  --grid-line: rgba(0, 240, 255, 0.06);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Custom Sleek Industrial Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-tangerine);
+}
+
+/* Technical Drafting Table Canvas */
+.cyber-canvas {
+  background-color: var(--canvas-bg);
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.05) 0%, transparent 70%),
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 100% 100%, 28px 28px, 28px 28px;
+}
+
+/* High-Voltage Neon Evidence Highlight */
+.laser-highlight {
+  border: 2px solid var(--accent-tangerine) !important;
+  background-color: rgba(255, 85, 0, 0.22) !important;
+  box-shadow: 0 0 0 1px var(--accent-tangerine), 0 0 20px rgba(255, 85, 0, 0.7), inset 0 0 15px rgba(255, 85, 0, 0.3) !important;
+  animation: pulse-laser 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-laser {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--accent-tangerine), 0 0 20px rgba(255, 85, 0, 0.7), inset 0 0 15px rgba(255, 85, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 2px var(--accent-tangerine), 0 0 35px rgba(255, 85, 0, 0.95), inset 0 0 22px rgba(255, 85, 0, 0.45);
+  }
 }
