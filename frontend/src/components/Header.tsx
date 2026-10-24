@@ -165,17 +165,17 @@ export function Header({
           </button>
         )}
 
-        {/* Official Certificate Export Button */}
-        <button
-          onClick={onOpenCertificate}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider"
-          title="Official BaFin / DIN 66399 Compliance Certificate"
-        >
-          <Award className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden lg:inline">
-            {lang === "DE" ? "Prüfbericht" : "Certificate"}
-          </span>
-        </button>
+        {/* Official Certificate Export Button (Active in Workspace) */}
+        {layoutMode !== "portal" && (
+          <button
+            onClick={onOpenCertificate}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider"
+            title="Official BaFin / DIN 66399 Compliance Certificate"
+          >
+            <Award className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span className="hidden lg:inline">{t.btn_certificate}</span>
+          </button>
+        )}
 
         {/* Color Palette Switcher */}
         <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 font-mono text-[10px]">
