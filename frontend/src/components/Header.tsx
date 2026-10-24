@@ -87,7 +87,7 @@ export function Header({
           title="Split Dual-View: Original PDF + English Translation Dossier"
         >
           <Columns3 className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden md:inline">Dual-View Workbench</span>
+          <span className="hidden md:inline">{t.nav_workbench}</span>
         </button>
 
         {/* Dedicated Standalone KI-Auditor Studio */}
@@ -101,7 +101,7 @@ export function Header({
           title="Standalone AI Compliance Auditor (Harvey / ChatGPT Studio)"
         >
           <Bot className="w-3.5 h-3.5 stroke-[2.5] text-[var(--accent-tangerine)]" />
-          <span className="hidden md:inline">KI-Auditor (Studio)</span>
+          <span className="hidden md:inline">{t.nav_auditor}</span>
         </button>
 
         <button
@@ -114,7 +114,7 @@ export function Header({
           title="Executive Compliance Cockpit & Metrics"
         >
           <LayoutGrid className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden md:inline">Executive Cockpit</span>
+          <span className="hidden md:inline">{t.nav_cockpit}</span>
         </button>
       </div>
 
@@ -136,7 +136,7 @@ export function Header({
             </span>
             <button
               onClick={onLogout}
-              title="Abmelden (Log Out)"
+              title={t.btn_logout}
               className="text-[var(--foreground)] opacity-50 hover:opacity-100 hover:text-rose-500 p-0.5 cursor-pointer ml-1"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -148,7 +148,7 @@ export function Header({
             className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--accent-tangerine)]/50 text-[var(--foreground)] font-mono font-bold text-[11px] shadow-sm cursor-pointer transition-all"
           >
             <Lock className="w-3 h-3 text-[var(--accent-tangerine)]" />
-            <span>Anmelden</span>
+            <span>{t.btn_sign_in}</span>
           </button>
         )}
 

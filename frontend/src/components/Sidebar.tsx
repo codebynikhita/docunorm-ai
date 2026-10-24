@@ -32,7 +32,7 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
     },
     {
       id: "auditor" as const,
-      label: "KI-Prüfassistent",
+      label: lang === "DE" ? "KI-Prüfassistent" : "AI Auditor Studio",
       icon: Bot,
       badge: "Studio",
     },
@@ -68,7 +68,7 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
         {/* Navigation Category */}
         <div className="space-y-1">
           <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-50 px-3 pb-1 flex items-center justify-between">
-            <span>Prüfmodule (Module)</span>
+            <span>{lang === "DE" ? "Prüfmodule" : "Audit Modules"}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-tangerine)]"></span>
           </p>
           <nav className="space-y-1">
@@ -127,8 +127,12 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
               <span className="text-[var(--accent-cyan)] font-semibold">Postgres 16</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-[var(--foreground)] opacity-60">Embedding-Modell:</span>
-              <span className="text-[var(--accent-cyan)] font-semibold">1024-dim Kosinus</span>
+              <span className="text-[var(--foreground)] opacity-60">
+                {lang === "DE" ? "Embedding-Modell:" : "Embedding Model:"}
+              </span>
+              <span className="text-[var(--accent-cyan)] font-semibold">
+                {lang === "DE" ? "1024-dim Kosinus" : "1024-dim Cosine"}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[var(--foreground)] opacity-60">BDSG / DSGVO:</span>

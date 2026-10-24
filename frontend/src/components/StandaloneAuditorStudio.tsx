@@ -48,33 +48,62 @@ interface ThreadInquiry {
   }>;
 }
 
-const PRESET_PROMPTS = [
-  {
-    framework: "DORA" as const,
-    label: "DORA Art. 30 Ausstiegsfrist",
-    prompt: "Welche Kündigungs- und Übergangsfristen für den Ausstieg sind gem. DORA Art. 30 Abs. 2 geregelt?",
-  },
-  {
-    framework: "DORA" as const,
-    label: "Haftung & 0,2% Verzugsstrafe",
-    prompt: "Wie hoch ist die maximale Verzugsstrafe und welche Haftungsbeschränkungen greifen nicht?",
-  },
-  {
-    framework: "DORA" as const,
-    label: "30 Tage Unterauftrag Veto",
-    prompt: "Welche Frist und Genehmigungspflicht gilt für Unterauftragsvergaben nach DORA Art. 30 Abs. 3?",
-  },
-  {
-    framework: "ZUGFeRD" as const,
-    label: "ZUGFeRD 2.3 XML & Leitweg-ID",
-    prompt: "Welches Rechnungsformat und welche Leitweg-ID sind nach ZUGFeRD 2.3 / Factur-X vereinbart?",
-  },
-  {
-    framework: "LkSG" as const,
-    label: "Sorgfaltspflichten & Audit",
-    prompt: "Welche Kontroll- und Prüfungsrechte stehen dem Auftraggeber bezüglich Sub-Dienstleistern zu?",
-  },
-];
+const PRESET_PROMPTS = {
+  DE: [
+    {
+      framework: "DORA" as const,
+      label: "DORA Art. 30 Ausstiegsfrist",
+      prompt: "Welche Kündigungs- und Übergangsfristen für den Ausstieg sind gem. DORA Art. 30 Abs. 2 geregelt?",
+    },
+    {
+      framework: "DORA" as const,
+      label: "Haftung & 0,2% Verzugsstrafe",
+      prompt: "Wie hoch ist die maximale Verzugsstrafe und welche Haftungsbeschränkungen greifen nicht?",
+    },
+    {
+      framework: "DORA" as const,
+      label: "30 Tage Unterauftrag Veto",
+      prompt: "Welche Frist und Genehmigungspflicht gilt für Unterauftragsvergaben nach DORA Art. 30 Abs. 3?",
+    },
+    {
+      framework: "ZUGFeRD" as const,
+      label: "ZUGFeRD 2.3 XML & Leitweg-ID",
+      prompt: "Welches Rechnungsformat und welche Leitweg-ID sind nach ZUGFeRD 2.3 / Factur-X vereinbart?",
+    },
+    {
+      framework: "LkSG" as const,
+      label: "Sorgfaltspflichten & Audit",
+      prompt: "Welche Kontroll- und Prüfungsrechte stehen dem Auftraggeber bezüglich Sub-Dienstleistern zu?",
+    },
+  ],
+  EN: [
+    {
+      framework: "DORA" as const,
+      label: "DORA Art. 30 Exit Window",
+      prompt: "What termination and transition exit periods are stipulated under DORA Art. 30 (2)?",
+    },
+    {
+      framework: "DORA" as const,
+      label: "Liability & 0.2% Delay Penalty",
+      prompt: "What is the maximum delay penalty rate and which liability caps are explicitly waived?",
+    },
+    {
+      framework: "DORA" as const,
+      label: "30-Day Subcontractor Veto",
+      prompt: "What notice period and approval requirements apply to sub-outsourcing under DORA Art. 30 (3)?",
+    },
+    {
+      framework: "ZUGFeRD" as const,
+      label: "ZUGFeRD 2.3 XML & Leitweg-ID",
+      prompt: "Which invoice format and Leitweg-ID are agreed under ZUGFeRD 2.3 / Factur-X standards?",
+    },
+    {
+      framework: "LkSG" as const,
+      label: "Due Diligence & Audit Rights",
+      prompt: "What audit and inspection rights does the client retain regarding sub-contractor facilities?",
+    },
+  ],
+};
 
 export function StandaloneAuditorStudio({
   lang = "DE",
@@ -276,13 +305,13 @@ export function StandaloneAuditorStudio({
             className="w-full flex items-center justify-center gap-2 bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] text-[var(--foreground)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] font-mono text-xs font-bold py-2.5 px-3 rounded-xl transition-all shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4 text-[var(--accent-tangerine)]" />
-            <span>Neuer Prüfvorgang</span>
+            <span>{t.studio_new_thread}</span>
           </button>
 
           {/* Framework Switcher */}
           <div className="space-y-1.5">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-50 px-1">
-              Aufsichtsrahmen (Framework)
+              {t.studio_framework_label}
             </span>
             <div className="grid grid-cols-3 gap-1 bg-[var(--surface-card)] p-1 rounded-lg border border-[var(--surface-border)] font-mono text-[10px]">
               {(["DORA", "LkSG", "ZUGFeRD"] as const).map((fw) => (
@@ -305,7 +334,7 @@ export function StandaloneAuditorStudio({
           <div className="space-y-1 pt-2">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-50 px-1 flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-[var(--accent-tangerine)]" />
-              <span>Prüfhistorie ({threads.length})</span>
+              <span>{t.studio_history_label} ({threads.length})</span>
             </span>
             <div className="space-y-1 pt-1">
               {threads.map((item) => {
@@ -340,10 +369,10 @@ export function StandaloneAuditorStudio({
           <div className="space-y-1.5 pt-3 border-t border-[var(--surface-border)]">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-50 px-1 flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-[var(--accent-cyan)]" />
-              <span>Standard-Prüffragen</span>
+              <span>{t.studio_presets_label}</span>
             </span>
             <div className="space-y-1">
-              {PRESET_PROMPTS.map((p, idx) => (
+              {PRESET_PROMPTS[lang].map((p, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSendQuery(p.prompt)}
@@ -361,7 +390,7 @@ export function StandaloneAuditorStudio({
         <div className="p-3 border-t border-[var(--surface-border)] text-[10px] font-mono text-[var(--foreground)] opacity-60 flex items-center justify-between">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            KI-Audit Engine v0.2
+            {lang === "DE" ? "KI-Audit Engine v0.2" : "AI Audit Engine v0.2"}
           </span>
           <span className="text-[9px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/25 px-1.5 py-0.5 rounded font-bold">
             BAFIN READY
@@ -380,7 +409,7 @@ export function StandaloneAuditorStudio({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)]">
-                  KI-Revisionsprüfer Studio
+                  {t.studio_title}
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-tangerine)]">
                   {framework} Grounded
@@ -398,7 +427,7 @@ export function StandaloneAuditorStudio({
                 onClick={onSwitchToWorkbench}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] font-mono text-xs font-bold transition-all shadow-sm cursor-pointer"
               >
-                <span>Zur PDF-Prüfbank</span>
+                <span>{t.studio_btn_workbench}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
               </button>
             )}
@@ -412,7 +441,7 @@ export function StandaloneAuditorStudio({
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono text-xs font-bold transition-all shadow cursor-pointer uppercase tracking-wider"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Prüfbericht PDF</span>
+              <span>{t.studio_btn_pdf}</span>
             </button>
           </div>
         </div>
@@ -425,14 +454,13 @@ export function StandaloneAuditorStudio({
                 <Bot className="w-8 h-8" />
               </div>
               <h3 className="font-extrabold text-sm font-mono uppercase tracking-wide text-[var(--foreground)] mb-2">
-                Rechtskonforme BaFin & DORA Prüfinstanz
+                {t.studio_empty_title}
               </h3>
               <p className="text-xs text-[var(--foreground)] opacity-60 leading-relaxed font-sans mb-6">
-                Stellen Sie konkrete Prüffragen zu Ausstiegsfristen, Haftungsobergrenzen,
-                ZUGFeRD 2.3 E-Rechnungen oder BDSG § 26 Datenschutzstandards.
+                {t.studio_empty_desc}
               </p>
               <div className="grid grid-cols-2 gap-2 w-full text-left">
-                {PRESET_PROMPTS.slice(0, 4).map((p, idx) => (
+                {PRESET_PROMPTS[lang].slice(0, 4).map((p, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSendQuery(p.prompt)}
@@ -476,7 +504,7 @@ export function StandaloneAuditorStudio({
                       <div className="flex items-center justify-between pb-2 border-b border-[var(--surface-border)] text-xs">
                         <span className="font-mono font-bold text-emerald-500 flex items-center gap-1.5">
                           <CheckCircle className="w-3.5 h-3.5" />
-                          <span>{framework} Geprüft (Audit Evidence)</span>
+                          <span>{framework} {lang === "DE" ? "Geprüft (Audit-Beleg)" : "Verified (Audit Evidence)"}</span>
                         </span>
 
                         <div className="flex items-center gap-2">
@@ -490,13 +518,13 @@ export function StandaloneAuditorStudio({
                             className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[var(--accent-cyan)] font-bold hover:border-[var(--accent-cyan)] transition-all cursor-pointer"
                           >
                             <Languages className="w-3 h-3" />
-                            <span>{isTranslated ? "Auf Deutsch 🇩🇪" : "Translate to English 🇬🇧"}</span>
+                            <span>{isTranslated ? (lang === "DE" ? "Original Deutsch 🇩🇪" : "German Original 🇩🇪") : (lang === "DE" ? "Auf Englisch übersetzen 🇬🇧" : "Translate to English 🇬🇧")}</span>
                           </button>
 
                           <button
                             onClick={() => handleCopyText(displayedText, msg.id)}
                             className="text-[var(--foreground)] opacity-50 hover:opacity-100 p-1 rounded hover:bg-[var(--surface-dark)] cursor-pointer"
-                            title="Befund kopieren"
+                            title={lang === "DE" ? "Befund kopieren" : "Copy Finding"}
                           >
                             {copiedId === msg.id ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -516,7 +544,7 @@ export function StandaloneAuditorStudio({
                     {msg.citations && msg.citations.length > 0 && (
                       <div className="pt-2.5 border-t border-[var(--surface-border)] space-y-1.5">
                         <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-50 font-bold block">
-                          Geprüfte Belegstellen im Vertrag:
+                          {lang === "DE" ? "Geprüfte Belegstellen im Vertrag:" : "Verified Contract Citations:"}
                         </span>
                         <div className="flex flex-wrap gap-2">
                           {msg.citations.map((c, idx) => (
@@ -530,7 +558,9 @@ export function StandaloneAuditorStudio({
                               }`}
                             >
                               <span>{c.source_tag}</span>
-                              <span className="opacity-70 text-[9.5px]">S. {c.page_number}</span>
+                              <span className="opacity-70 text-[9.5px]">
+                                {lang === "DE" ? "S." : "P."} {c.page_number}
+                              </span>
                             </button>
                           ))}
                         </div>
@@ -567,7 +597,7 @@ export function StandaloneAuditorStudio({
                     handleSendQuery();
                   }
                 }}
-                placeholder={`Frage zu ${framework} oder Vertragsklauseln eingeben (z. B. 'Wie hoch ist die maximale Verzugsstrafe?')...`}
+                placeholder={t.studio_input_placeholder}
                 rows={2}
                 className="w-full bg-[var(--surface-dark)] border border-[var(--surface-border)] focus:border-[var(--accent-tangerine)] rounded-xl px-4 py-3 pr-12 text-xs text-[var(--foreground)] font-mono leading-relaxed focus:outline-none resize-none shadow-inner transition-colors"
               />
@@ -580,7 +610,9 @@ export function StandaloneAuditorStudio({
               </button>
             </div>
             <p className="text-[10px] font-mono text-[var(--foreground)] opacity-50 text-center">
-              Revisionssicher gem. BaFin Rundschreiben & DORA Art. 30 · Zero Hallucination Standard.
+              {lang === "DE"
+                ? "Revisionssicher gem. BaFin Rundschreiben & DORA Art. 30 · Zero-Hallucination-Standard."
+                : "Audit-proof under BaFin circulars & DORA Art. 30 · Zero-Hallucination Standard."}
             </p>
           </div>
         </div>
@@ -593,11 +625,11 @@ export function StandaloneAuditorStudio({
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-[var(--accent-tangerine)]" />
               <span className="font-mono font-bold text-xs uppercase tracking-wide text-[var(--foreground)]">
-                Prüfbeleg & Kontext
+                {t.studio_evidence_title}
               </span>
             </div>
             <span className="text-[9.5px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25 font-bold">
-              VERIFIZIERT
+              {t.studio_evidence_verified}
             </span>
           </div>
 
@@ -608,13 +640,13 @@ export function StandaloneAuditorStudio({
                   {selectedCitation.source_tag}
                 </span>
                 <span className="opacity-60 text-[11px]">
-                  Seite {selectedCitation.page_number}
+                  {lang === "DE" ? "Seite" : "Page"} {selectedCitation.page_number}
                 </span>
               </div>
 
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-50 font-bold block mb-1">
-                  Visuelle DIN A4 Koordinaten:
+                  {lang === "DE" ? "Visuelle DIN A4 Koordinaten:" : "Visual DIN A4 Coordinates:"}
                 </span>
                 <span className="font-mono text-xs text-[var(--accent-cyan)] bg-[var(--surface-dark)] px-2 py-1 rounded border border-[var(--surface-border)] block">
                   📍 [{Math.round(selectedCitation.bounding_box?.[0] || 0)}, {Math.round(selectedCitation.bounding_box?.[1] || 0)}, {Math.round(selectedCitation.bounding_box?.[2] || 0)}, {Math.round(selectedCitation.bounding_box?.[3] || 0)}]
@@ -623,7 +655,7 @@ export function StandaloneAuditorStudio({
 
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-50 font-bold block mb-1">
-                  Originaltext (Authentischer Wortlaut):
+                  {lang === "DE" ? "Originaltext (Authentischer Wortlaut):" : "Original German Text (Authentic):"}
                 </span>
                 <div className="p-3 rounded-lg bg-[var(--surface-dark)] border-l-2 border-[var(--accent-tangerine)] border-r border-t border-b border-[var(--surface-border)] text-xs font-sans text-[var(--foreground)] leading-relaxed">
                   "{selectedCitation.content}"
@@ -640,7 +672,7 @@ export function StandaloneAuditorStudio({
                   }
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--accent-tangerine)] border border-[var(--accent-tangerine)]/40 font-mono text-[11px] font-bold transition-all shadow-sm cursor-pointer"
                 >
-                  <span>In PDF-Prüfbank Anspringen</span>
+                  <span>{t.studio_locate_workbench}</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               )}
@@ -648,10 +680,11 @@ export function StandaloneAuditorStudio({
           ) : (
             <div className="p-6 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] text-center text-xs font-mono opacity-60 space-y-2">
               <ShieldCheck className="w-8 h-8 mx-auto text-[var(--accent-tangerine)] opacity-60" />
-              <p className="font-bold">Kein Beleg ausgewählt</p>
+              <p className="font-bold">{lang === "DE" ? "Kein Beleg ausgewählt" : "No Citation Selected"}</p>
               <p className="text-[11px]">
-                Klicken Sie auf ein [SOURCE_X] Tag im Chat, um die exakte Textstelle und
-                Koordinaten einzusehen.
+                {lang === "DE"
+                  ? "Klicken Sie auf ein [SOURCE_X] Tag im Chat, um die exakte Textstelle und Koordinaten einzusehen."
+                  : "Click a [SOURCE_X] tag in the chat stream to view exact contract text and coordinates."}
               </p>
             </div>
           )}
@@ -659,13 +692,15 @@ export function StandaloneAuditorStudio({
           {/* Active Contract Info */}
           <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] space-y-2 font-mono text-[11px] shadow-sm">
             <span className="text-[10px] uppercase tracking-wider opacity-50 font-bold block">
-              Geprüfter Master-Vertrag:
+              {lang === "DE" ? "Geprüfter Master-Vertrag:" : "Audited Master Contract:"}
             </span>
             <div className="truncate font-bold text-[var(--foreground)]">
               {documentName}
             </div>
             <div className="text-[10px] opacity-60">
-              DIN 66399 Schutzklasse 3 · BaFin Audit-Prüfstrom aktiv
+              {lang === "DE"
+                ? "DIN 66399 Schutzklasse 3 · BaFin Audit-Prüfstrom aktiv"
+                : "DIN 66399 Class 3 · BaFin Audit Stream Active"}
             </div>
           </div>
         </div>

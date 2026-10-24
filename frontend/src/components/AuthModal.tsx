@@ -121,7 +121,9 @@ export function AuthModal({
                 DocuNorm Gateway
               </h3>
               <p className="text-[11px] font-mono opacity-60">
-                BaFin & DORA Art. 30 Audit Authentication
+                {lang === "DE"
+                  ? "BaFin & DORA Art. 30 Revisions-Authentifizierung"
+                  : "BaFin & DORA Art. 30 Audit Authentication"}
               </p>
             </div>
           </div>
@@ -153,7 +155,7 @@ export function AuthModal({
                 : "text-[var(--foreground)] opacity-50 hover:opacity-80"
             }`}
           >
-            {lang === "DE" ? "Konto Erstellen (Sign Up)" : "Sign Up"}
+            {lang === "DE" ? "Konto Registrieren (Sign Up)" : "Sign Up"}
           </button>
         </div>
 
@@ -161,7 +163,7 @@ export function AuthModal({
         <div className="p-4 bg-[var(--surface-dark)]/30 border-b border-[var(--surface-border)] space-y-2">
           <p className="text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-50 font-bold flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-[var(--accent-tangerine)]" />
-            1-Click Institutional Demo Profiles:
+            {lang === "DE" ? "1-Klick Institutionelle Demo-Profile:" : "1-Click Institutional Demo Profiles:"}
           </p>
           <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
             <button
@@ -172,7 +174,9 @@ export function AuthModal({
               <div className="font-bold text-[var(--foreground)] group-hover:text-[var(--accent-tangerine)] truncate">
                 Dr. M. Weber
               </div>
-              <div className="opacity-60 text-[9px] truncate">Siemens General Counsel</div>
+              <div className="opacity-60 text-[9px] truncate">
+                {lang === "DE" ? "Siemens General Counsel" : "Siemens General Counsel"}
+              </div>
             </button>
             <button
               type="button"
@@ -182,7 +186,9 @@ export function AuthModal({
               <div className="font-bold text-[var(--foreground)] group-hover:text-[var(--accent-tangerine)] truncate">
                 BaFin Auditor
               </div>
-              <div className="opacity-60 text-[9px] truncate">Federal Oversight Admin</div>
+              <div className="opacity-60 text-[9px] truncate">
+                {lang === "DE" ? "Bundesaufsicht Admin" : "Federal Oversight Admin"}
+              </div>
             </button>
           </div>
         </div>
@@ -253,7 +259,7 @@ export function AuthModal({
 
           <div>
             <label className="block text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-70 mb-1">
-              Email-Adresse
+              {lang === "DE" ? "E-Mail-Adresse" : "Email Address"}
             </label>
             <div className="relative">
               <input
@@ -284,7 +290,9 @@ export function AuthModal({
               <Lock className="w-3.5 h-3.5 opacity-40 absolute left-3 top-2.5" />
             </div>
             <p className="text-[10px] font-mono opacity-50 mt-1">
-              NIST & BSI TR-02102 compliant PBKDF2 hashing.
+              {lang === "DE"
+                ? "BSI TR-02102 & NIST konforme PBKDF2 Verschlüsselung."
+                : "BSI TR-02102 & NIST compliant PBKDF2 hashing."}
             </p>
           </div>
 
@@ -297,7 +305,11 @@ export function AuthModal({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>{tab === "login" ? "Anmelden (Enter Platform)" : "Registrieren & Starten"}</span>
+                <span>
+                  {tab === "login"
+                    ? (lang === "DE" ? "Anmelden & Plattform Betreten" : "Sign In & Enter Platform")
+                    : (lang === "DE" ? "Registrieren & Starten" : "Register & Start")}
+                </span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -306,7 +318,11 @@ export function AuthModal({
 
         {/* Footer */}
         <div className="p-3 bg-[var(--surface-dark)] border-t border-[var(--surface-border)] text-center text-[10px] font-mono opacity-60">
-          <span>Geschützt gem. BDSG § 26 & EU-DSGVO · Serverstandort Frankfurt am Main</span>
+          <span>
+            {lang === "DE"
+              ? "Geschützt gem. BDSG § 26 & EU-DSGVO · Serverstandort Frankfurt am Main"
+              : "Protected under BDSG § 26 & EU GDPR · Server Location Frankfurt am Main"}
+          </span>
         </div>
       </div>
     </div>

@@ -16,7 +16,7 @@ import {
   Award,
   Sparkles,
 } from "lucide-react";
-import { Language } from "@/lib/i18n";
+import { Language, translations } from "@/lib/i18n";
 
 interface LandingPageProps {
   lang?: Language;
@@ -31,6 +31,8 @@ export function LandingPage({
   onEnterAsDemo,
   onExploreWorkbench,
 }: LandingPageProps) {
+  const t = translations[lang];
+
   return (
     <div className="flex-1 overflow-auto bg-[var(--background)] text-[var(--foreground)] font-sans">
       {/* 1. Hero Section */}
@@ -41,21 +43,19 @@ export function LandingPage({
           <span className="font-bold text-[var(--foreground)]">DocuNorm DE v0.2</span>
           <span className="opacity-40">|</span>
           <span className="text-[var(--accent-tangerine)] font-bold">
-            BaFin & DORA Art. 30 Validiert
+            {t.landing_badge}
           </span>
         </div>
 
         {/* Headline */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-mono tracking-tight max-w-4xl mx-auto leading-[1.15]">
-          Deutsche Regulatorik & IKT-Verträge.{" "}
-          <span className="text-[var(--accent-tangerine)]">Revisionssicher geprüft.</span>
+          {t.landing_hero_h1_pre}{" "}
+          <span className="text-[var(--accent-tangerine)]">{t.landing_hero_h1_accent}</span>
         </h1>
 
         {/* Subtitle */}
         <p className="text-sm sm:text-base text-[var(--foreground)] opacity-70 max-w-2xl mx-auto leading-relaxed font-sans">
-          Automatisierte Vertragsanalyse nach <strong>EU DORA (VO 2022/2554)</strong>,{" "}
-          <strong>BDSG § 26</strong> und <strong>ZUGFeRD 2.3 / Factur-X</strong>. Mit
-          visuellem DIN A4 Belegnachweis und beglaubigtem englischen Revisionsdossier.
+          {t.landing_hero_sub}
         </p>
 
         {/* Action CTAs */}
@@ -64,7 +64,7 @@ export function LandingPage({
             onClick={() => onEnterAsDemo("siemens")}
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-bold shadow-lg shadow-[var(--accent-tangerine)]/20 transition-all cursor-pointer uppercase tracking-wider text-xs"
           >
-            <span>Live-Demo Starten (Siemens IKT)</span>
+            <span>{t.landing_cta_demo}</span>
             <ArrowRight className="w-4 h-4 stroke-[2.5]" />
           </button>
 
@@ -73,38 +73,38 @@ export function LandingPage({
             className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] text-[var(--foreground)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] font-bold transition-all shadow-sm cursor-pointer"
           >
             <Lock className="w-4 h-4 text-[var(--accent-tangerine)]" />
-            <span>Anmelden / Registrieren</span>
+            <span>{t.landing_cta_auth}</span>
           </button>
 
           <button
             onClick={onExploreWorkbench}
             className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--foreground)] opacity-80 hover:opacity-100 border border-[var(--surface-border)] font-bold transition-all cursor-pointer"
           >
-            <span>Direkt zur Prüfbank</span>
+            <span>{t.landing_cta_workbench}</span>
           </button>
         </div>
 
         {/* Trust & Compliance Metric Badges */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto pt-10 text-left font-mono">
           <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm">
-            <div className="text-[10px] opacity-60 uppercase font-bold">Aufsichtsbehörde</div>
+            <div className="text-[10px] opacity-60 uppercase font-bold">{t.landing_metric_authority}</div>
             <div className="text-sm font-bold text-[var(--foreground)] mt-0.5">BaFin / EZB</div>
-            <div className="text-[10px] text-emerald-500 font-bold mt-1">DORA Pillar IV Konform</div>
+            <div className="text-[10px] text-emerald-500 font-bold mt-1">{t.landing_metric_authority_sub}</div>
           </div>
           <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm">
-            <div className="text-[10px] opacity-60 uppercase font-bold">Datensouveränität</div>
+            <div className="text-[10px] opacity-60 uppercase font-bold">{t.landing_metric_privacy}</div>
             <div className="text-sm font-bold text-[var(--foreground)] mt-0.5">BDSG § 26 / DSGVO</div>
-            <div className="text-[10px] text-emerald-500 font-bold mt-1">Node Frankfurt a. M.</div>
+            <div className="text-[10px] text-emerald-500 font-bold mt-1">{t.landing_metric_privacy_sub}</div>
           </div>
           <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm">
-            <div className="text-[10px] opacity-60 uppercase font-bold">E-Rechnungspflicht</div>
+            <div className="text-[10px] opacity-60 uppercase font-bold">{t.landing_metric_invoice}</div>
             <div className="text-sm font-bold text-[var(--foreground)] mt-0.5">ZUGFeRD 2.3</div>
-            <div className="text-[10px] text-emerald-500 font-bold mt-1">EN 16931 / Factur-X</div>
+            <div className="text-[10px] text-emerald-500 font-bold mt-1">{t.landing_metric_invoice_sub}</div>
           </div>
           <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm">
-            <div className="text-[10px] opacity-60 uppercase font-bold">Sicherheitsstufe</div>
+            <div className="text-[10px] opacity-60 uppercase font-bold">{t.landing_metric_security}</div>
             <div className="text-sm font-bold text-[var(--foreground)] mt-0.5">DIN 66399</div>
-            <div className="text-[10px] text-emerald-500 font-bold mt-1">Schutzklasse 3 Validiert</div>
+            <div className="text-[10px] text-emerald-500 font-bold mt-1">{t.landing_metric_security_sub}</div>
           </div>
         </div>
       </section>
@@ -113,10 +113,10 @@ export function LandingPage({
       <section className="py-16 px-6 max-w-6xl mx-auto border-t border-[var(--surface-border)] space-y-10">
         <div className="text-center space-y-2">
           <span className="text-xs font-mono font-bold uppercase tracking-widest text-[var(--accent-tangerine)]">
-            Enterprise Module
+            {t.landing_modules_tag}
           </span>
           <h2 className="text-2xl sm:text-3xl font-black font-mono">
-            Vollständige Prüfung von IKT-Drittparteirisiken
+            {t.landing_modules_title}
           </h2>
         </div>
 
@@ -127,11 +127,10 @@ export function LandingPage({
               <Shield className="w-6 h-6 stroke-[2.5]" />
             </div>
             <h3 className="font-mono font-bold text-sm text-[var(--foreground)]">
-              DORA Art. 30 Prüfung
+              {t.landing_mod1_title}
             </h3>
             <p className="text-xs text-[var(--foreground)] opacity-70 leading-relaxed font-sans">
-              Prüfung wesentlicher Vertragsklauseln: 60 Tage Kündigungsfrist, 90 Tage
-              Migrationszusicherung und 30 Tage Widerspruchsrecht bei Unterauftragnehmern.
+              {t.landing_mod1_desc}
             </p>
             <div className="pt-2 text-[11px] font-mono font-bold text-[var(--accent-tangerine)] flex items-center gap-1">
               <span>VO (EU) 2022/2554</span>
@@ -145,11 +144,10 @@ export function LandingPage({
               <FileSpreadsheet className="w-6 h-6 stroke-[2.5]" />
             </div>
             <h3 className="font-mono font-bold text-sm text-[var(--foreground)]">
-              ZUGFeRD 2.3 & Factur-X
+              {t.landing_mod2_title}
             </h3>
             <p className="text-xs text-[var(--foreground)] opacity-70 leading-relaxed font-sans">
-              Validierung hybrider PDF/XML Rechnungsdaten gem. EN 16931 und dem
-              Wachstumschancengesetz. Automatische Leitweg-ID und Umsatzsteuer-Prüfung.
+              {t.landing_mod2_desc}
             </p>
             <div className="pt-2 text-[11px] font-mono font-bold text-sky-500 flex items-center gap-1">
               <span>Wachstumschancengesetz 2025</span>
@@ -163,11 +161,10 @@ export function LandingPage({
               <Languages className="w-6 h-6 stroke-[2.5]" />
             </div>
             <h3 className="font-mono font-bold text-sm text-[var(--foreground)]">
-              Beglaubigtes englisches Dossier
+              {t.landing_mod3_title}
             </h3>
             <p className="text-xs text-[var(--foreground)] opacity-70 leading-relaxed font-sans">
-              Automatische klauselweise Übersetzung für internationale Vorstände und
-              Aufsichtsgremien mit SHA-256 Prüffingerabdruck und PDF-Download.
+              {t.landing_mod3_desc}
             </p>
             <div className="pt-2 text-[11px] font-mono font-bold text-emerald-500 flex items-center gap-1">
               <span>DIN EN 15038 Parität</span>
@@ -179,8 +176,8 @@ export function LandingPage({
 
       {/* 3. Footer */}
       <footer className="border-t border-[var(--surface-border)] bg-[var(--surface-dark)] py-8 px-6 text-center text-xs font-mono opacity-60">
-        <p>DocuNorm AI © 2026 · Entwickelt für BaFin & europäische IKT-Compliance</p>
-        <p className="text-[10px] mt-1">Frankfurt am Main · DIN 66399 Schutzklasse 3 · BDSG § 26 Konform</p>
+        <p>DocuNorm AI © 2026 · {lang === "DE" ? "Entwickelt für BaFin & europäische IKT-Compliance" : "Built for BaFin & European ICT Compliance"}</p>
+        <p className="text-[10px] mt-1">Frankfurt am Main · DIN 66399 Schutzklasse 3 · BDSG § 26 {lang === "DE" ? "Konform" : "Compliant"}</p>
       </footer>
     </div>
   );

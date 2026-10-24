@@ -319,7 +319,7 @@ export function DocumentViewer({
               title="Side-by-Side Dual View: German PDF + English Translation"
             >
               <Columns className="w-3 h-3" />
-              <span>Dual-View</span>
+              <span>{lang === "DE" ? "Dual-Ansicht" : "Dual-View"}</span>
             </button>
             <button
               onClick={() => handleToggleDocViewMode("english")}
@@ -331,7 +331,9 @@ export function DocumentViewer({
               title="Full English Translated Dossier"
             >
               <Languages className="w-3 h-3" />
-              <span className="hidden sm:inline">English Dossier</span>
+              <span className="hidden sm:inline">
+                {lang === "DE" ? "Englisches Dossier" : "English Dossier"}
+              </span>
             </button>
           </div>
         </div>
@@ -540,10 +542,12 @@ export function DocumentViewer({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-mono font-black tracking-wider uppercase text-[var(--foreground)]">
-                        Certified English Translation Dossier
+                        {lang === "DE"
+                          ? "Beglaubigtes englisches Revisionsdossier"
+                          : "Certified English Translation Dossier"}
                       </span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold shrink-0 opacity-80">
-                        Page {currentPage} of {totalPages}
+                        {lang === "DE" ? "Seite" : "Page"} {currentPage} {lang === "DE" ? "von" : "of"} {totalPages}
                       </span>
                     </div>
                     <p className="text-[11px] font-mono opacity-60 truncate max-w-[280px]">
@@ -554,7 +558,8 @@ export function DocumentViewer({
 
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-md font-bold hidden xl:flex items-center gap-1.5 shadow-sm">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> BaFin DORA Art. 30 Certified
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />{" "}
+                    {lang === "DE" ? "BaFin & DORA Art. 30 Beglaubigt" : "BaFin DORA Art. 30 Certified"}
                   </span>
                   <button
                     onClick={() => {
@@ -566,7 +571,7 @@ export function DocumentViewer({
                     className="flex items-center gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono font-bold text-[11px] px-3 py-1.5 rounded-md shadow transition-all cursor-pointer uppercase tracking-wider"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Certified PDF</span>
+                    <span>{lang === "DE" ? "Beglaubigtes PDF" : "Certified PDF"}</span>
                   </button>
                   <button
                     onClick={() => {
@@ -589,7 +594,11 @@ export function DocumentViewer({
                   type="text"
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
-                  placeholder="Filter clauses (e.g. 'SLA', 'DORA', 'Exit', 'Liability', 'BDSG', 'ZUGFeRD')..."
+                  placeholder={
+                    lang === "DE"
+                      ? "Klauseln filtern (z.B. 'SLA', 'DORA', 'Kündigung', 'Haftung', 'BDSG')..."
+                      : "Filter clauses (e.g. 'SLA', 'DORA', 'Exit', 'Liability', 'BDSG', 'ZUGFeRD')..."
+                  }
                   className="w-full bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40 text-xs rounded-lg px-3 py-1.5 pl-8 focus:outline-none focus:border-[var(--accent-tangerine)] font-mono shadow-inner transition-colors"
                 />
                 <Search className="w-3.5 h-3.5 text-[var(--foreground)] opacity-40 absolute left-2.5 top-2.5 pointer-events-none" />
@@ -695,7 +704,7 @@ export function DocumentViewer({
                               title="Highlight this clause directly on the PDF canvas"
                             >
                               <MapPin className="w-3.5 h-3.5" />
-                              <span>Locate in PDF Canvas</span>
+                              <span>{lang === "DE" ? "Im PDF-Plan verorten" : "Locate in PDF Canvas"}</span>
                             </button>
                             <span className="text-[10px] opacity-50">
                               DIN A4 [ {Math.round(chunk.bounding_box?.[0] || 0)}, {Math.round(chunk.bounding_box?.[1] || 0)} ]
@@ -706,9 +715,11 @@ export function DocumentViewer({
                             <summary className="cursor-pointer text-[10.5px] font-mono text-[var(--accent-cyan)] hover:opacity-100 flex items-center justify-between select-none py-1">
                               <span className="flex items-center gap-1.5 font-bold">
                                 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-open/details:rotate-180" />
-                                <span>German Statutory Source (DE 🇩🇪)</span>
+                                <span>{lang === "DE" ? "Deutscher Originaltext (DE 🇩🇪)" : "German Statutory Source (DE 🇩🇪)"}</span>
                               </span>
-                              <span className="text-[9.5px] font-mono opacity-60">Bilingual Parity 100%</span>
+                              <span className="text-[9.5px] font-mono opacity-60">
+                                {lang === "DE" ? "Zweisprachige Parität 100%" : "Bilingual Parity 100%"}
+                              </span>
                             </summary>
                             <div className="mt-2 p-3 rounded-lg bg-[var(--surface-dark)] border-l-2 border-[var(--accent-tangerine)] border-r border-t border-b border-[var(--surface-border)] text-[12px] font-sans text-[var(--foreground)] opacity-90 leading-relaxed">
                               <p>{chunk.content}</p>
