@@ -131,7 +131,7 @@ export function ExecutiveDashboard({
 
         <button
           onClick={onSwitchToWorkbench}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 text-black font-mono text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer flex-shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer flex-shrink-0"
         >
           <span>{isDe ? "Zur PDF-Prüfbank" : "Open in PDF Workbench"}</span>
           <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />

@@ -152,7 +152,7 @@ export function AuditPanel({
               onClick={() => setMode(tab)}
               className={`py-1 text-xs font-mono font-bold rounded transition-all cursor-pointer ${
                 mode === tab
-                  ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
+                  ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
                   : "text-[var(--foreground)] opacity-60 hover:opacity-100"
               }`}
             >
@@ -268,7 +268,7 @@ export function AuditPanel({
                           }
                           className="group flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--accent-tangerine)]/10 border border-[var(--accent-tangerine)]/30 hover:border-[var(--accent-tangerine)] hover:bg-[var(--accent-tangerine)]/20 text-[var(--accent-tangerine)] text-xs transition-all w-full text-left shadow-sm cursor-pointer"
                         >
-                          <span className="font-black font-mono text-[9px] bg-[var(--accent-tangerine)] text-black px-1.5 py-0.5 rounded shadow">
+                          <span className="font-black font-mono text-[9px] bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] px-1.5 py-0.5 rounded shadow">
                             {citation.source_tag}
                           </span>
                           <span className="truncate flex-1 text-[11px] text-[var(--foreground)] opacity-80 group-hover:opacity-100 font-mono">
@@ -332,7 +332,7 @@ export function AuditPanel({
           <button
             onClick={() => executeAudit(query)}
             disabled={!query.trim() || loading}
-            className="absolute right-2.5 bottom-3.5 p-2 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-40 text-black font-black transition-all shadow-sm cursor-pointer"
+            className="absolute right-2.5 bottom-3.5 p-2 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-40 text-[var(--accent-contrast)] font-black transition-all shadow-sm cursor-pointer"
           >
             {loading ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />

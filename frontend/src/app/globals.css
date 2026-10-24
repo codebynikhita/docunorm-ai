@@ -14,21 +14,23 @@
   --surface-border: #1e263d;
   --canvas-bg: #07090f;
   --grid-line: rgba(255, 85, 0, 0.05);
+  --font-heading: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 2. Bauhaus Paper (Prestigious German Architectural Light Mode) */
+/* 2. Bauhaus Paper (Prestigious German Architectural Light Mode - Executive & Professional) */
 [data-theme="bauhaus"] {
-  --background: #f7f6f2;
-  --foreground: #0f172a;
-  --accent-tangerine: #dc2626; /* Bauhaus Bold Crimson */
+  --background: #f7f6f2; /* Warm German ivory architectural paper */
+  --foreground: #0f172a; /* Deep Prussian slate ink */
+  --accent-tangerine: #b91c1c; /* Refined Institutional Seal Crimson */
   --accent-contrast: #ffffff;
-  --accent-lime: #16a34a;
-  --accent-cyan: #2563eb;
-  --surface-dark: #eeebe2;
-  --surface-card: #ffffff;
-  --surface-border: #e2ddd4;
-  --canvas-bg: #f2efe7;
-  --grid-line: rgba(0, 0, 0, 0.04);
+  --accent-lime: #15803d; /* Forest Emerald */
+  --accent-cyan: #1d4ed8; /* Deep Cobalt Blue (replaces neon cyan) */
+  --surface-dark: #eeebe2; /* Muted stone paper */
+  --surface-card: #ffffff; /* Pristine white card */
+  --surface-border: #ded9cd; /* Subtle architectural border */
+  --canvas-bg: #f0ece1; /* Warm drafting table */
+  --grid-line: rgba(0, 0, 0, 0.025);
+  --font-heading: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* 3. Prussian Blueprint (Deep Midnight Oceanic Navy & Electric Cyber Cyan) */
@@ -45,6 +47,7 @@
   --surface-border: #1d3368;
   --canvas-bg: #060e24;
   --grid-line: rgba(0, 240, 255, 0.06);
+  --font-heading: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {

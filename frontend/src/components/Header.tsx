@@ -157,7 +157,7 @@ export function Header({
             onClick={() => onToggleLang("DE")}
             className={`px-2 py-0.5 rounded transition-all font-bold cursor-pointer ${
               lang === "DE"
-                ? "bg-[var(--accent-tangerine)] text-black"
+                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
           >
@@ -167,7 +167,7 @@ export function Header({
             onClick={() => onToggleLang("EN")}
             className={`px-2 py-0.5 rounded transition-all font-bold cursor-pointer ${
               lang === "EN"
-                ? "bg-[var(--accent-tangerine)] text-black"
+                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
           >

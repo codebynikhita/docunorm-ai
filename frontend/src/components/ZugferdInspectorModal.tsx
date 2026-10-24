@@ -116,7 +116,7 @@ export function ZugferdInspectorModal({
                 onClick={() => setActiveTab("comparison")}
                 className={`px-3 py-1 rounded font-bold cursor-pointer transition-all ${
                   activeTab === "comparison"
-                    ? "bg-[var(--accent-tangerine)] text-black"
+                    ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
                     : "text-[var(--foreground)] opacity-60 hover:opacity-100"
                 }`}
               >
@@ -126,7 +126,7 @@ export function ZugferdInspectorModal({
                 onClick={() => setActiveTab("raw_xml")}
                 className={`px-3 py-1 rounded font-bold cursor-pointer transition-all ${
                   activeTab === "raw_xml"
-                    ? "bg-[var(--accent-tangerine)] text-black"
+                    ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
                     : "text-[var(--foreground)] opacity-60 hover:opacity-100"
                 }`}
               >
@@ -286,7 +286,7 @@ export function ZugferdInspectorModal({
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-[var(--accent-tangerine)] text-black font-bold font-mono text-xs uppercase cursor-pointer hover:opacity-90 transition-opacity"
+            className="px-4 py-1.5 rounded-lg bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-bold font-mono text-xs uppercase cursor-pointer hover:opacity-90 transition-opacity"
           >
             {isDe ? "Prüfung Abschließen" : "Done"}
           </button>

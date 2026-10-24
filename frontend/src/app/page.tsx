@@ -184,7 +184,7 @@ export default function Home() {
                 <div className="relative">
                   <button
                     onClick={() => setIsFloatingAuditorOpen(false)}
-                    className="absolute -top-3 -right-3 z-50 w-7 h-7 rounded-full bg-[var(--accent-tangerine)] text-black font-black flex items-center justify-center text-xs shadow-lg cursor-pointer"
+                    className="absolute -top-3 -right-3 z-50 w-7 h-7 rounded-full bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-black flex items-center justify-center text-xs shadow-lg cursor-pointer"
                   >
                     ✕
                   </button>
@@ -198,7 +198,7 @@ export default function Home() {
               ) : (
                 <button
                   onClick={() => setIsFloatingAuditorOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--accent-tangerine)] text-black font-mono font-bold text-xs shadow-2xl hover:opacity-90 transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-mono font-bold text-xs shadow-2xl hover:opacity-90 transition-all cursor-pointer"
                 >
                   <Bot className="w-4 h-4 stroke-[2.5]" />
                   <span>Auditor HUD</span>

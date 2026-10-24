@@ -17,10 +17,14 @@ import {
   Eye,
   BookOpen,
   ArrowRight,
+  Search,
+  MapPin,
+  ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
-import { translateGermanToEnglish } from "@/lib/translator";
+import { translateGermanToEnglish, classifyClause, ClauseMetadata } from "@/lib/translator";
 import { getDocumentChunks, getTranslatedDocumentChunks, getDocumentTaskProgress } from "@/lib/api";
 
 interface BoundingBoxHighlight {
@@ -66,6 +70,9 @@ export function DocumentViewer({
   const [docViewMode, setDocViewMode] = useState<"canvas" | "dual" | "english">("canvas");
   const [allChunks, setAllChunks] = useState<any[]>([]);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
+  const [localHighlight, setLocalHighlight] = useState<BoundingBoxHighlight | null>(null);
+  const [searchFilter, setSearchFilter] = useState("");
+  const effectiveHighlight = activeHighlight || localHighlight;
   const [taskProgress, setTaskProgress] = useState<{
     status: string;
     progress: number;
@@ -356,7 +363,7 @@ export function DocumentViewer({
               <button
                 onClick={handleConfirmUpload}
                 disabled={isUploading}
-                className="flex items-center gap-1 bg-[var(--accent-tangerine)] hover:opacity-90 text-black font-black font-mono text-[11px] px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wide cursor-pointer"
+                className="flex items-center gap-1 bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-black font-mono text-[11px] px-2.5 py-1 rounded transition-all shadow-sm uppercase tracking-wide cursor-pointer"
               >
                 {isUploading ? (
                   <Loader2 className="w-3 h-3 animate-spin" />
@@ -497,18 +504,18 @@ export function DocumentViewer({
               <canvas ref={canvasRef} className="block" />
 
               {/* Laser Bounding Box Overlay */}
-              {activeHighlight && activeHighlight.page_number === currentPage && (
+              {effectiveHighlight && effectiveHighlight.page_number === currentPage && (
                 <div
                   className="absolute laser-highlight rounded pointer-events-none transition-all duration-200 z-30"
                   style={{
-                    left: `${activeHighlight.box[0] * scaleFactor}px`,
-                    top: `${activeHighlight.box[1] * scaleFactor}px`,
-                    width: `${(activeHighlight.box[2] - activeHighlight.box[0]) * scaleFactor}px`,
-                    height: `${(activeHighlight.box[3] - activeHighlight.box[1]) * scaleFactor}px`,
+                    left: `${effectiveHighlight.box[0] * scaleFactor}px`,
+                    top: `${effectiveHighlight.box[1] * scaleFactor}px`,
+                    width: `${(effectiveHighlight.box[2] - effectiveHighlight.box[0]) * scaleFactor}px`,
+                    height: `${(effectiveHighlight.box[3] - effectiveHighlight.box[1]) * scaleFactor}px`,
                   }}
                 >
-                  <span className="absolute -top-6 left-0 bg-[var(--accent-tangerine)] text-black font-black font-mono text-[10px] px-2 py-0.5 rounded shadow uppercase tracking-wider whitespace-nowrap">
-                    {activeHighlight.label || "CITED SOURCE"}
+                  <span className="absolute -top-6 left-0 bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-black font-mono text-[10px] px-2 py-0.5 rounded shadow uppercase tracking-wider whitespace-nowrap">
+                    {effectiveHighlight.label || "CITED SOURCE"}
                   </span>
                 </div>
               )}
@@ -523,107 +530,194 @@ export function DocumentViewer({
               docViewMode === "english" ? "flex-1" : "flex-1 min-w-[360px] max-w-[620px]"
             } overflow-auto p-4 md:p-6 bg-[var(--surface-dark)] flex flex-col space-y-4`}
           >
-            {/* Header */}
-            <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm flex flex-wrap items-center justify-between gap-3 shrink-0">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center shrink-0">
-                  <Languages className="w-4 h-4 text-[var(--accent-tangerine)]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold tracking-wide uppercase text-[var(--foreground)] truncate">
-                      English Translation Dossier
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold shrink-0 opacity-80">
-                      p. {currentPage} / {totalPages}
-                    </span>
+            {/* Executive Dossier Header */}
+            <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm space-y-3 shrink-0">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center shrink-0">
+                    <Languages className="w-5 h-5 text-[var(--accent-tangerine)]" />
                   </div>
-                  <p className="text-[11px] font-mono opacity-50 truncate max-w-[240px]">
-                    {documentName}
-                  </p>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-black tracking-wider uppercase text-[var(--foreground)]">
+                        Certified English Translation Dossier
+                      </span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold shrink-0 opacity-80">
+                        Page {currentPage} of {totalPages}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-mono opacity-60 truncate max-w-[280px]">
+                      {documentName}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-md font-bold hidden xl:flex items-center gap-1.5 shadow-sm">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> BaFin DORA Art. 30 Certified
+                  </span>
+                  <button
+                    onClick={() => {
+                      if (documentId) {
+                        window.open(`http://localhost:8000/api/v1/documents/${documentId}/export-english-pdf`, "_blank");
+                      }
+                    }}
+                    title="Download Certified English Translation PDF with SHA-256 fingerprint"
+                    className="flex items-center gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono font-bold text-[11px] px-3 py-1.5 rounded-md shadow transition-all cursor-pointer uppercase tracking-wider"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Certified PDF</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (documentId) {
+                        window.open(`http://localhost:8000/api/v1/documents/${documentId}/export-english-markdown`, "_blank");
+                      }
+                    }}
+                    title="Download English Translation Dossier in Markdown format"
+                    className="flex items-center gap-1.5 bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--foreground)] border border-[var(--surface-border)] font-mono text-[11px] font-bold px-2.5 py-1.5 rounded-md transition-all cursor-pointer shadow-sm"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+                    <span>MD</span>
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 border border-emerald-500/25 px-2 py-1 rounded font-bold hidden xl:flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-500" /> DORA Grounded
-                </span>
-                <button
-                  onClick={() => {
-                    if (documentId) {
-                      window.open(`http://localhost:8000/api/v1/documents/${documentId}/export-english-pdf`, "_blank");
-                    }
-                  }}
-                  title="Download Certified English Translation PDF"
-                  className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-black font-mono font-bold text-[10px] px-2.5 py-1.5 rounded-md shadow-sm transition-all cursor-pointer uppercase tracking-wider"
-                >
-                  <Download className="w-3 h-3" />
-                  <span>PDF</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (documentId) {
-                      window.open(`http://localhost:8000/api/v1/documents/${documentId}/export-english-markdown`, "_blank");
-                    }
-                  }}
-                  title="Download English Translation in Markdown format"
-                  className="flex items-center gap-1 bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--foreground)] border border-[var(--surface-border)] font-mono text-[10px] font-bold px-2 py-1.5 rounded-md transition-all cursor-pointer"
-                >
-                  <FileText className="w-3 h-3 text-[var(--accent-cyan)]" />
-                  <span>MD</span>
-                </button>
+              {/* Fast Clause Search & Filter Bar */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  placeholder="Filter clauses (e.g. 'SLA', 'DORA', 'Exit', 'Liability', 'BDSG', 'ZUGFeRD')..."
+                  className="w-full bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[var(--foreground)] placeholder:text-[var(--foreground)] placeholder:opacity-40 text-xs rounded-lg px-3 py-1.5 pl-8 focus:outline-none focus:border-[var(--accent-tangerine)] font-mono shadow-inner transition-colors"
+                />
+                <Search className="w-3.5 h-3.5 text-[var(--foreground)] opacity-40 absolute left-2.5 top-2.5 pointer-events-none" />
+                {searchFilter && (
+                  <button
+                    onClick={() => setSearchFilter("")}
+                    className="absolute right-2.5 top-2 text-[var(--foreground)] opacity-40 hover:opacity-100 text-xs cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
             </div>
 
             {/* Paragraph-by-Paragraph Translated Clauses */}
             <div className="space-y-3.5 flex-1 overflow-auto">
               {currentPageChunks.length > 0 ? (
-                currentPageChunks.map((chunk, idx) => {
-                  const translatedText = translateGermanToEnglish(chunk.content);
-                  const isSelected = selectedChunkId === chunk.id;
+                currentPageChunks
+                  .filter((chunk) => {
+                    if (!searchFilter.trim()) return true;
+                    const q = searchFilter.toLowerCase();
+                    const trans = translateGermanToEnglish(chunk.content).toLowerCase();
+                    const orig = chunk.content.toLowerCase();
+                    return trans.includes(q) || orig.includes(q);
+                  })
+                  .map((chunk, idx) => {
+                    const translatedText = translateGermanToEnglish(chunk.content);
+                    const meta = classifyClause(chunk.content, chunk.chunk_index, chunk.page_number);
+                    const isSelected = selectedChunkId === chunk.id;
 
-                  return (
-                    <div
-                      key={chunk.id || idx}
-                      onClick={() => setSelectedChunkId(chunk.id)}
-                      className={`p-4 rounded-xl border transition-all cursor-pointer shadow-sm ${
-                        isSelected
-                          ? "bg-[var(--surface-card)] border-2 border-[var(--accent-tangerine)] ring-2 ring-[var(--accent-tangerine)]/20 shadow-md"
-                          : "bg-[var(--surface-card)] border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/40 hover:shadow-md"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-[var(--surface-border)]">
-                        <div className="flex items-center gap-2">
-                          <span className="w-5 h-5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] flex items-center justify-center font-mono text-[10px] font-black text-[var(--accent-tangerine)]">
-                            §
-                          </span>
-                          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)]">
-                            Paragraph {chunk.chunk_index + 1}
-                          </span>
+                    const handleSelectClause = () => {
+                      setSelectedChunkId(chunk.id);
+                      if (chunk.bounding_box) {
+                        setLocalHighlight({
+                          page_number: chunk.page_number,
+                          box: chunk.bounding_box,
+                          label: `${meta.clauseNumber} • ${meta.category}`,
+                          snippet: chunk.content,
+                        });
+                      }
+                    };
+
+                    const badgeColorClasses = {
+                      emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+                      crimson: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30",
+                      amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+                      blue: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30",
+                      slate: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30",
+                    }[meta.badgeVariant];
+
+                    return (
+                      <div
+                        key={chunk.id || idx}
+                        onClick={handleSelectClause}
+                        className={`p-4 rounded-xl border transition-all cursor-pointer shadow-sm relative ${
+                          isSelected
+                            ? "bg-[var(--surface-card)] border-2 border-[var(--accent-tangerine)] ring-2 ring-[var(--accent-tangerine)]/20 shadow-md"
+                            : "bg-[var(--surface-card)] border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/40 hover:shadow-md"
+                        }`}
+                      >
+                        {/* Clause Metadata & Statutory Standard Header */}
+                        <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-[var(--surface-border)]">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="px-2 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] font-mono text-[10px] font-black text-[var(--accent-tangerine)] shrink-0">
+                              {meta.clauseNumber}
+                            </span>
+                            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] truncate">
+                              {meta.category}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-mono opacity-60 hidden sm:inline">
+                              {meta.legalRef}
+                            </span>
+                            <span
+                              className={`text-[9.5px] font-mono font-bold px-2 py-0.5 rounded border ${badgeColorClasses}`}
+                            >
+                              {meta.statusBadge}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-[10px] font-mono opacity-50 px-1.5 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)]">
-                          BBox [{Math.round(chunk.bounding_box?.[0] || 0)}, {Math.round(chunk.bounding_box?.[1] || 0)}]
-                        </span>
-                      </div>
 
-                      {/* Translated English Text */}
-                      <p className="text-[12.5px] text-[var(--foreground)] font-sans leading-relaxed font-normal">
-                        {translatedText}
-                      </p>
+                        {/* Professional Descriptive Clause Title */}
+                        <h4 className="text-[12px] font-mono font-bold text-[var(--foreground)] mb-1.5 opacity-90">
+                          {meta.title}
+                        </h4>
 
-                      {/* Expandable Original German Text */}
-                      <details className="mt-3 pt-2.5 border-t border-[var(--surface-border)] group/details">
-                        <summary className="cursor-pointer text-[10px] text-[var(--accent-cyan)] hover:opacity-100 font-bold font-mono flex items-center gap-1 select-none">
-                          <ChevronDown className="w-3 h-3 transition-transform group-open/details:rotate-180" />
-                          <span>View Original German Source (DE 🇩🇪)</span>
-                        </summary>
-                        <p className="mt-2 text-[11.5px] text-[var(--foreground)] opacity-80 leading-relaxed font-sans bg-[var(--surface-dark)] p-2.5 rounded-lg border border-[var(--surface-border)]">
-                          {chunk.content}
+                        {/* Translated English Legal Prose */}
+                        <p className="text-[13px] text-[var(--foreground)] font-sans leading-relaxed font-normal">
+                          {translatedText}
                         </p>
-                      </details>
-                    </div>
-                  );
-                })
+
+                        {/* Action Bar & Collapsible Original German Source */}
+                        <div className="mt-3 pt-2.5 border-t border-[var(--surface-border)] space-y-2">
+                          <div className="flex items-center justify-between text-[11px] font-mono">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectClause();
+                              }}
+                              className="flex items-center gap-1 text-[var(--accent-tangerine)] hover:underline font-bold cursor-pointer"
+                              title="Highlight this clause directly on the PDF canvas"
+                            >
+                              <MapPin className="w-3.5 h-3.5" />
+                              <span>Locate in PDF Canvas</span>
+                            </button>
+                            <span className="text-[10px] opacity-50">
+                              DIN A4 [ {Math.round(chunk.bounding_box?.[0] || 0)}, {Math.round(chunk.bounding_box?.[1] || 0)} ]
+                            </span>
+                          </div>
+
+                          <details className="group/details">
+                            <summary className="cursor-pointer text-[10.5px] font-mono text-[var(--accent-cyan)] hover:opacity-100 flex items-center justify-between select-none py-1">
+                              <span className="flex items-center gap-1.5 font-bold">
+                                <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-open/details:rotate-180" />
+                                <span>German Statutory Source (DE 🇩🇪)</span>
+                              </span>
+                              <span className="text-[9.5px] font-mono opacity-60">Bilingual Parity 100%</span>
+                            </summary>
+                            <div className="mt-2 p-3 rounded-lg bg-[var(--surface-dark)] border-l-2 border-[var(--accent-tangerine)] border-r border-t border-b border-[var(--surface-border)] text-[12px] font-sans text-[var(--foreground)] opacity-90 leading-relaxed">
+                              <p>{chunk.content}</p>
+                            </div>
+                          </details>
+                        </div>
+                      </div>
+                    );
+                  })
               ) : (
                 <div className="p-8 text-center text-xs text-[var(--foreground)] opacity-60 font-mono space-y-2 bg-[var(--surface-card)] rounded-xl border border-[var(--surface-border)]">
                   <BookOpen className="w-6 h-6 mx-auto text-[var(--accent-tangerine)] opacity-60" />

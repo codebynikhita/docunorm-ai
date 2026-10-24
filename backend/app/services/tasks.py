@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 pdf_parser = PDFParserService()
 
+# Resilient in-memory task store fallback for offline/test environments
+_IN_MEMORY_TASK_STORE: dict[str, dict] = {}
+
 
 def get_redis_client() -> Redis:
     """
@@ -41,15 +44,17 @@ async def set_task_progress(
     Record real-time document ingestion stage and percentage progress in Redis.
     Expires after 3600 seconds (1 hour).
     """
+    payload = {
+        "document_id": str(document_id),
+        "status": status,
+        "progress": progress,
+        "stage": stage,
+        "error": error,
+    }
+    _IN_MEMORY_TASK_STORE[str(document_id)] = payload
+
     try:
         redis = get_redis_client()
-        payload = {
-            "document_id": str(document_id),
-            "status": status,
-            "progress": progress,
-            "stage": stage,
-            "error": error,
-        }
         await redis.set(f"doc:task:{document_id}", json.dumps(payload), ex=3600)
         await redis.aclose()
     except Exception as e:
@@ -69,6 +74,9 @@ async def get_task_progress(document_id: UUID) -> dict[str, str | int | None]:
             return json.loads(raw)
     except Exception as e:
         logger.warning(f"Could not read task progress from Redis: {e}")
+
+    if str(document_id) in _IN_MEMORY_TASK_STORE:
+        return _IN_MEMORY_TASK_STORE[str(document_id)]
 
     return {
         "document_id": str(document_id),
