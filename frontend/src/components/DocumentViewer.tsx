@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   UploadCloud,
   FileText,
+  Download,
   ZoomIn,
   ZoomOut,
   CheckCircle2,
@@ -529,9 +530,35 @@ export function DocumentViewer({
                 </h3>
               </div>
 
-              <span className="text-[10px] font-mono text-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/30 px-2 py-1 rounded font-bold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> DORA Grounded
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono text-[var(--accent-cyan)] bg-[var(--accent-cyan)]/10 border border-[var(--accent-cyan)]/30 px-2 py-1 rounded font-bold hidden sm:flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> DORA Grounded
+                </span>
+                <button
+                  onClick={() => {
+                    if (documentId) {
+                      window.open(`http://localhost:8000/api/v1/documents/${documentId}/export-english-pdf`, "_blank");
+                    }
+                  }}
+                  title="Download Certified English Translation PDF"
+                  className="flex items-center gap-1.5 bg-[var(--accent-tangerine)] hover:opacity-90 text-black font-black font-mono text-[10px] px-2.5 py-1 rounded shadow-sm transition-all cursor-pointer uppercase tracking-wider"
+                >
+                  <Download className="w-3 h-3" />
+                  <span>Download PDF</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (documentId) {
+                      window.open(`http://localhost:8000/api/v1/documents/${documentId}/export-english-markdown`, "_blank");
+                    }
+                  }}
+                  title="Download English Translation in Markdown format"
+                  className="flex items-center gap-1 bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] text-[var(--foreground)] border border-[var(--surface-border)] font-mono text-[10px] font-bold px-2 py-1 rounded transition-all cursor-pointer"
+                >
+                  <FileText className="w-3 h-3 text-[var(--accent-cyan)]" />
+                  <span className="hidden sm:inline">MD</span>
+                </button>
+              </div>
             </div>
 
             {/* Paragraph-by-Paragraph Translated Clauses */}

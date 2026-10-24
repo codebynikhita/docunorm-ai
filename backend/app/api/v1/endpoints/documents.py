@@ -2,7 +2,7 @@ from typing import Annotated, Any
 from uuid import UUID, uuid4
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -29,6 +29,7 @@ from app.services.auditor import (
     translate_chunks_to_english,
 )
 from app.services.embedding import embedding_service
+from app.services.exporter import generate_english_dossier_markdown, generate_english_dossier_pdf
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
 from app.services.storage import storage_service
@@ -625,5 +626,102 @@ async def audit_document(
         status="COMPLIANT",
         finding_summary=finding_summary,
         citations=citations,
+    )
+
+
+@router.get(
+    "/{document_id}/export-english-pdf",
+    summary="Download Certified English Translated Contract Dossier (PDF)",
+)
+async def export_english_pdf_endpoint(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> FileResponse:
+    """
+    Generates and downloads a certified DIN A4 English Regulatory Audit Dossier PDF
+    with synchronized German statutory references and SHA-256 tamper-proof fingerprints.
+    """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
+
+    stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+    )
+    result = await db.execute(stmt)
+    raw_chunks = result.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "chunk_index": c.chunk_index,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+            "content": c.content,
+        }
+        for c in raw_chunks
+    ]
+
+    translated = await translate_chunks_to_english(chunk_dicts)
+    pdf_path = generate_english_dossier_pdf(doc, translated)
+
+    clean_filename = f"{doc.filename.replace('.pdf', '')}_ENGLISH_DOSSIER.pdf"
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=clean_filename,
+    )
+
+
+@router.get(
+    "/{document_id}/export-english-markdown",
+    summary="Download English Contract Dossier in Markdown Format",
+)
+async def export_english_markdown_endpoint(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> Response:
+    """
+    Generates and downloads an English contract dossier in Markdown format.
+    """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
+
+    stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+    )
+    result = await db.execute(stmt)
+    raw_chunks = result.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "chunk_index": c.chunk_index,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+            "content": c.content,
+        }
+        for c in raw_chunks
+    ]
+
+    translated = await translate_chunks_to_english(chunk_dicts)
+    md_content = generate_english_dossier_markdown(doc, translated)
+
+    clean_filename = f"{doc.filename.replace('.pdf', '')}_ENGLISH_DOSSIER.md"
+    return Response(
+        content=md_content,
+        media_type="text/markdown",
+        headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
     )
 
