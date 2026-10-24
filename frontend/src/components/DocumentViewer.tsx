@@ -243,6 +243,15 @@ export function DocumentViewer({
     }
   };
 
+  const handleToggleDocViewMode = (mode: "canvas" | "dual" | "english") => {
+    setDocViewMode(mode);
+    if (mode === "dual" && zoom > 75) {
+      setZoom(75);
+    } else if (mode === "canvas" && zoom < 100) {
+      setZoom(100);
+    }
+  };
+
   const scaleFactor = (zoom / 100) * 1.25;
 
   // Filter chunks for current page
@@ -283,7 +292,7 @@ export function DocumentViewer({
           {/* DOCUMENT TRANSLATION MODE SELECTOR */}
           <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm">
             <button
-              onClick={() => setDocViewMode("canvas")}
+              onClick={() => handleToggleDocViewMode("canvas")}
               className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all ${
                 docViewMode === "canvas"
                   ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
@@ -294,7 +303,7 @@ export function DocumentViewer({
               🇩🇪 PDF
             </button>
             <button
-              onClick={() => setDocViewMode("dual")}
+              onClick={() => handleToggleDocViewMode("dual")}
               className={`px-2.5 py-0.5 rounded font-bold cursor-pointer transition-all flex items-center gap-1 ${
                 docViewMode === "dual"
                   ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
@@ -306,7 +315,7 @@ export function DocumentViewer({
               <span>Dual-View</span>
             </button>
             <button
-              onClick={() => setDocViewMode("english")}
+              onClick={() => handleToggleDocViewMode("english")}
               className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all flex items-center gap-1 ${
                 docViewMode === "english"
                   ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
@@ -448,7 +457,7 @@ export function DocumentViewer({
       <div className="flex-1 overflow-hidden flex">
         {/* 1. PDF Canvas View (Kept mounted in DOM to preserve rendered canvas state) */}
         <div
-          className={`overflow-auto p-6 flex justify-center cyber-canvas relative ${
+          className={`overflow-auto p-4 md:p-6 cyber-canvas relative flex flex-col items-center min-w-0 ${
             docViewMode === "english"
               ? "hidden"
               : docViewMode === "dual"
@@ -477,7 +486,7 @@ export function DocumentViewer({
           ) : (
             <div
               style={{ width: `${canvasDimensions.width}px`, minHeight: `${canvasDimensions.height}px` }}
-              className="relative bg-white rounded-lg shadow-2xl transition-all duration-150 flex items-center justify-center overflow-hidden border border-[var(--surface-border)] my-auto"
+              className="relative bg-white rounded-lg shadow-2xl transition-all duration-150 flex items-center justify-center overflow-hidden border border-[var(--surface-border)] m-auto shrink-0"
             >
               {rendering && (
                 <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-10">
