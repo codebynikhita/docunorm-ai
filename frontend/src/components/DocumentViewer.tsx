@@ -626,8 +626,10 @@ export function DocumentViewer({
                   })
                   .map((chunk, idx) => {
                     const translatedText = chunk.translated_content || translateGermanToEnglish(chunk.content);
-                    const meta = classifyClause(chunk.content, chunk.chunk_index, chunk.page_number);
+                    const meta = classifyClause(chunk.content, chunk.chunk_index, chunk.page_number, lang);
                     const isSelected = selectedChunkId === chunk.id;
+                    const primaryText = lang === "EN" ? translatedText : chunk.content;
+                    const alternateText = lang === "EN" ? chunk.content : translatedText;
 
                     const handleSelectClause = () => {
                       setSelectedChunkId(chunk.id);
@@ -687,12 +689,12 @@ export function DocumentViewer({
                           {meta.title}
                         </h4>
 
-                        {/* Translated English Legal Prose */}
+                        {/* Primary Legal Prose (Respects Language Toggle) */}
                         <p className="text-[13px] text-[var(--foreground)] font-sans leading-relaxed font-normal">
-                          {translatedText}
+                          {primaryText}
                         </p>
 
-                        {/* Action Bar & Collapsible Original German Source */}
+                        {/* Action Bar & Collapsible Alternate Language Source */}
                         <div className="mt-3 pt-2.5 border-t border-[var(--surface-border)] space-y-2">
                           <div className="flex items-center justify-between text-[11px] font-mono">
                             <button
@@ -715,14 +717,18 @@ export function DocumentViewer({
                             <summary className="cursor-pointer text-[10.5px] font-mono text-[var(--accent-cyan)] hover:opacity-100 flex items-center justify-between select-none py-1">
                               <span className="flex items-center gap-1.5 font-bold">
                                 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-open/details:rotate-180" />
-                                <span>{lang === "DE" ? "Deutscher Originaltext (DE 🇩🇪)" : "German Statutory Source (DE 🇩🇪)"}</span>
+                                <span>
+                                  {lang === "EN"
+                                    ? "German Statutory Source (DE 🇩🇪)"
+                                    : "Beglaubigte englische Übersetzung (EN 🇬🇧)"}
+                                </span>
                               </span>
                               <span className="text-[9.5px] font-mono opacity-60">
                                 {lang === "DE" ? "Zweisprachige Parität 100%" : "Bilingual Parity 100%"}
                               </span>
                             </summary>
                             <div className="mt-2 p-3 rounded-lg bg-[var(--surface-dark)] border-l-2 border-[var(--accent-tangerine)] border-r border-t border-b border-[var(--surface-border)] text-[12px] font-sans text-[var(--foreground)] opacity-90 leading-relaxed">
-                              <p>{chunk.content}</p>
+                              <p>{alternateText}</p>
                             </div>
                           </details>
                         </div>

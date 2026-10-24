@@ -48,8 +48,13 @@ export default function Home() {
     snippet?: string;
   } | null>(null);
 
-  // Restore User Session from localStorage on mount
+  // Restore User Session & Language Preference from localStorage on mount
   useEffect(() => {
+    const savedLang = localStorage.getItem("docunorm_lang") as Language;
+    if (savedLang === "DE" || savedLang === "EN") {
+      setLang(savedLang);
+    }
+
     const savedUser = localStorage.getItem("docunorm_user");
     const savedToken = localStorage.getItem("docunorm_token");
     if (savedUser && savedToken) {
@@ -72,6 +77,15 @@ export default function Home() {
       setUser(initialDemo);
     }
   }, []);
+
+  const handleToggleLang = (newLang: Language) => {
+    setLang(newLang);
+    try {
+      localStorage.setItem("docunorm_lang", newLang);
+    } catch (e) {
+      console.warn("Could not save language to localStorage", e);
+    }
+  };
 
   // Load available documents list for dropdown and select German demo contract
   useEffect(() => {
@@ -179,7 +193,7 @@ export default function Home() {
       {/* Top Enterprise Header with Theme & Layout Switchers */}
       <Header
         lang={lang}
-        onToggleLang={(l) => setLang(l)}
+        onToggleLang={handleToggleLang}
         theme={theme}
         onThemeChange={(th) => setTheme(th)}
         layoutMode={layoutMode}
@@ -341,6 +355,7 @@ export default function Home() {
       {/* Advanced Regulatory Ingestion Telemetry Modal */}
       <IngestionModal
         isOpen={isIngestModalOpen}
+        lang={lang}
         filename={pendingFile?.name || "document.pdf"}
         fileSizeBytes={pendingFile?.size || 0}
         onComplete={() => setIsIngestModalOpen(false)}

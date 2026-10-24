@@ -339,6 +339,14 @@ export function StandaloneAuditorStudio({
             <div className="space-y-1 pt-1">
               {threads.map((item) => {
                 const isActive = item.id === activeThreadId;
+                const displayTitle =
+                  lang === "EN"
+                    ? item.title
+                        .replace("Ausstiegsfrist & Migration", "Exit Period & Migration")
+                        .replace("Haftung & 0,2% Verzugsstrafen", "Liability & 0.2% Delay Penalties")
+                        .replace("Neuer Prüfvorgang", "New Audit Inquiry")
+                    : item.title;
+
                 return (
                   <button
                     key={item.id}
@@ -358,7 +366,7 @@ export function StandaloneAuditorStudio({
                       </span>
                       <span className="text-[9px] opacity-40">{item.timestamp}</span>
                     </div>
-                    <p className="truncate text-[11px]">{item.title}</p>
+                    <p className="truncate text-[11px]">{displayTitle}</p>
                   </button>
                 );
               })}
@@ -477,7 +485,11 @@ export function StandaloneAuditorStudio({
           ) : (
             activeThread.messages.map((msg) => {
               const isUser = msg.sender === "user";
-              const isTranslated = translatedMap[msg.id] || false;
+              // If lang is EN, default to English translation unless toggled off
+              const isTranslated =
+                translatedMap[msg.id] !== undefined
+                  ? translatedMap[msg.id]
+                  : lang === "EN";
               const displayedText = isTranslated
                 ? translateGermanToEnglish(msg.text)
                 : msg.text;
@@ -655,11 +667,21 @@ export function StandaloneAuditorStudio({
 
               <div>
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-50 font-bold block mb-1">
-                  {lang === "DE" ? "Originaltext (Authentischer Wortlaut):" : "Original German Text (Authentic):"}
+                  {lang === "DE" ? "Originaltext (Authentischer Wortlaut):" : "Verified Statutory Content (English):"}
                 </span>
                 <div className="p-3 rounded-lg bg-[var(--surface-dark)] border-l-2 border-[var(--accent-tangerine)] border-r border-t border-b border-[var(--surface-border)] text-xs font-sans text-[var(--foreground)] leading-relaxed">
-                  "{selectedCitation.content}"
+                  "{lang === "EN" ? translateGermanToEnglish(selectedCitation.content || "") : selectedCitation.content}"
                 </div>
+                {lang === "EN" && (
+                  <details className="mt-2 group/citation">
+                    <summary className="text-[10px] font-mono text-[var(--accent-cyan)] cursor-pointer select-none">
+                      Show German Statutory Source (DE 🇩🇪)
+                    </summary>
+                    <div className="mt-1 p-2.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[11px] font-sans opacity-80 leading-relaxed">
+                      "{selectedCitation.content}"
+                    </div>
+                  </details>
+                )}
               </div>
 
               {onOpenWorkbenchWithCitation && (

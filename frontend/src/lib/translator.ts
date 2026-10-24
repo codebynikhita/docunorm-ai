@@ -367,18 +367,20 @@ export interface ClauseMetadata {
 export function classifyClause(
   germanText: string,
   chunkIndex: number,
-  pageNumber: number
+  pageNumber: number,
+  lang: "DE" | "EN" = "EN"
 ): ClauseMetadata {
+  const isDe = lang === "DE";
   const lower = (germanText || "").toLowerCase();
 
   // 1. Entity Header
   if (lower.includes("rechtsabteilung compliance") || lower.includes("legal department")) {
     return {
-      clauseNumber: "Entity Preamble",
-      category: "Corporate Governance",
-      title: "Siemens AG Legal & Regulatory Compliance",
+      clauseNumber: isDe ? "Präambel" : "Entity Preamble",
+      category: isDe ? "Unternehmensführung" : "Corporate Governance",
+      title: isDe ? "Siemens AG Rechts- & Complianceabteilung" : "Siemens AG Legal & Regulatory Compliance",
       legalRef: "DIN EN ISO 9001 / Governance",
-      statusBadge: "Verified Entity",
+      statusBadge: isDe ? "Aufsichtsgeprüft" : "Verified Entity",
       badgeVariant: "slate",
     };
   }
@@ -386,11 +388,11 @@ export function classifyClause(
   // 2. Dossier Number
   if (lower.includes("dossier-nr") || lower.includes("dossier no")) {
     return {
-      clauseNumber: "Audit Ref",
-      category: "Audit Identification",
-      title: "BaFin & DORA Reference Key",
+      clauseNumber: isDe ? "Akte" : "Audit Ref",
+      category: isDe ? "Aufsichts-Identifikation" : "Audit Identification",
+      title: isDe ? "BaFin & DORA Referenzschlüssel" : "BaFin & DORA Reference Key",
       legalRef: "BaFin Circular 10/2018 (BAIT)",
-      statusBadge: "DORA Traceable",
+      statusBadge: isDe ? "DORA Nachverfolgbar" : "DORA Traceable",
       badgeVariant: "blue",
     };
   }
@@ -398,11 +400,11 @@ export function classifyClause(
   // 3. Framework Master Agreement
   if (lower.includes("rahmenvereinbarung") || lower.includes("master agreement")) {
     return {
-      clauseNumber: "Preamble",
-      category: "Contract Foundation",
-      title: "Master ICT Services Framework Agreement",
+      clauseNumber: isDe ? "Präambel" : "Preamble",
+      category: isDe ? "Vertragsgrundlagen" : "Contract Foundation",
+      title: isDe ? "IKT-Dienstleistungs-Rahmenvereinbarung" : "Master ICT Services Framework Agreement",
       legalRef: "BGB § 311 / ICT Framework",
-      statusBadge: "Binding Agreement",
+      statusBadge: isDe ? "Rechtsverbindlich" : "Binding Agreement",
       badgeVariant: "blue",
     };
   }
@@ -410,11 +412,11 @@ export function classifyClause(
   // 4. Contracting Parties
   if (lower.includes("zwischen der siemens ag") || lower.includes("auftraggeber")) {
     return {
-      clauseNumber: "Parties",
-      category: "Contracting Representation",
-      title: "Designation of Principal and Contractor",
+      clauseNumber: isDe ? "Parteien" : "Parties",
+      category: isDe ? "Vertragsparteien" : "Contracting Representation",
+      title: isDe ? "Bestimmung von Auftraggeber und Auftragnehmer" : "Designation of Principal and Contractor",
       legalRef: "BGB § 126 / Commercial Code",
-      statusBadge: "Parties Identified",
+      statusBadge: isDe ? "Identifiziert" : "Parties Identified",
       badgeVariant: "slate",
     };
   }
@@ -423,10 +425,10 @@ export function classifyClause(
   if (lower.includes("gegenstand der vereinbarung") || (lower.includes("§ 1") && lower.includes("leistungsumfang"))) {
     return {
       clauseNumber: "§ 1",
-      category: "Service Scope",
-      title: "Subject Matter & Service Specification",
+      category: isDe ? "Leistungsumfang" : "Service Scope",
+      title: isDe ? "Gegenstand der Vereinbarung & Leistungsbeschreibung" : "Subject Matter & Service Specification",
       legalRef: "SLA Tier-3 Specification",
-      statusBadge: "Core Scope",
+      statusBadge: isDe ? "Kernleistung" : "Core Scope",
       badgeVariant: "blue",
     };
   }
@@ -435,10 +437,10 @@ export function classifyClause(
   if (lower.includes("hochverfügbare tier-3") || lower.includes("99,95 %")) {
     return {
       clauseNumber: "§ 1.1",
-      category: "Operational SLA",
-      title: "Tier-3 Cloud SLA & 99.95% Availability Guarantee",
+      category: isDe ? "Service Level Agreement" : "Operational SLA",
+      title: isDe ? "Tier-3 Cloud SLA & 99,95 % Verfügbarkeitsgarantie" : "Tier-3 Cloud SLA & 99.95% Availability Guarantee",
       legalRef: "DIN EN 50600 Tier-3 Standard",
-      statusBadge: "99.95% Target SLA",
+      statusBadge: isDe ? "99,95 % SLA Ziel" : "99.95% Target SLA",
       badgeVariant: "emerald",
     };
   }
@@ -447,10 +449,10 @@ export function classifyClause(
   if (lower.includes("regulatorische einstufung") || (lower.includes("§ 2") && lower.includes("dora"))) {
     return {
       clauseNumber: "§ 2",
-      category: "Regulatory Classification",
-      title: "Classification under EU DORA (Reg 2022/2554)",
+      category: isDe ? "Regulatorik (EU DORA)" : "Regulatory Classification",
+      title: isDe ? "Einstufung nach EU DORA (VO 2022/2554)" : "Classification under EU DORA (Reg 2022/2554)",
       legalRef: "EU Reg 2022/2554 (DORA)",
-      statusBadge: "DORA Art. 30 Scope",
+      statusBadge: isDe ? "DORA Art. 30 Geltung" : "DORA Art. 30 Scope",
       badgeVariant: "crimson",
     };
   }
@@ -459,10 +461,10 @@ export function classifyClause(
   if (lower.includes("kritische oder wichtige funktion") || lower.includes("bafin")) {
     return {
       clauseNumber: "§ 2.1",
-      category: "Supervisory Mandate",
-      title: "Critical Function & BaFin Minimum Standards",
+      category: isDe ? "Aufsichtsrecht" : "Supervisory Mandate",
+      title: isDe ? "Kritische Funktion & BaFin Mindeststandards" : "Critical Function & BaFin Minimum Standards",
       legalRef: "DORA Art. 30(2) · BaFin KWG § 25b",
-      statusBadge: "Critical Function",
+      statusBadge: isDe ? "Kritische Funktion" : "Critical Function",
       badgeVariant: "crimson",
     };
   }
@@ -471,10 +473,10 @@ export function classifyClause(
   if (lower.includes("übergangsfristen und ausstiegsstrategie") || (lower.includes("§ 3") && lower.includes("ausstieg"))) {
     return {
       clauseNumber: "§ 3",
-      category: "DORA Exit Strategy",
-      title: "Termination, Transition, and Disentanglement",
+      category: isDe ? "Ausstiegsstrategie" : "DORA Exit Strategy",
+      title: isDe ? "Kündigung, Übergang und Entflechtung" : "Termination, Transition, and Disentanglement",
       legalRef: "DORA Art. 30 Abs. 2(e)",
-      statusBadge: "Mandatory Exit Plan",
+      statusBadge: isDe ? "Ausstiegsregelung" : "Mandatory Exit Plan",
       badgeVariant: "crimson",
     };
   }
@@ -483,10 +485,10 @@ export function classifyClause(
   if (lower.includes("sechzig (60) tagen") || (lower.includes("kündigung") && lower.includes("neunzig (90) tage"))) {
     return {
       clauseNumber: "§ 3.1",
-      category: "Operational Disentanglement",
-      title: "60-Day Termination Notice & 90-Day Migration Guarantee",
+      category: isDe ? "Betriebliche Migration" : "Operational Disentanglement",
+      title: isDe ? "60 Tage Kündigungsfrist & 90 Tage Migrationsgarantie" : "60-Day Termination Notice & 90-Day Migration Guarantee",
       legalRef: "DORA Art. 30(2)(e) · EBA Guidelines",
-      statusBadge: "60d / 90d Migration",
+      statusBadge: isDe ? "60d / 90d Fristen" : "60d / 90d Migration",
       badgeVariant: "emerald",
     };
   }
@@ -495,10 +497,10 @@ export function classifyClause(
   if (lower.includes("haftungsobergrenzen") || (lower.includes("§ 4") && lower.includes("verzug"))) {
     return {
       clauseNumber: "§ 4",
-      category: "Commercial Remedy",
-      title: "Liability Caps & Delay Penalties",
+      category: isDe ? "Haftung & Verzug" : "Commercial Remedy",
+      title: isDe ? "Haftungsobergrenzen & Vertragsstrafen" : "Liability Caps & Delay Penalties",
       legalRef: "BGB § 339 / BGB § 276",
-      statusBadge: "Liability Safeguards",
+      statusBadge: isDe ? "Haftungssicherung" : "Liability Safeguards",
       badgeVariant: "amber",
     };
   }
@@ -507,10 +509,10 @@ export function classifyClause(
   if (lower.includes("0,2 %") || lower.includes("vertragsstrafe in höhe")) {
     return {
       clauseNumber: "§ 4.1",
-      category: "Delay Remedy",
-      title: "Delay Penalty (0.2%/day, capped at 5%) & Liability Exemptions",
+      category: isDe ? "Verzugsstrafen" : "Delay Remedy",
+      title: isDe ? "Vertragsstrafe (0,2 %/Werktag, max. 5 %) & Haftungsausnahmen" : "Delay Penalty (0.2%/day, capped at 5%) & Liability Exemptions",
       legalRef: "BGB § 343 · GDPR Art. 82",
-      statusBadge: "5% Cap Safeguard",
+      statusBadge: isDe ? "5 % Deckel" : "5% Cap Safeguard",
       badgeVariant: "amber",
     };
   }
@@ -519,10 +521,10 @@ export function classifyClause(
   if (lower.includes("sub-dienstleister") || (lower.includes("§ 5") && lower.includes("unterauftrag"))) {
     return {
       clauseNumber: "§ 5",
-      category: "Supply Chain Risk",
-      title: "Sub-Contracting Governance & Sub-Service Providers",
+      category: isDe ? "Lieferketten-Risiko" : "Supply Chain Risk",
+      title: isDe ? "Unterauftragsvergaben & Sub-Dienstleister Steuerung" : "Sub-Contracting Governance & Sub-Service Providers",
       legalRef: "DORA Art. 30 Abs. 3",
-      statusBadge: "Sub-Outsourcing",
+      statusBadge: isDe ? "Sub-Dienstleister" : "Sub-Outsourcing",
       badgeVariant: "crimson",
     };
   }
@@ -531,10 +533,10 @@ export function classifyClause(
   if (lower.includes("hinzuziehung wesentlicher unterauftragnehmer") || lower.includes("dreißig (30) tagen")) {
     return {
       clauseNumber: "§ 5.1",
-      category: "Supply Chain Risk",
-      title: "Prior Written Consent & 30-Day Client Objection Right",
+      category: isDe ? "Lieferketten-Risiko" : "Supply Chain Risk",
+      title: isDe ? "Vorherige schriftliche Zustimmung & 30 Tage Widerspruchsrecht" : "Prior Written Consent & 30-Day Client Objection Right",
       legalRef: "DORA Art. 30(3) · BaFin VAIT/BAIT",
-      statusBadge: "30-Day Veto Window",
+      statusBadge: isDe ? "30 Tage Veto" : "30-Day Veto Window",
       badgeVariant: "crimson",
     };
   }
@@ -543,10 +545,10 @@ export function classifyClause(
   if (lower.includes("bdsg § 26") || (lower.includes("§ 6") && lower.includes("datenschutz"))) {
     return {
       clauseNumber: "§ 6",
-      category: "Data Privacy & Sovereignty",
-      title: "Data Protection under BDSG Section 26 & EU GDPR",
+      category: isDe ? "Datenschutz & Souveränität" : "Data Privacy & Sovereignty",
+      title: isDe ? "Datenschutz nach BDSG § 26 und EU-DSGVO" : "Data Protection under BDSG Section 26 & EU GDPR",
       legalRef: "BDSG § 26 · EU GDPR Art. 28",
-      statusBadge: "BDSG / GDPR Verified",
+      statusBadge: isDe ? "BDSG / DSGVO" : "BDSG / GDPR Verified",
       badgeVariant: "emerald",
     };
   }
@@ -555,10 +557,10 @@ export function classifyClause(
   if (lower.includes("auftragsverarbeitungsvereinbarung") || lower.includes("serverstandort ist ausschließlich frankfurt")) {
     return {
       clauseNumber: "§ 6.1",
-      category: "Data Sovereignty",
-      title: "Audited DPA & Sovereign Frankfurt Cloud Hosting",
+      category: isDe ? "Datensouveränität" : "Data Sovereignty",
+      title: isDe ? "Geprüfte AVV & Serverstandort Frankfurt am Main" : "Audited DPA & Sovereign Frankfurt Cloud Hosting",
       legalRef: "GDPR Art. 44 (Data Sovereignty)",
-      statusBadge: "Frankfurt Sovereign Node",
+      statusBadge: isDe ? "Frankfurt Node" : "Frankfurt Sovereign Node",
       badgeVariant: "emerald",
     };
   }
@@ -567,10 +569,10 @@ export function classifyClause(
   if (lower.includes("elektronische rechnungsstellung") || (lower.includes("§ 7") && lower.includes("zugferd"))) {
     return {
       clauseNumber: "§ 7",
-      category: "Electronic Invoicing",
-      title: "Electronic Invoicing pursuant to ZUGFeRD 2.3 / EN 16931",
+      category: isDe ? "E-Rechnungspflicht" : "Electronic Invoicing",
+      title: isDe ? "Elektronische Rechnungsstellung gem. ZUGFeRD 2.3 / EN 16931" : "Electronic Invoicing pursuant to ZUGFeRD 2.3 / EN 16931",
       legalRef: "EN 16931 / Growth Opportunities Act",
-      statusBadge: "EN 16931 Mandate",
+      statusBadge: isDe ? "EN 16931 Pflicht" : "EN 16931 Mandate",
       badgeVariant: "blue",
     };
   }
@@ -579,10 +581,10 @@ export function classifyClause(
   if (lower.includes("crossindustryinvoice") || lower.includes("leitweg-id")) {
     return {
       clauseNumber: "§ 7.1",
-      category: "Electronic Invoicing",
-      title: "Hybrid ZUGFeRD XML PDF & EUR 48,500 Base Compensation",
+      category: isDe ? "E-Rechnungspflicht" : "Electronic Invoicing",
+      title: isDe ? "Hybride ZUGFeRD XML / PDF & EUR 48.500 Grundvergütung" : "Hybrid ZUGFeRD XML PDF & EUR 48,500 Base Compensation",
       legalRef: "E-Rechnungs-Verordnung (E-Rech-V)",
-      statusBadge: "Factur-X Profile",
+      statusBadge: isDe ? "Factur-X Profil" : "Factur-X Profile",
       badgeVariant: "blue",
     };
   }
@@ -590,11 +592,11 @@ export function classifyClause(
   // 19. Signatures
   if (lower.includes("unterschriften der parteien") || lower.includes("dr. m. weber") || lower.includes("bereichsleitung recht")) {
     return {
-      clauseNumber: "Signatures",
-      category: "Contract Execution",
-      title: "Authorized Signatures and Corporate Representation",
+      clauseNumber: isDe ? "Unterschriften" : "Signatures",
+      category: isDe ? "Vertragsabschluss" : "Contract Execution",
+      title: isDe ? "Rechtsgültige Vertretung & Zeichnung" : "Authorized Signatures and Corporate Representation",
       legalRef: "eIDAS Regulation / BGB § 126a",
-      statusBadge: "Duly Executed",
+      statusBadge: isDe ? "Vollzogen" : "Duly Executed",
       badgeVariant: "slate",
     };
   }
@@ -602,22 +604,22 @@ export function classifyClause(
   // 20. Security Stamp / DIN 66399
   if (lower.includes("schutzklasse 3") || lower.includes("din 66399")) {
     return {
-      clauseNumber: "Security Seal",
-      category: "Document Protection",
-      title: "DIN 66399 Protection Class 3 Security Seal",
+      clauseNumber: isDe ? "Sicherheitssiegel" : "Security Seal",
+      category: isDe ? "Dokumentenschutz" : "Document Protection",
+      title: isDe ? "DIN 66399 Schutzklasse 3 Sicherheitssiegel" : "DIN 66399 Protection Class 3 Security Seal",
       legalRef: "DIN 66399 Schutzklasse 3",
-      statusBadge: "Confidential Seal",
+      statusBadge: isDe ? "Schutzklasse 3" : "Confidential Seal",
       badgeVariant: "slate",
     };
   }
 
   // Generic fallback
   return {
-    clauseNumber: `Clause ${pageNumber}.${chunkIndex + 1}`,
-    category: "Contract Provision",
-    title: `Contractual Clause ${chunkIndex + 1}`,
+    clauseNumber: isDe ? `Klausel ${pageNumber}.${chunkIndex + 1}` : `Clause ${pageNumber}.${chunkIndex + 1}`,
+    category: isDe ? "Vertragsklausel" : "Contract Provision",
+    title: isDe ? `Vertragsklausel ${chunkIndex + 1}` : `Contractual Clause ${chunkIndex + 1}`,
     legalRef: "BGB Legal Standard",
-    statusBadge: "Verified Clause",
+    statusBadge: isDe ? "Geprüft" : "Verified Clause",
     badgeVariant: "slate",
   };
 }

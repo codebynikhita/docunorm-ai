@@ -12,11 +12,14 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { Language } from "@/lib/i18n";
+
 interface IngestionModalProps {
   isOpen: boolean;
   filename: string;
   fileSizeBytes: number;
   onComplete: () => void;
+  lang?: Language;
 }
 
 export function IngestionModal({
@@ -24,43 +27,80 @@ export function IngestionModal({
   filename,
   fileSizeBytes,
   onComplete,
+  lang = "DE",
 }: IngestionModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
     {
-      title: "Cryptographic SHA-256 Fingerprinting",
-      desc: "Computing tamper-proof hash for duplicate prevention",
+      title:
+        lang === "DE"
+          ? "Kryptografischer SHA-256 Fingerabdruck"
+          : "Cryptographic SHA-256 Fingerprinting",
+      desc:
+        lang === "DE"
+          ? "Berechnung des manipulationssicheren Hashs zur Duplikatvermeidung"
+          : "Computing tamper-proof hash for duplicate prevention",
       icon: ShieldCheck,
       color: "text-[#00e5ff]",
     },
     {
-      title: "Structural Coordinate Extraction",
-      desc: "PyMuPDF mapping paragraphs to exact [x0, y0, x1, y1] coordinates",
+      title:
+        lang === "DE"
+          ? "Strukturelle Koordinaten-Extraktion"
+          : "Structural Coordinate Extraction",
+      desc:
+        lang === "DE"
+          ? "PyMuPDF-Zuordnung von Absätzen zu exakten [x0, y0, x1, y1] Koordinaten"
+          : "PyMuPDF mapping paragraphs to exact [x0, y0, x1, y1] coordinates",
       icon: Cpu,
       color: "text-[#ff5500]",
     },
     {
-      title: "German PII Redaction Firewall",
-      desc: "Masking German IBANs, Steuer-ID, emails, and phone numbers",
+      title:
+        lang === "DE"
+          ? "Deutsche DSGVO / PII Redaktions-Firewall"
+          : "German PII Redaction Firewall",
+      desc:
+        lang === "DE"
+          ? "Automatische Schwärzung von IBANs, Steuer-IDs, E-Mails und Telefonnummern"
+          : "Masking German IBANs, Steuer-ID, emails, and phone numbers",
       icon: Lock,
       color: "text-[#ffaa00]",
     },
     {
-      title: "1024-Dimensional Semantic Vectorization",
-      desc: "Generating normalized embeddings compatible with pgvector",
+      title:
+        lang === "DE"
+          ? "1024-Dimensionale Semantische Vektorisierung"
+          : "1024-Dimensional Semantic Vectorization",
+      desc:
+        lang === "DE"
+          ? "Generierung normalisierter Einbettungen kompatibel mit pgvector"
+          : "Generating normalized embeddings compatible with pgvector",
       icon: Sparkles,
       color: "text-[#00e5ff]",
     },
     {
-      title: "ZUGFeRD EN 16931 Stream Analysis",
-      desc: "Probing for embedded XML invoice attachments",
+      title:
+        lang === "DE"
+          ? "ZUGFeRD EN 16931 Datenstrom-Analyse"
+          : "ZUGFeRD EN 16931 Stream Analysis",
+      desc:
+        lang === "DE"
+          ? "Prüfung auf eingebettete hybride XML-Rechnungsanhänge"
+          : "Probing for embedded XML invoice attachments",
       icon: FileSpreadsheet,
       color: "text-[#c6f000]",
     },
     {
-      title: "PostgreSQL & GDPR Audit Trail Commit",
-      desc: "Persisting atomic chunks and recording immutable access ledger",
+      title:
+        lang === "DE"
+          ? "PostgreSQL & Revisions-Protokoll Speicherung"
+          : "PostgreSQL & GDPR Audit Trail Commit",
+      desc:
+        lang === "DE"
+          ? "Persistierung atomarer Abschnitte und unveränderbares Audit-Ledger"
+          : "Persisting atomic chunks and recording immutable access ledger",
       icon: Database,
       color: "text-[#c6f000]",
     },
@@ -101,7 +141,7 @@ export function IngestionModal({
             </div>
             <div>
               <h3 className="text-sm font-extrabold text-white tracking-wide font-mono">
-                Regulatory Ingestion Pipeline
+                {lang === "DE" ? "Regulatorische Ingestions-Pipeline" : "Regulatory Ingestion Pipeline"}
               </h3>
               <p className="text-xs text-zinc-400 font-mono truncate max-w-[280px]">
                 {filename} ({Math.round(fileSizeBytes / 1024)} KB)
@@ -165,7 +205,9 @@ export function IngestionModal({
             disabled={!isDone}
             className="w-full py-2.5 px-4 rounded-lg bg-[#ff5500] hover:bg-[#ff6a00] disabled:opacity-40 text-black font-black font-mono text-xs transition-all shadow-[0_0_20px_rgba(255,85,0,0.4)] cursor-pointer uppercase tracking-wider"
           >
-            {isDone ? "Bereit • In Prüfbank öffnen / Open in Workbench" : "Pipeline wird ausgeführt..."}
+            {isDone
+              ? (lang === "DE" ? "Bereit • In Prüfbank öffnen" : "Ready • Open in Workbench")
+              : (lang === "DE" ? "Pipeline wird ausgeführt..." : "Executing Ingestion Pipeline...")}
           </button>
         </div>
       </div>
