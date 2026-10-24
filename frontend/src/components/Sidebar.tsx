@@ -8,14 +8,15 @@ import {
   History,
   Layers,
   Cpu,
+  Bot,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
 
 interface SidebarProps {
   lang: Language;
-  activeTab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log";
-  onTabChange: (tab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log") => void;
+  activeTab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor";
+  onTabChange: (tab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor") => void;
   documentCount: number;
 }
 
@@ -28,6 +29,12 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
       label: t.vault_title,
       icon: FileText,
       badge: `${documentCount} PDFs`,
+    },
+    {
+      id: "auditor" as const,
+      label: "KI-Prüfassistent",
+      icon: Bot,
+      badge: "Studio",
     },
     {
       id: "dora" as const,

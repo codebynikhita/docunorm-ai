@@ -129,3 +129,66 @@ export async function getDocumentTaskProgress(documentId: string): Promise<TaskP
     return null;
   }
 }
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  tenant_id: string;
+  organization: string;
+}
+
+export interface AuthSessionResponse {
+  access_token: string;
+  token_type: string;
+  user: UserProfile;
+}
+
+export async function loginUser(email: string, password: string): Promise<AuthSessionResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Authentication failed.");
+  }
+
+  return res.json();
+}
+
+export async function signupUser(data: {
+  email: string;
+  password: string;
+  full_name: string;
+  organization?: string;
+  role?: string;
+}): Promise<AuthSessionResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/auth/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Registration failed.");
+  }
+
+  return res.json();
+}
+
+export async function getCurrentUser(token: string): Promise<UserProfile | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}

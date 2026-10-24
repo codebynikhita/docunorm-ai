@@ -9,8 +9,11 @@ import { ExecutiveDashboard } from "@/components/ExecutiveDashboard";
 import { IngestionModal } from "@/components/IngestionModal";
 import { AuditCertificateModal } from "@/components/AuditCertificateModal";
 import { ZugferdInspectorModal } from "@/components/ZugferdInspectorModal";
+import { AuthModal } from "@/components/AuthModal";
+import { LandingPage } from "@/components/LandingPage";
+import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
 import { Language } from "@/lib/i18n";
-import { uploadDocument, listDocuments } from "@/lib/api";
+import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
 import { Bot, Award } from "lucide-react";
 
 export default function Home() {
@@ -18,8 +21,12 @@ export default function Home() {
   const [theme, setTheme] = useState<Theme>("bauhaus");
   const [layoutMode, setLayoutMode] = useState<LayoutMode>("workbench");
 
+  // User Authentication State
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   const [activeTab, setActiveTab] = useState<
-    "documents" | "dora" | "lksg" | "zugferd" | "audit_log"
+    "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor"
   >("documents");
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>("");
@@ -40,6 +47,31 @@ export default function Home() {
     label?: string;
     snippet?: string;
   } | null>(null);
+
+  // Restore User Session from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem("docunorm_user");
+    const savedToken = localStorage.getItem("docunorm_token");
+    if (savedUser && savedToken) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        localStorage.removeItem("docunorm_user");
+        localStorage.removeItem("docunorm_token");
+      }
+    } else {
+      // Default initial demo user profile for immediate out-of-the-box exploration
+      const initialDemo: UserProfile = {
+        id: "demo-weber",
+        email: "dr.weber@siemens.de",
+        full_name: "Dr. M. Weber",
+        role: "auditor",
+        tenant_id: "siemens-ag",
+        organization: "Siemens AG",
+      };
+      setUser(initialDemo);
+    }
+  }, []);
 
   // Load available documents list for dropdown and select German demo contract
   useEffect(() => {
@@ -101,6 +133,44 @@ export default function Home() {
     }
   };
 
+  const handleAuthSuccess = (authUser: UserProfile, token: string) => {
+    setUser(authUser);
+    setIsAuthModalOpen(false);
+    setLayoutMode("workbench");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("docunorm_user");
+    localStorage.removeItem("docunorm_token");
+    setUser(null);
+    setLayoutMode("portal");
+  };
+
+  const handleEnterAsDemo = (role: "siemens" | "bafin") => {
+    const demoUser: UserProfile =
+      role === "siemens"
+        ? {
+            id: "demo-weber",
+            email: "dr.weber@siemens.de",
+            full_name: "Dr. M. Weber",
+            role: "auditor",
+            tenant_id: "siemens-ag",
+            organization: "Siemens AG",
+          }
+        : {
+            id: "demo-bafin",
+            email: "auditor@bafin.de",
+            full_name: "BaFin Lead Auditor",
+            role: "admin",
+            tenant_id: "bafin-supervisory",
+            organization: "Bundesanstalt für Finanzdienstleistungsaufsicht",
+          };
+    localStorage.setItem("docunorm_user", JSON.stringify(demoUser));
+    localStorage.setItem("docunorm_token", "demo-token-" + Date.now());
+    setUser(demoUser);
+    setLayoutMode("workbench");
+  };
+
   return (
     <div
       data-theme={theme}
@@ -116,6 +186,9 @@ export default function Home() {
         onLayoutChange={(lm) => setLayoutMode(lm)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         onOpenZugferd={() => setIsZugferdModalOpen(true)}
+        user={user}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Upload Error Banner if present */}
@@ -131,122 +204,139 @@ export default function Home() {
         </div>
       )}
 
-      {/* Body Area with Sidebar + Dynamic Layout Template */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Zone 1: Mini Compliance Navigation Sidebar */}
-        <Sidebar
+      {/* Public Landing Portal */}
+      {layoutMode === "portal" ? (
+        <LandingPage
           lang={lang}
-          activeTab={activeTab}
-          onTabChange={(tab) => {
-            setActiveTab(tab);
-            if (tab === "dora" || tab === "lksg") {
-              setLayoutMode("executive");
-            } else if (tab === "zugferd") {
-              setIsZugferdModalOpen(true);
-            } else if (tab === "audit_log") {
-              setIsCertificateOpen(true);
-            }
-          }}
-          documentCount={availableDocuments.length}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onEnterAsDemo={handleEnterAsDemo}
+          onExploreWorkbench={() => setLayoutMode("workbench")}
         />
+      ) : (
+        /* Authenticated Application Shell with Sidebar + Main Viewport */
+        <div className="flex-1 flex overflow-hidden">
+          {/* Zone 1: Mini Compliance Navigation Sidebar */}
+          <Sidebar
+            lang={lang}
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              if (tab === "auditor") {
+                setLayoutMode("auditor");
+              } else if (tab === "dora" || tab === "lksg") {
+                setLayoutMode("executive");
+              } else if (tab === "zugferd") {
+                setIsZugferdModalOpen(true);
+              } else if (tab === "audit_log") {
+                setIsCertificateOpen(true);
+              } else if (tab === "documents") {
+                setLayoutMode("workbench");
+              }
+            }}
+            documentCount={availableDocuments.length}
+          />
 
-        {/* Dynamic Layout Template Switcher */}
-        {layoutMode === "executive" ? (
-          /* Template 2: Executive Compliance Cockpit */
-          <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
-            <ExecutiveDashboard
+          {/* Dynamic Viewport Switcher */}
+          {layoutMode === "auditor" ? (
+            /* DEDICATED STANDALONE AI COMPLIANCE AUDITOR STUDIO */
+            <StandaloneAuditorStudio
               lang={lang}
+              documentId={documentId}
               documentName={documentName}
-              onAuditQuery={() => {}}
               onSwitchToWorkbench={() => setLayoutMode("workbench")}
+              onOpenWorkbenchWithCitation={(page, bbox) => {
+                setCurrentPage(page);
+                setActiveHighlight({
+                  page_number: page,
+                  box: bbox,
+                  label: "Cited Source",
+                });
+                setLayoutMode("workbench");
+              }}
             />
-          </main>
-        ) : layoutMode === "focus" ? (
-          /* Template 3: Full-Screen Document Focus Canvas with Floating Auditor */
-          <main className="flex-1 flex relative overflow-hidden bg-[var(--background)]">
-            <DocumentViewer
-              lang={lang}
-              documentId={documentId}
-              documentName={documentName}
-              availableDocuments={availableDocuments}
-              onSelectDocument={handleSelectDocument}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              isUploading={isUploading}
-              activeHighlight={activeHighlight}
-              onUploadFile={handleUploadFile}
-              onPageChange={(page) => setCurrentPage(page)}
-            />
-
-            {/* Floating Glass Auditor HUD */}
-            <div className="absolute top-4 right-4 z-40">
-              {isFloatingAuditorOpen ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsFloatingAuditorOpen(false)}
-                    className="absolute -top-3 -right-3 z-50 w-7 h-7 rounded-full bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-black flex items-center justify-center text-xs shadow-lg cursor-pointer"
-                  >
-                    ✕
-                  </button>
-                  <AuditPanel
-                    lang={lang}
-                    documentId={documentId}
-                    onSelectCitation={handleSelectCitation}
-                    floating={true}
-                  />
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsFloatingAuditorOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-mono font-bold text-xs shadow-2xl hover:opacity-90 transition-all cursor-pointer"
-                >
-                  <Bot className="w-4 h-4 stroke-[2.5]" />
-                  <span>Auditor HUD</span>
-                </button>
-              )}
-            </div>
-          </main>
-        ) : (
-          /* Template 1: Classic Split Dual-Workbench */
-          <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
-            <DocumentViewer
-              lang={lang}
-              documentId={documentId}
-              documentName={documentName}
-              availableDocuments={availableDocuments}
-              onSelectDocument={handleSelectDocument}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              isUploading={isUploading}
-              activeHighlight={activeHighlight}
-              onUploadFile={handleUploadFile}
-              onPageChange={(page) => setCurrentPage(page)}
-            />
-
-            {isAuditorOpen ? (
-              <AuditPanel
+          ) : layoutMode === "executive" ? (
+            /* Template 2: Executive Compliance Cockpit */
+            <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
+              <ExecutiveDashboard
+                lang={lang}
+                documentName={documentName}
+                onAuditQuery={() => setLayoutMode("auditor")}
+                onSwitchToWorkbench={() => setLayoutMode("workbench")}
+              />
+            </main>
+          ) : layoutMode === "focus" ? (
+            /* Template 3: Full-Screen Document Focus Canvas with Floating Auditor */
+            <main className="flex-1 flex relative overflow-hidden bg-[var(--background)]">
+              <DocumentViewer
                 lang={lang}
                 documentId={documentId}
-                onSelectCitation={handleSelectCitation}
-                onClose={() => setIsAuditorOpen(false)}
+                documentName={documentName}
+                availableDocuments={availableDocuments}
+                onSelectDocument={handleSelectDocument}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                isUploading={isUploading}
+                activeHighlight={activeHighlight}
+                onUploadFile={handleUploadFile}
+                onPageChange={(page) => setCurrentPage(page)}
               />
-            ) : (
-              <div className="w-10 shrink-0 bg-[var(--surface-dark)] border-l border-[var(--surface-border)] flex flex-col items-center py-4 select-none">
-                <button
-                  onClick={() => setIsAuditorOpen(true)}
-                  title="Open Auditor Panel"
-                  className="flex flex-col items-center gap-3 text-[var(--foreground)] opacity-60 hover:opacity-100 hover:text-[var(--accent-tangerine)] transition-all cursor-pointer p-1"
-                >
-                  <Bot className="w-4 h-4 text-[var(--accent-tangerine)]" />
-                  <span className="font-mono text-[9px] font-bold uppercase tracking-widest [writing-mode:vertical-rl] rotate-180">
-                    Revisionsprüfer
-                  </span>
-                </button>
+
+              {/* Floating Glass Auditor HUD */}
+              <div className="absolute top-4 right-4 z-40">
+                {isFloatingAuditorOpen ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsFloatingAuditorOpen(false)}
+                      className="absolute -top-3 -right-3 z-50 w-7 h-7 rounded-full bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-black flex items-center justify-center text-xs shadow-lg cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                    <AuditPanel
+                      lang={lang}
+                      documentId={documentId}
+                      onSelectCitation={handleSelectCitation}
+                      floating={true}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsFloatingAuditorOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-mono font-bold text-xs shadow-2xl hover:opacity-90 transition-all cursor-pointer"
+                  >
+                    <Bot className="w-4 h-4 stroke-[2.5]" />
+                    <span>Auditor HUD</span>
+                  </button>
+                )}
               </div>
-            )}
-          </main>
-        )}
-      </div>
+            </main>
+          ) : (
+            /* Template 1: Classic Split Dual-Workbench */
+            <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
+              <DocumentViewer
+                lang={lang}
+                documentId={documentId}
+                documentName={documentName}
+                availableDocuments={availableDocuments}
+                onSelectDocument={handleSelectDocument}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                isUploading={isUploading}
+                activeHighlight={activeHighlight}
+                onUploadFile={handleUploadFile}
+                onPageChange={(page) => setCurrentPage(page)}
+              />
+            </main>
+          )}
+        </div>
+      )}
+
+      {/* Authentication Modal (Sign In & Sign Up) */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        lang={lang}
+        onAuthSuccess={handleAuthSuccess}
+      />
 
       {/* Advanced Regulatory Ingestion Telemetry Modal */}
       <IngestionModal
