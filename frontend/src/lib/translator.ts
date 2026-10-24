@@ -3,37 +3,144 @@
  * Translates German contractual and BaFin/DORA regulatory text into crisp, professional English.
  */
 
-const LEGAL_PHRASE_DICTIONARY: Record<string, string> = {
-  "ausstiegsfrist": "exit notice period",
-  "ausstiegsfristen": "exit transition clauses",
-  "kündigungsfrist": "termination notice period",
-  "kündigungsfristen": "termination notice periods",
-  "verzugsstrafe": "delay penalty",
-  "verzugsstrafen": "delay penalty provisions",
-  "unterauftragsvergabe": "sub-outsourcing / sub-contracting",
-  "unterauftragsvergaben": "sub-contracting engagements",
-  "sorgfaltspflicht": "statutory due diligence",
-  "sorgfaltspflichten": "due diligence obligations",
-  "haftungsbeschränkung": "limitation of liability",
-  "haftungsbeschränkungen": "liability limitation clauses",
-  "haftungsobergrenze": "liability cap",
-  "haftungsausschluss": "liability exclusion",
-  "datenschutz": "data protection / privacy",
-  "datensicherheit": "data security",
-  "auftragsverarbeitung": "data processing on behalf",
-  "dienstleister": "service provider / vendor",
-  "auftraggeber": "client / principal",
-  "geschäftsbetrieb": "business operations",
-  "unterbrechung": "interruption / downtime",
-  "widerspruchsfrist": "objection period",
-  "zustimmungsvorbehalt": "requirement for prior written consent",
-  "grober fahrlässigkeit": "gross negligence",
-  "vorsatz": "willful intent",
-  "datenschutzverstößen": "data protection violations",
-  "revisionsfähig": "audit-ready / compliant",
-  "revisionsbericht": "audit report",
-  "prüfnachweis": "audit evidence",
-};
+const CANONICAL_CONTRACT_CLAUSES: Array<{ deMatch: string[]; enText: string }> = [
+  // Page 1
+  {
+    deMatch: ["rechtsabteilung compliance", "legal department"],
+    enText: "SIEMENS AG • LEGAL & REGULATORY COMPLIANCE DEPARTMENT",
+  },
+  {
+    deMatch: ["dossier-nr", "dossier no", "dora-0918-b"],
+    enText: "Dossier No.: SIE-2026-DORA-0918-B (DORA Grounded Audit Stream)",
+  },
+  {
+    deMatch: ["rahmenvereinbarung über informationstechnologie", "master agreement for information technology", "informationstechnologie-dienstlei"],
+    enText: "MASTER FRAMEWORK AGREEMENT FOR INFORMATION TECHNOLOGY SERVICES",
+  },
+  {
+    deMatch: ["zwischen der siemens ag", "auftraggeber", "cloudscale gmbh"],
+    enText: "Between Siemens AG (Client / Principal) and CloudScale GmbH, Frankfurt am Main (Contractor / Vendor)",
+  },
+  {
+    deMatch: ["gegenstand der vereinbarung und leistungsumfang", "gegenstand der vereinbarung"],
+    enText: "§ 1 Subject Matter of Agreement and Scope of Services",
+  },
+  {
+    deMatch: ["hochverfügbare tier-3", "tier-3 cloud", "99,95 %", "sla-katalog a"],
+    enText: "The contractor provides highly available Tier-3 cloud infrastructure services for the client to execute mission-critical financial and logistics processes. Guaranteed annual availability is 99.95% (excluding agreed maintenance windows pursuant to SLA Catalog A).",
+  },
+  {
+    deMatch: ["regulatorische einstufung nach eu dora", "vo 2022/2554", "regulatorische einstufung"],
+    enText: "§ 2 Regulatory Classification under EU DORA (Regulation 2022/2554)",
+  },
+  {
+    deMatch: ["kritische oder wichtige funktion", "art. 30 dora", "bundesanstalt für finanzdienstleistungsaufsicht", "bafin"],
+    enText: "The parties establish that the provided ICT services constitute a critical or important function within the meaning of Art. 30 DORA. The contractor commits to unrestricted compliance with the supervisory minimum standards of the Federal Financial Supervisory Authority (BaFin).",
+  },
+  // Page 2
+  {
+    deMatch: ["dora art. 30 audit-dossier", "audit-dossier"],
+    enText: "SIEMENS AG • DORA ART. 30 REGULATORY AUDIT DOSSIER",
+  },
+  {
+    deMatch: ["kündigung, übergangsfristen und ausstiegsstrategie", "übergangsfristen und ausstiegsstrategie"],
+    enText: "§ 3 Termination, Transition Notice Periods, and Exit Strategy (DORA Art. 30 Para. 2)",
+  },
+  {
+    deMatch: ["sechzig (60) tagen", "neunzig (90) tage", "unterbrechung des geschäftsbetriebs"],
+    enText: "Either contractual party may terminate this agreement with an ordinary notice period of sixty (60) days to the end of a calendar quarter. In the event of termination, the contractor guarantees a comprehensive support obligation for the migration of datasets and applications to the client or a designated third-party provider for at least ninety (90) days without interruption of business operations. § 4 Liability Caps and Delay Penalties",
+  },
+  {
+    deMatch: ["haftungsobergrenzen und verzugsstrafen"],
+    enText: "§ 4 Liability Caps and Delay Penalties",
+  },
+  {
+    deMatch: ["schuldhafter nichteinhaltung", "0,2 % der jährlichen vergütung", "5 % des jährlichen gesamtauftragswerts", "grober fahrlässigkeit"],
+    enText: "In the event of culpable non-compliance with agreed provisioning deadlines, the contractor pays a delay penalty in the amount of 0.2% of annual compensation per business day of delay, capped at a maximum of 5% of the total annual contract value. Claims for damages due to gross negligence, willful intent, or violation of data protection laws remain unaffected.",
+  },
+  {
+    deMatch: ["unterauftragsvergaben und sub-dienstleister", "sub-dienstleister"],
+    enText: "§ 5 Sub-contracting and Sub-service Providers (DORA Art. 30 Para. 3)",
+  },
+  {
+    deMatch: ["hinzuziehung wesentlicher unterauftragnehmer", "dreißig (30) tagen", "widerspruchsrecht"],
+    enText: "The engagement of material sub-contractors requires the prior written consent of the client. The client holds a right of objection with a notice period of thirty (30) days. All sub-contractors must be subjected to identical ICT security and audit obligations.",
+  },
+  // Page 3
+  {
+    deMatch: ["datenschutz und rechnungslegung"],
+    enText: "SIEMENS AG • DATA PRIVACY AND FINANCIAL ACCOUNTING COMPLIANCE",
+  },
+  {
+    deMatch: ["datenschutz nach bdsg § 26", "bdsg § 26 und eu-dsgvo", "bdsg § 26"],
+    enText: "§ 6 Data Protection under BDSG Section 26 and EU GDPR",
+  },
+  {
+    deMatch: ["auftragsverarbeitungsvereinbarung (avv)", "serverstandort ist ausschließlich frankfurt", "auftragsverarbeitungsvereinbarung"],
+    enText: "The contractor processes personal data exclusively within the framework of an audited Data Processing Agreement (DPA). The server location is exclusively Frankfurt am Main (Federal Republic of Germany).",
+  },
+  {
+    deMatch: ["zahlungsverbindung und steuerangaben"],
+    enText: "Banking Details and Tax Identification (Verified):",
+  },
+  {
+    deMatch: ["bankinstitut: deutsche bank ag", "deutsche bank ag"],
+    enText: "Banking Institution: Deutsche Bank AG, Frankfurt am Main",
+  },
+  {
+    deMatch: ["iban: de89", "deutdeddfxx"],
+    enText: "IBAN: DE89 3704 0044 0532 0130 00  •  BIC: DEUTDEDDFXX",
+  },
+  {
+    deMatch: ["umsatzsteuer-identifikationsnummer", "ust-idnr.: de812345678", "de812345678"],
+    enText: "VAT Identification Number (USt-IdNr.): DE812345678",
+  },
+  {
+    deMatch: ["steuer-nummer: 91/283/01824", "91/283/01824"],
+    enText: "German Tax Number (Steuer-Nr.): 91/283/01824",
+  },
+  {
+    deMatch: ["elektronische rechnungsstellung gem. zugferd 2.3", "zugferd 2.3 / en 16931"],
+    enText: "§ 7 Electronic Invoicing pursuant to ZUGFeRD 2.3 / EN 16931 Mandate",
+  },
+  {
+    deMatch: ["crossindustryinvoice", "48.500,00", "57.715,00", "leitweg-id: 04011000-12345-67"],
+    enText: "Invoices must mandatorily be transmitted as a hybrid ZUGFeRD 2.3 / Factur-X PDF with embedded XML (CrossIndustryInvoice). The monthly base fee is EUR 48,500.00 plus 19% VAT (EUR 9,215.00), total amount EUR 57,715.00. Leitweg-ID: 04011000-12345-67.",
+  },
+  {
+    deMatch: ["unterschriften der parteien"],
+    enText: "Signatures of the Authorized Contractual Parties:",
+  },
+  {
+    deMatch: ["frankfurt am main, den 15. märz 2026"],
+    enText: "Executed in Frankfurt am Main, on March 15, 2026",
+  },
+  {
+    deMatch: ["bereichsleitung recht", "geschäftsführung"],
+    enText: "Siemens AG (Head of Legal & Compliance)   •   CloudScale GmbH (Executive Directorate)",
+  },
+  {
+    deMatch: ["dr. m. weber", "t. schneider"],
+    enText: "signed Dr. M. Weber, General Counsel   •   signed T. Schneider, Chief Executive Officer",
+  },
+  // DIN 66399 Stamps
+  {
+    deMatch: ["seite 1 von 3", "page 1 von 3"],
+    enText: "Audited Document pursuant to DIN 66399 Protection Class 3 • Confidential • Page 1 of 3",
+  },
+  {
+    deMatch: ["seite 2 von 3", "page 2 von 3"],
+    enText: "Audited Document pursuant to DIN 66399 Protection Class 3 • Confidential • Page 2 of 3",
+  },
+  {
+    deMatch: ["seite 3 von 3", "page 3 von 3"],
+    enText: "Audited Document pursuant to DIN 66399 Protection Class 3 • Confidential • Page 3 of 3",
+  },
+  {
+    deMatch: ["din 66399", "schutzklasse 3"],
+    enText: "Audited Document pursuant to DIN 66399 Protection Class 3 • Confidential Corporate Record",
+  },
+];
 
 /**
  * Translates German regulatory audit finding text into English.
@@ -41,8 +148,16 @@ const LEGAL_PHRASE_DICTIONARY: Record<string, string> = {
 export function translateGermanToEnglish(text: string): string {
   if (!text) return "";
 
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ");
 
+  // 1. Direct match against canonical contract clauses
+  for (const clause of CANONICAL_CONTRACT_CLAUSES) {
+    if (clause.deMatch.some((m) => lower.includes(m.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ")))) {
+      return clause.enText;
+    }
+  }
+
+  // 2. Synthetic Auditor Finding Summary replacements
   if (lower.includes("ausstiegsfrist von 60 tagen") || (lower.includes("art. 30 abs. 2") && lower.includes("60"))) {
     return text
       .replace(

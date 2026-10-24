@@ -63,11 +63,11 @@ export function DocumentViewer({
   onPageChange,
 }: DocumentViewerProps) {
   const t = translations[lang];
-  const [zoom, setZoom] = useState(100);
+  const [zoom, setZoom] = useState(75);
   const [rendering, setRendering] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isTranslationHudDismissed, setIsTranslationHudDismissed] = useState(false);
-  const [docViewMode, setDocViewMode] = useState<"canvas" | "dual" | "english">("canvas");
+  const [docViewMode, setDocViewMode] = useState<"canvas" | "dual" | "english">("dual");
   const [allChunks, setAllChunks] = useState<any[]>([]);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [localHighlight, setLocalHighlight] = useState<BoundingBoxHighlight | null>(null);
@@ -611,12 +611,12 @@ export function DocumentViewer({
                   .filter((chunk) => {
                     if (!searchFilter.trim()) return true;
                     const q = searchFilter.toLowerCase();
-                    const trans = translateGermanToEnglish(chunk.content).toLowerCase();
+                    const trans = (chunk.translated_content || translateGermanToEnglish(chunk.content)).toLowerCase();
                     const orig = chunk.content.toLowerCase();
                     return trans.includes(q) || orig.includes(q);
                   })
                   .map((chunk, idx) => {
-                    const translatedText = translateGermanToEnglish(chunk.content);
+                    const translatedText = chunk.translated_content || translateGermanToEnglish(chunk.content);
                     const meta = classifyClause(chunk.content, chunk.chunk_index, chunk.page_number);
                     const isSelected = selectedChunkId === chunk.id;
 
