@@ -91,43 +91,64 @@ export function Header({
         </button>
 
         <button
-          onClick={() => onLayoutChange("workbench")}
+          onClick={() => {
+            if (!user) {
+              onLayoutChange("login");
+            } else {
+              onLayoutChange("workbench");
+            }
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "workbench"
               ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
               : "text-[var(--foreground)] opacity-70 hover:opacity-100"
           }`}
-          title="Split Dual-View: Original PDF + English Translation Dossier"
+          title={user ? "Split Dual-View: Original PDF + English Translation Dossier" : "Sign In required to open Dual-Workbench"}
         >
           <Columns3 className="w-3.5 h-3.5 stroke-[2.5]" />
           <span className="hidden md:inline">{t.nav_workbench}</span>
+          {!user && <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />}
         </button>
 
         {/* Dedicated Standalone KI-Auditor Studio */}
         <button
-          onClick={() => onLayoutChange("auditor")}
+          onClick={() => {
+            if (!user) {
+              onLayoutChange("login");
+            } else {
+              onLayoutChange("auditor");
+            }
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "auditor"
               ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
               : "text-[var(--foreground)] opacity-70 hover:opacity-100"
           }`}
-          title="Standalone AI Compliance Auditor (Harvey / ChatGPT Studio)"
+          title={user ? "Standalone AI Compliance Auditor (Harvey / ChatGPT Studio)" : "Sign In required to open AI Auditor Studio"}
         >
           <Bot className="w-3.5 h-3.5 stroke-[2.5] text-[var(--accent-tangerine)]" />
           <span className="hidden md:inline">{t.nav_auditor}</span>
+          {!user && <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />}
         </button>
 
         <button
-          onClick={() => onLayoutChange("executive")}
+          onClick={() => {
+            if (!user) {
+              onLayoutChange("login");
+            } else {
+              onLayoutChange("executive");
+            }
+          }}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
             layoutMode === "executive"
               ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
               : "text-[var(--foreground)] opacity-70 hover:opacity-100"
           }`}
-          title="Executive Compliance Cockpit & Metrics"
+          title={user ? "Executive Compliance Cockpit & Metrics" : "Sign In required to open Executive Cockpit"}
         >
           <LayoutGrid className="w-3.5 h-3.5 stroke-[2.5]" />
           <span className="hidden md:inline">{t.nav_cockpit}</span>
+          {!user && <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />}
         </button>
       </div>
 

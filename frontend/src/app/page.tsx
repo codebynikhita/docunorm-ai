@@ -21,7 +21,7 @@ import { Bot, Award } from "lucide-react";
 export default function Home() {
   const [lang, setLang] = useState<Language>("DE");
   const [theme, setTheme] = useState<Theme>("bauhaus");
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>("workbench");
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>("portal");
 
   // User Authentication State
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -62,22 +62,18 @@ export default function Home() {
     const savedToken = localStorage.getItem("docunorm_token");
     if (savedUser && savedToken) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
+        setLayoutMode("workbench");
       } catch {
         localStorage.removeItem("docunorm_user");
         localStorage.removeItem("docunorm_token");
+        setUser(null);
+        setLayoutMode("portal");
       }
     } else {
-      // Default initial demo user profile for immediate out-of-the-box exploration
-      const initialDemo: UserProfile = {
-        id: "demo-weber",
-        email: "dr.weber@siemens.de",
-        full_name: "Dr. M. Weber",
-        role: "auditor",
-        tenant_id: "siemens-ag",
-        organization: "Siemens AG",
-      };
-      setUser(initialDemo);
+      setUser(null);
+      setLayoutMode("portal");
     }
   }, []);
 
@@ -100,6 +96,13 @@ export default function Home() {
     }
     initDocumentList();
   }, []);
+
+  // Route Guard: Ensure unauthenticated users cannot access Workbench/Auditor without signing in
+  useEffect(() => {
+    if (!user && layoutMode !== "portal" && layoutMode !== "login") {
+      setLayoutMode("portal");
+    }
+  }, [user, layoutMode]);
 
   const handleSelectDocument = (doc: any) => {
     if (!doc) {
@@ -226,9 +229,16 @@ export default function Home() {
       {layoutMode === "portal" ? (
         <LandingPage
           lang={lang}
+          user={user}
           onOpenAuth={() => setLayoutMode("login")}
           onEnterAsDemo={handleEnterAsDemo}
-          onExploreWorkbench={() => setLayoutMode("workbench")}
+          onExploreWorkbench={() => {
+            if (!user) {
+              setLayoutMode("login");
+            } else {
+              setLayoutMode("workbench");
+            }
+          }}
         />
       ) : layoutMode === "login" ? (
         /* 2. Dedicated Institutional Sign In & Registration Page */

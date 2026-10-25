@@ -24,9 +24,11 @@ import {
   Search,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
+import { UserProfile } from "@/lib/api";
 
 interface LandingPageProps {
   lang?: Language;
+  user?: UserProfile | null;
   onOpenAuth: () => void;
   onEnterAsDemo: (role: "siemens" | "bafin") => void;
   onExploreWorkbench: () => void;
@@ -34,6 +36,7 @@ interface LandingPageProps {
 
 export function LandingPage({
   lang = "DE",
+  user,
   onOpenAuth,
   onEnterAsDemo,
   onExploreWorkbench,
@@ -79,29 +82,43 @@ export function LandingPage({
 
         {/* Primary Call-to-Actions */}
         <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2 font-mono text-xs">
-          <button
-            onClick={() => onEnterAsDemo("siemens")}
-            className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-[var(--accent-tangerine)] hover:opacity-95 text-[var(--accent-contrast)] font-extrabold shadow-xl shadow-[var(--accent-tangerine)]/20 transition-all cursor-pointer uppercase tracking-wider text-xs border border-white/20 active:scale-95"
-          >
-            <span>{t.landing_cta_demo}</span>
-            <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-          </button>
+          {user ? (
+            <>
+              <button
+                onClick={onExploreWorkbench}
+                className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-[var(--accent-tangerine)] hover:opacity-95 text-[var(--accent-contrast)] font-extrabold shadow-xl shadow-[var(--accent-tangerine)]/20 transition-all cursor-pointer uppercase tracking-wider text-xs border border-white/20 active:scale-95"
+              >
+                <Columns className="w-4 h-4 stroke-[2.5]" />
+                <span>{isDe ? "Zur PDF-Prüfbank öffnen" : "Open PDF Workbench"}</span>
+                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              </button>
+              <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs font-mono shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-[var(--foreground)] opacity-70">
+                  {isDe ? "Eingeloggt als:" : "Signed in as:"}
+                </span>
+                <strong className="text-[var(--foreground)] font-bold">{user.full_name}</strong>
+              </div>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => onEnterAsDemo("siemens")}
+                className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-[var(--accent-tangerine)] hover:opacity-95 text-[var(--accent-contrast)] font-extrabold shadow-xl shadow-[var(--accent-tangerine)]/20 transition-all cursor-pointer uppercase tracking-wider text-xs border border-white/20 active:scale-95"
+              >
+                <span>{t.landing_cta_demo}</span>
+                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              </button>
 
-          <button
-            onClick={onOpenAuth}
-            className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] text-[var(--foreground)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/60 font-bold transition-all shadow-sm cursor-pointer"
-          >
-            <Lock className="w-4 h-4 text-[var(--accent-tangerine)]" />
-            <span>{t.landing_cta_auth}</span>
-          </button>
-
-          <button
-            onClick={onExploreWorkbench}
-            className="flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--foreground)] opacity-80 hover:opacity-100 border border-[var(--surface-border)] font-bold transition-all cursor-pointer"
-          >
-            <Columns className="w-4 h-4" />
-            <span>{t.landing_cta_workbench}</span>
-          </button>
+              <button
+                onClick={onOpenAuth}
+                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] text-[var(--foreground)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/60 font-bold transition-all shadow-sm cursor-pointer"
+              >
+                <Lock className="w-4 h-4 text-[var(--accent-tangerine)]" />
+                <span>{t.landing_cta_auth}</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* 2. Interactive High-Fidelity Dual-View Product Mockup Frame */}
