@@ -22,6 +22,7 @@ import {
   HelpCircle,
   Copy,
   Check,
+  Trash2,
 } from "lucide-react";
 import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
@@ -161,6 +162,61 @@ export function StandaloneAuditorStudio({
     setAuditWarning(null);
   };
 
+  const handleDeleteThread = (threadIdToDelete: string) => {
+    setThreads((prev) => {
+      const filtered = prev.filter((t) => t.id !== threadIdToDelete);
+      if (threadIdToDelete === activeThreadId) {
+        if (filtered.length > 0) {
+          setActiveThreadId(filtered[0].id);
+          setSelectedCitation(
+            filtered[0].messages.find((m) => m.citations?.length)?.citations?.[0] || null
+          );
+        } else {
+          const freshId = `thread-${Date.now()}`;
+          const freshThread: ThreadInquiry = {
+            id: freshId,
+            title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
+            framework: framework,
+            timestamp: lang === "DE" ? "Jetzt" : "Just now",
+            messages: [],
+          };
+          setActiveThreadId(freshId);
+          setSelectedCitation(null);
+          return [freshThread];
+        }
+      }
+      return filtered;
+    });
+  };
+
+  const handleClearAllHistory = () => {
+    const freshId = `thread-${Date.now()}`;
+    const freshThread: ThreadInquiry = {
+      id: freshId,
+      title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
+      framework: framework,
+      timestamp: lang === "DE" ? "Jetzt" : "Just now",
+      messages: [],
+    };
+    setThreads([freshThread]);
+    setActiveThreadId(freshId);
+    setSelectedCitation(null);
+    setAuditWarning(null);
+  };
+
+  const handleDeleteMessage = (messageIdToDelete: string) => {
+    setThreads((prev) =>
+      prev.map((t) =>
+        t.id === activeThreadId
+          ? {
+              ...t,
+              messages: t.messages.filter((m) => m.id !== messageIdToDelete),
+            }
+          : t
+      )
+    );
+  };
+
   const handleSendQuery = async (customPrompt?: string) => {
     const promptToSend = (customPrompt || query).trim();
     if (!promptToSend) return;
@@ -281,10 +337,22 @@ export function StandaloneAuditorStudio({
 
           {/* Audit History List */}
           <div className="space-y-1 pt-2">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-50 px-1 flex items-center gap-1.5">
-              <Clock className="w-3 h-3 text-[var(--accent-tangerine)]" />
-              <span>{t.studio_history_label} ({threads.length})</span>
-            </span>
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--foreground)] opacity-50 flex items-center gap-1.5">
+                <Clock className="w-3 h-3 text-[var(--accent-tangerine)]" />
+                <span>{t.studio_history_label} ({threads.length})</span>
+              </span>
+              {(threads.length > 1 || threads[0]?.messages.length > 0) && (
+                <button
+                  onClick={handleClearAllHistory}
+                  title={lang === "DE" ? "Gesamte Historie leeren" : "Clear all history"}
+                  className="text-[9px] font-mono text-rose-400 opacity-60 hover:opacity-100 transition-opacity cursor-pointer flex items-center gap-1 hover:underline"
+                >
+                  <Trash2 className="w-2.5 h-2.5" />
+                  <span>{lang === "DE" ? "Leeren" : "Clear"}</span>
+                </button>
+              )}
+            </div>
             <div className="space-y-1 pt-1">
               {threads.map((item) => {
                 const isActive = item.id === activeThreadId;
@@ -297,13 +365,13 @@ export function StandaloneAuditorStudio({
                     : item.title;
 
                 return (
-                  <button
+                  <div
                     key={item.id}
                     onClick={() => {
                       setActiveThreadId(item.id);
                       setSelectedCitation(item.messages.find((m) => m.citations?.length)?.citations?.[0] || null);
                     }}
-                    className={`w-full text-left p-2.5 rounded-xl text-xs font-mono transition-all cursor-pointer border ${
+                    className={`group relative w-full text-left p-2.5 rounded-xl text-xs font-mono transition-all cursor-pointer border ${
                       isActive
                         ? "bg-[var(--surface-card)] border-[var(--accent-tangerine)] text-[var(--foreground)] font-bold shadow-sm"
                         : "border-transparent text-[var(--foreground)] opacity-65 hover:opacity-100 hover:bg-[var(--surface-card)]/50"
@@ -313,10 +381,22 @@ export function StandaloneAuditorStudio({
                       <span className="text-[9px] px-1.5 py-0.2 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[var(--accent-tangerine)] font-bold">
                         {item.framework}
                       </span>
-                      <span className="text-[9px] opacity-40">{item.timestamp}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] opacity-40">{item.timestamp}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteThread(item.id);
+                          }}
+                          title={lang === "DE" ? "Diesen Vorgang aus Historie löschen" : "Delete this inquiry from history"}
+                          className="opacity-0 group-hover:opacity-100 hover:text-rose-400 p-0.5 rounded transition-opacity cursor-pointer text-[var(--foreground)]/60 hover:bg-rose-500/10"
+                        >
+                          <Trash2 className="w-3 h-3 text-rose-400" />
+                        </button>
+                      </div>
                     </div>
-                    <p className="truncate text-[11px]">{displayTitle}</p>
-                  </button>
+                    <p className="truncate text-[11px] pr-2">{displayTitle}</p>
+                  </div>
                 );
               })}
             </div>
@@ -587,6 +667,14 @@ export function StandaloneAuditorStudio({
                               <Copy className="w-3.5 h-3.5" />
                             )}
                           </button>
+
+                          <button
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="text-[var(--foreground)] opacity-40 hover:opacity-100 hover:text-rose-400 p-1 rounded hover:bg-rose-500/10 cursor-pointer transition-colors"
+                            title={lang === "DE" ? "Befund aus Historie löschen" : "Delete finding from history"}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </div>
                     )}
@@ -622,8 +710,20 @@ export function StandaloneAuditorStudio({
                       </div>
                     )}
 
-                    <div className="text-[9.5px] font-mono opacity-40 text-right">
-                      {msg.timestamp}
+                    <div className="flex items-center justify-between text-[9.5px] font-mono opacity-40 pt-1">
+                      {isUser ? (
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="opacity-60 hover:opacity-100 hover:text-rose-400 flex items-center gap-1 transition-opacity cursor-pointer text-rose-400/80"
+                          title={lang === "DE" ? "Frage löschen" : "Delete question"}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>{lang === "DE" ? "Löschen" : "Delete"}</span>
+                        </button>
+                      ) : (
+                        <span />
+                      )}
+                      <span>{msg.timestamp}</span>
                     </div>
                   </div>
 
