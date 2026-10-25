@@ -16,7 +16,7 @@ import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
 
 export type Theme = "cyber" | "bauhaus" | "terminal";
-export type LayoutMode = "workbench" | "auditor" | "executive" | "focus" | "portal";
+export type LayoutMode = "workbench" | "auditor" | "executive" | "focus" | "portal" | "login";
 
 interface HeaderProps {
   lang: Language;
@@ -87,7 +87,7 @@ export function Header({
           title="Public Portal & Institutional Overview"
         >
           <Building2 className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden md:inline">{lang === "DE" ? "Portal" : "Overview"}</span>
+          <span className="hidden md:inline">{lang === "DE" ? "Übersicht" : "Overview"}</span>
         </button>
 
         <button
@@ -157,8 +157,12 @@ export function Header({
           </div>
         ) : (
           <button
-            onClick={onOpenAuth}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--accent-tangerine)]/50 text-[var(--foreground)] font-mono font-bold text-[11px] shadow-sm cursor-pointer transition-all"
+            onClick={() => onLayoutChange("login")}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-mono font-bold text-[11px] shadow-sm cursor-pointer ${
+              layoutMode === "login"
+                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
+                : "bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--accent-tangerine)]/50 text-[var(--foreground)]"
+            }`}
           >
             <Lock className="w-3 h-3 text-[var(--accent-tangerine)]" />
             <span>{t.btn_sign_in}</span>
@@ -166,7 +170,7 @@ export function Header({
         )}
 
         {/* Official Certificate Export Button (Active in Workspace) */}
-        {layoutMode !== "portal" && (
+        {layoutMode !== "portal" && layoutMode !== "login" && (
           <button
             onClick={onOpenCertificate}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider"

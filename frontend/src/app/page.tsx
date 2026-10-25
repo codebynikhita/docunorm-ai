@@ -12,6 +12,7 @@ import { ZugferdInspectorModal } from "@/components/ZugferdInspectorModal";
 import { DoraExitInspectorModal } from "@/components/DoraExitInspectorModal";
 import { AuthModal } from "@/components/AuthModal";
 import { LandingPage } from "@/components/LandingPage";
+import { LoginPage } from "@/components/LoginPage";
 import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
@@ -221,13 +222,20 @@ export default function Home() {
         </div>
       )}
 
-      {/* Public Landing Portal */}
+      {/* 1. Public Landing Portal (Overview) */}
       {layoutMode === "portal" ? (
         <LandingPage
           lang={lang}
-          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onOpenAuth={() => setLayoutMode("login")}
           onEnterAsDemo={handleEnterAsDemo}
           onExploreWorkbench={() => setLayoutMode("workbench")}
+        />
+      ) : layoutMode === "login" ? (
+        /* 2. Dedicated Institutional Sign In & Registration Page */
+        <LoginPage
+          lang={lang}
+          onAuthSuccess={handleAuthSuccess}
+          onBackToOverview={() => setLayoutMode("portal")}
         />
       ) : (
         /* Authenticated Application Shell with Sidebar + Main Viewport */
