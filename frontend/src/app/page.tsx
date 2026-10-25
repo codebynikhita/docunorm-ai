@@ -89,25 +89,26 @@ export default function Home() {
     }
   };
 
-  // Load available documents list for dropdown and select German demo contract
+  // Load available documents list for dropdown (clean empty state by default)
   useEffect(() => {
     async function initDocumentList() {
       const docs = await listDocuments();
       if (docs && docs.length > 0) {
         setAvailableDocuments(docs);
-        const demoDoc =
-          docs.find((d) => d.filename.includes("Siemens_Master_IKT_Vertrag_2026")) || docs[0];
-        if (demoDoc) {
-          setDocumentId(demoDoc.id);
-          setDocumentName(demoDoc.filename);
-          setTotalPages(demoDoc.total_pages || 3);
-        }
       }
     }
     initDocumentList();
   }, []);
 
   const handleSelectDocument = (doc: any) => {
+    if (!doc) {
+      setDocumentId(null);
+      setDocumentName("");
+      setTotalPages(1);
+      setCurrentPage(1);
+      setActiveHighlight(null);
+      return;
+    }
     setDocumentId(doc.id);
     setDocumentName(doc.filename);
     setTotalPages(doc.total_pages || 1);

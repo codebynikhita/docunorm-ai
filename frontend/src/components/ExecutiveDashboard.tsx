@@ -24,7 +24,7 @@ interface ExecutiveDashboardProps {
 
 export function ExecutiveDashboard({
   lang,
-  documentName = "Siemens_Master_ICT_Agreement_2026.pdf",
+  documentName = "",
   onAuditQuery,
   onSwitchToWorkbench,
 }: ExecutiveDashboardProps) {

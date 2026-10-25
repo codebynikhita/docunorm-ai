@@ -108,7 +108,7 @@ const PRESET_PROMPTS = {
 export function StandaloneAuditorStudio({
   lang = "DE",
   documentId,
-  documentName = "Siemens_Master_IKT_Vertrag_2026.pdf",
+  documentName = "",
   onOpenWorkbenchWithCitation,
   onSwitchToWorkbench,
 }: StandaloneAuditorProps) {
@@ -486,7 +486,7 @@ export function StandaloneAuditorStudio({
                 </span>
               </div>
               <p className="text-[11px] font-mono opacity-50 truncate max-w-[320px]">
-                {documentName}
+                {documentName || (lang === "DE" ? "Kein Dokument ausgewählt (Allgemeine Auskunft)" : "No document selected (General Mode)")}
               </p>
             </div>
           </div>

@@ -54,7 +54,7 @@ interface DocumentViewerProps {
 export function DocumentViewer({
   lang = "DE",
   documentId,
-  documentName = "Siemens_Master_ICT_Agreement_2026.pdf",
+  documentName = "",
   availableDocuments = [],
   currentPage = 1,
   totalPages = 1,
@@ -279,6 +279,10 @@ export function DocumentViewer({
               <select
                 value={documentId || ""}
                 onChange={(e) => {
+                  if (e.target.value === "") {
+                    if (onSelectDocument) onSelectDocument(null);
+                    return;
+                  }
                   const doc = availableDocuments.find((d) => d.id === e.target.value);
                   if (doc && onSelectDocument) onSelectDocument(doc);
                 }}
@@ -548,6 +552,22 @@ export function DocumentViewer({
               docViewMode === "english" ? "flex-1" : "flex-1 min-w-[360px] max-w-[620px]"
             } overflow-auto p-4 md:p-6 bg-[var(--surface-dark)] flex flex-col space-y-4`}
           >
+            {!documentId ? (
+              <div className="w-full h-[650px] border border-dashed border-[var(--surface-border)] rounded-2xl flex flex-col items-center justify-center p-8 text-center text-[var(--foreground)] bg-[var(--surface-card)]/80 backdrop-blur-md shadow-xl my-auto">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--accent-tangerine)]/10 border border-[var(--accent-tangerine)]/30 flex items-center justify-center mb-4 shadow-sm">
+                  <Languages className="w-7 h-7 text-[var(--accent-tangerine)]" />
+                </div>
+                <h4 className="text-sm font-bold text-[var(--foreground)] font-mono mb-1 tracking-wide uppercase">
+                  {lang === "DE" ? "Kein Dokument ausgewählt" : "No Document Selected"}
+                </h4>
+                <p className="text-xs text-[var(--foreground)] opacity-60 max-w-[320px] mb-4 leading-relaxed font-mono text-[11px]">
+                  {lang === "DE"
+                    ? "Wählen Sie ein Dokument aus dem Dropdown oder laden Sie eine PDF hoch, um das beglaubigte englische Dossier anzuzeigen."
+                    : "Select a document from the dropdown or upload a PDF to display the certified English translation dossier."}
+                </p>
+              </div>
+            ) : (
+              <>
             {/* Executive Dossier Header */}
             <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm space-y-3 shrink-0">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -761,6 +781,8 @@ export function DocumentViewer({
                 </div>
               )}
             </div>
+            </>
+            )}
           </div>
         )}
       </div>
