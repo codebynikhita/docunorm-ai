@@ -451,27 +451,25 @@ export function StandaloneAuditorStudio({
       {/* 2. Center Stage: Harvey / ChatGPT Legal Conversational Workspace */}
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--background)]">
         {/* Studio Top Bar */}
-        <div className="h-14 border-b border-[var(--surface-border)] bg-[var(--surface-card)] px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
+        <div className="h-14 border-b border-[var(--surface-border)] bg-[var(--surface-card)] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3 overflow-hidden">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] shrink-0">
                 <Scale className="w-4 h-4 stroke-[2.5]" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)]">
-                    {t.studio_title}
-                  </h2>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-tangerine)]">
-                    {framework} Grounded
-                  </span>
-                </div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)] whitespace-nowrap">
+                  {t.studio_title}
+                </h2>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-tangerine)] whitespace-nowrap">
+                  {framework} Grounded
+                </span>
               </div>
             </div>
 
             {/* Document Selector in Studio Header */}
             {availableDocuments && availableDocuments.length > 0 && (
-              <div className="hidden md:flex items-center gap-2 pl-3 border-l border-[var(--surface-border)]">
+              <div className="hidden sm:flex items-center gap-1.5 pl-3 border-l border-[var(--surface-border)] min-w-0 shrink">
                 <FileText className="w-3.5 h-3.5 text-[var(--accent-tangerine)] shrink-0" />
                 <select
                   value={documentId || ""}
@@ -484,13 +482,13 @@ export function StandaloneAuditorStudio({
                       if (doc && onSelectDocument) onSelectDocument(doc);
                     }
                   }}
-                  className={`bg-[var(--surface-dark)] border text-xs rounded-lg px-2.5 py-1.5 font-mono max-w-[220px] lg:max-w-[300px] truncate shadow-sm cursor-pointer transition-colors ${
+                  className={`bg-[var(--surface-dark)] border text-xs rounded-lg px-2 py-1.5 font-mono max-w-[150px] md:max-w-[190px] lg:max-w-[240px] truncate shadow-sm cursor-pointer transition-colors ${
                     documentId
                       ? "border-emerald-500/50 text-[var(--foreground)]"
-                      : "border-amber-500/60 text-amber-500 animate-pulse"
+                      : "border-amber-500/60 text-amber-500"
                   }`}
                 >
-                  <option value="">{lang === "DE" ? "⚠️ Kein PDF gewählt (Dokument wählen...)" : "⚠️ No PDF (Select document...)"}</option>
+                  <option value="">{lang === "DE" ? "⚠️ Kein PDF (wählen...)" : "⚠️ No PDF (select...)"}</option>
                   {availableDocuments.map((doc) => (
                     <option key={doc.id} value={doc.id}>
                       {doc.filename}
@@ -498,23 +496,23 @@ export function StandaloneAuditorStudio({
                   ))}
                 </select>
                 {documentId ? (
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold hidden lg:inline">
-                    {lang === "DE" ? "PDF BEREIT" : "PDF ACTIVE"}
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold whitespace-nowrap shrink-0">
+                    {lang === "DE" ? "PDF BEREIT" : "ACTIVE"}
                   </span>
                 ) : (
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold hidden lg:inline">
-                    {lang === "DE" ? "KEIN DOKUMENT" : "NO PDF"}
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold whitespace-nowrap shrink-0">
+                    {lang === "DE" ? "KEIN PDF" : "NO PDF"}
                   </span>
                 )}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {onSwitchToWorkbench && (
               <button
                 onClick={onSwitchToWorkbench}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] font-mono text-xs font-bold transition-all shadow-sm cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] font-mono text-xs font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap"
               >
                 <span>{t.studio_btn_workbench}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -527,7 +525,7 @@ export function StandaloneAuditorStudio({
                 }
               }}
               title="Download Certified Audit Dossier in PDF"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono text-xs font-bold transition-all shadow cursor-pointer uppercase tracking-wider"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono text-xs font-bold transition-all shadow cursor-pointer uppercase tracking-wider whitespace-nowrap"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{t.studio_btn_pdf}</span>
