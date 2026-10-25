@@ -67,12 +67,22 @@ class SearchResponse(BaseModel):
     total_results: int
     results: list[SearchResultChunk]
 
+class AuditHistoryItem(BaseModel):
+    """
+    Individual message turn in a multi-turn compliance conversation.
+    """
+    role: str = "user"  # "user" or "auditor" / "assistant"
+    text: str = ""
+
+
 class AuditRequest(BaseModel):
     """
     Inbound request for auditing a document against European regulations.
+    Supports multi-turn conversational follow-up inquiries.
     """
     query: str
     framework: str = "DORA"  # DORA, LkSG, ZUGFeRD
+    history: list[AuditHistoryItem] | None = None
 
 
 class AuditCitation(BaseModel):

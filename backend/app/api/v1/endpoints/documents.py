@@ -539,8 +539,25 @@ async def audit_document(
                 c.embedding = embedding_service.generate_embedding(c.content)
         await db.flush()
 
-    # 1. Retrieve top matching chunks via pgvector
-    query_vector = embedding_service.generate_embedding(payload.query)
+    # 1. Retrieve top matching chunks via pgvector (with follow-up context enrichment)
+    effective_search_query = payload.query
+    if payload.history:
+        past_user_queries = [h.text for h in payload.history if h.role == "user" and h.text.strip()]
+        if past_user_queries:
+            last_query = past_user_queries[-1]
+            q_tokens = payload.query.lower().split()
+            is_followup = (
+                len(q_tokens) < 10
+                or any(w in payload.query.lower() for w in [
+                    "and", "und", "what about", "wie steht", "gilt", "wer", "who", "cost", "kosten",
+                    "strafe", "penalty", "support", "unterstützung", "migration", "frist", "period",
+                    "zweite", "second", "erklär", "explain", "detail", "sub", "unterauftrag"
+                ])
+            )
+            if is_followup:
+                effective_search_query = f"{last_query} {payload.query}"
+
+    query_vector = embedding_service.generate_embedding(effective_search_query)
     distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label("distance")
 
     stmt = (
@@ -582,10 +599,12 @@ async def audit_document(
         chunk_map[source_key] = chunk_data
 
     # 3. Generate grounded regulatory LLM finding (Gemini 1.5 with deterministic fallback)
+    history_dicts = [h.model_dump() for h in payload.history] if payload.history else None
     finding_summary = await generate_llm_audit_finding(
         query=payload.query,
         retrieved_chunks=retrieved_chunks,
         framework=payload.framework,
+        history=history_dicts,
     )
 
     # 4. Extract citations and bounding boxes

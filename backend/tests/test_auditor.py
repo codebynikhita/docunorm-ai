@@ -63,3 +63,57 @@ def test_parse_citations_handles_no_citations():
     ai_response = "I could not find relevant information in the provided document."
     citations = parse_citations_from_response(ai_response, {})
     assert citations == []
+
+
+def test_build_audit_prompt_with_conversation_history():
+    """
+    Verifies that multi-turn history items are injected into the audit prompt
+    for conversational continuity and follow-up query answering.
+    """
+    chunks = [
+        {"id": "c1", "page_number": 2, "content": "Exit clauses mandate 60-day notice and 90-day migration support."},
+    ]
+    history = [
+        {"role": "user", "text": "What is the exit clause?"},
+        {"role": "auditor", "text": "• [SOURCE_1]: Notice period is 60 days."},
+    ]
+    prompt = build_audit_prompt(
+        query="And what about the migration period?",
+        retrieved_chunks=chunks,
+        framework="DORA",
+        lang="EN",
+        history=history,
+    )
+
+    assert "CONVERSATION HISTORY" in prompt
+    assert "What is the exit clause?" in prompt
+    assert "Notice period is 60 days." in prompt
+    assert "And what about the migration period?" in prompt
+
+
+@pytest.mark.asyncio
+async def test_followup_synthesis_recognizes_contextual_topics():
+    """
+    Verifies that the audit finding synthesis answers follow-up inquiries
+    (migration periods, delay penalties, sub-contractors) with strict citations.
+    """
+    from app.services.auditor import generate_llm_audit_finding
+
+    chunks = [
+        {"id": "c1", "page_number": 2, "content": "Exit transition and migration."},
+        {"id": "c2", "page_number": 2, "content": "Data transfer provisions."},
+    ]
+    history = [
+        {"role": "user", "text": "What are the exit clauses under DORA?"},
+    ]
+
+    finding = await generate_llm_audit_finding(
+        query="And what about the migration period?",
+        retrieved_chunks=chunks,
+        framework="DORA",
+        lang="EN",
+        history=history,
+    )
+
+    assert "[SOURCE_1]" in finding
+    assert "90 calendar days" in finding or "migration" in finding.lower()

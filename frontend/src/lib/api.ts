@@ -60,6 +60,11 @@ export interface AuditCitationResponse {
   content?: string;
 }
 
+export interface AuditHistoryItem {
+  role: "user" | "auditor" | "assistant";
+  text: string;
+}
+
 export interface AuditApiResponse {
   document_id: string;
   query: string;
@@ -72,14 +77,15 @@ export interface AuditApiResponse {
 export async function auditDocument(
   documentId: string,
   query: string,
-  framework: string = "DORA"
+  framework: string = "DORA",
+  history?: AuditHistoryItem[]
 ): Promise<AuditApiResponse> {
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/audit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query, framework }),
+    body: JSON.stringify({ query, framework, history }),
   });
 
   if (!res.ok) {

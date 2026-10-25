@@ -244,22 +244,77 @@ export function StandaloneAuditorStudio({
       let resultText = "";
       let citationsList: AuditCitationResponse[] = [];
 
+      const historyPayload = (activeThread?.messages || []).map((m) => ({
+        role: m.sender as "user" | "auditor",
+        text: m.text,
+      }));
+
       if (documentId) {
-        const res = await auditDocument(documentId, promptToSend, framework);
+        const res = await auditDocument(documentId, promptToSend, framework, historyPayload);
         resultText = res.finding_summary;
         citationsList = res.citations || [];
       } else {
-        // Fallback demo response
-        resultText =
-          "• [SOURCE_1]: Gemäß DORA Art. 30 Abs. 2 ist eine Ausstiegsfrist von 60 Tagen mit garantierter Migrationsunterstützung geregelt.\n• [SOURCE_2]: Der IKT-Dienstleister ist verpflichtet, Datenbestände geordnet und ohne Unterbrechung des Geschäftsbetriebs zu übergeben.";
-        citationsList = [
-          {
-            source_tag: "[SOURCE_1]",
-            page_number: 2,
-            bounding_box: [50, 115, 528, 203],
-            content: "Kündigungsfrist von 60 Tagen mit 90 Tagen Migrationsunterstützung.",
-          },
-        ];
+        // Fallback demo response with multi-turn follow-up awareness
+        const pLower = promptToSend.toLowerCase();
+        if (pLower.includes("migration") || pLower.includes("übergang") || pLower.includes("zeitraum") || pLower.includes("period")) {
+          resultText =
+            lang === "DE"
+              ? "• [SOURCE_1]: Ergänzend zur Kündigungsregelung: Die Migrationsunterstützung (§ 8 Abs. 4) beträgt verbindlich mindestens 90 Kalendertage nach Vertragsbeendigung.\n• [SOURCE_2]: Der Auftragnehmer hat alle Datenbestände und Konfigurationen in interoperablen Standardformaten ohne zusätzliche Übergabekosten zu transferieren."
+              : "• [SOURCE_1]: In direct follow-up to the termination terms: Mandatory migration support (§ 8 Para. 4) spans at least 90 calendar days post-termination.\n• [SOURCE_2]: The vendor must transfer all digital records and database dumps in open interoperable standards without operational interruption or handover surcharges.";
+          citationsList = [
+            {
+              source_tag: "[SOURCE_1]",
+              page_number: 2,
+              bounding_box: [50, 115, 528, 203],
+              content: "Migrationsunterstützung von mindestens 90 Kalendertagen (§ 8 Abs. 4).",
+            },
+            {
+              source_tag: "[SOURCE_2]",
+              page_number: 2,
+              bounding_box: [50, 310, 528, 390],
+              content: "Datenübergabe in interoperablen Standardformaten ohne zusätzliche Kosten.",
+            },
+          ];
+        } else if (pLower.includes("verzug") || pLower.includes("strafe") || pLower.includes("penalty") || pLower.includes("delay") || pLower.includes("haftung")) {
+          resultText =
+            lang === "DE"
+              ? "• [SOURCE_1]: Die Pönalen bei Leistungsverzug betragen 0,2 % pro Werktag, gedeckelt auf höchstens 5 % des jährlichen Auftragswerts (§ 12).\n• [SOURCE_2]: Haftungsausschlüsse greifen ausdrücklich nicht bei grober Fahrlässigkeit, Vorsatz oder Datenschutzverstößen gem. DSGVO Art. 82."
+              : "• [SOURCE_1]: Delay penalties are assessed at 0.2% per business day, capped at a maximum of 5% of annual contract volume (§ 12).\n• [SOURCE_2]: Liability limitations explicitly do not apply in cases of gross negligence, intentional misconduct, or GDPR Art. 82 violations.";
+          citationsList = [
+            {
+              source_tag: "[SOURCE_1]",
+              page_number: 3,
+              bounding_box: [50, 180, 528, 260],
+              content: "Vertragsstrafe von 0,2 % pro Werktag, Maximaldeckelung 5 % des Jahresvolumens.",
+            },
+          ];
+        } else if (pLower.includes("sub") || pLower.includes("unterauftrag") || pLower.includes("outsourc")) {
+          resultText =
+            lang === "DE"
+              ? "• [SOURCE_1]: Unterauftragsvergaben bedürfen der vorherigen schriftlichen Zustimmung mit 30-tägiger Prüffrist (§ 6 Abs. 2).\n• [SOURCE_2]: Der Hauptauftragnehmer haftet für Unterdienstleister uneingeschränkt wie für eigenes Verschulden (DORA Art. 30 Abs. 3)."
+              : "• [SOURCE_1]: Sub-contracting strictly requires prior written approval with a 30-day objection window under DORA Art. 30 Para. 3.\n• [SOURCE_2]: The primary contractor maintains strict liability for sub-contractor defaults.";
+          citationsList = [
+            {
+              source_tag: "[SOURCE_1]",
+              page_number: 1,
+              bounding_box: [50, 240, 528, 310],
+              content: "Zustimmungsvorbehalt für Unterbeauftragung und 30 Tage Einspruchsfrist.",
+            },
+          ];
+        } else {
+          resultText =
+            lang === "DE"
+              ? "• [SOURCE_1]: Gemäß DORA Art. 30 Abs. 2 ist eine Ausstiegsfrist von 60 Tagen mit garantierter Migrationsunterstützung geregelt.\n• [SOURCE_2]: Der IKT-Dienstleister ist verpflichtet, Datenbestände geordnet und ohne Unterbrechung des Geschäftsbetriebs zu übergeben."
+              : "• [SOURCE_1]: Under DORA Art. 30 Para. 2, an exit transition period of 60 days with mandatory migration support is stipulated.\n• [SOURCE_2]: The ICT vendor is legally obligated to transfer records without operational disruption.";
+          citationsList = [
+            {
+              source_tag: "[SOURCE_1]",
+              page_number: 2,
+              bounding_box: [50, 115, 528, 203],
+              content: "Kündigungsfrist von 60 Tagen mit 90 Tagen Migrationsunterstützung.",
+            },
+          ];
+        }
       }
 
       const auditorMsg = {

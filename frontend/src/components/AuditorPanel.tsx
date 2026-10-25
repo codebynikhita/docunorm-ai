@@ -88,7 +88,11 @@ export function AuditPanel({
     setQuery("");
 
     try {
-      const result = await auditDocument(documentId, userQuestion, mode);
+      const historyPayload = messages.flatMap((m) => [
+        { role: "user" as const, text: m.question },
+        { role: "auditor" as const, text: m.finding_summary },
+      ]);
+      const result = await auditDocument(documentId, userQuestion, mode, historyPayload);
       const newMessage: AuditMessage = {
         id: `msg-${Date.now()}`,
         question: userQuestion,
