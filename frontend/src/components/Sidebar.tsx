@@ -26,39 +26,39 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
   const navItems = [
     {
       id: "documents" as const,
-      label: t.vault_title,
+      label: lang === "DE" ? "Dokumenten-Vault" : "Document Vault",
       icon: FileText,
       badge: `${documentCount} PDFs`,
     },
     {
       id: "auditor" as const,
-      label: lang === "DE" ? "KI-Prüfassistent" : "AI Auditor Studio",
+      label: lang === "DE" ? "KI-Auditor" : "AI Auditor",
       icon: Bot,
       badge: "Studio",
     },
     {
       id: "dora" as const,
-      label: t.dora_title,
+      label: "DORA Art. 30",
       icon: Shield,
-      badge: "IKT-Risk",
+      badge: "BaFin",
     },
     {
       id: "zugferd" as const,
-      label: t.zugferd_title,
+      label: "ZUGFeRD 2.3",
       icon: FileSpreadsheet,
-      badge: "EN 16931",
+      badge: "Factur-X",
     },
     {
       id: "lksg" as const,
-      label: t.lksg_title,
+      label: lang === "DE" ? "LkSG Lieferkette" : "LkSG Supply Chain",
       icon: Layers,
-      badge: "Sorgfalt",
+      badge: "BAFA",
     },
     {
       id: "audit_log" as const,
-      label: t.ledger_title,
+      label: lang === "DE" ? "Audit-Log" : "Audit Ledger",
       icon: History,
-      badge: lang === "DE" ? "Unveränderbar" : "Immutable",
+      badge: lang === "DE" ? "Zertifiziert" : "Certified",
     },
   ];
 
@@ -144,8 +144,8 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
         </div>
       </div>
 
-      {/* Footer Info with German Legal Impressum link style */}
-      <div className="p-3 border-t border-[var(--surface-border)] text-[10px] font-mono text-[var(--foreground)] opacity-60 flex items-center justify-between bg-[var(--surface-dark)] overflow-hidden">
+      {/* Footer Info with German Legal Impressum link style (padded left to avoid Next.js dev badge) */}
+      <div className="p-3 pl-12 border-t border-[var(--surface-border)] text-[10px] font-mono text-[var(--foreground)] opacity-60 flex items-center justify-between bg-[var(--surface-dark)] overflow-hidden">
         <span className="flex items-center gap-1.5 truncate mr-2 min-w-0">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-lime)] shrink-0"></span>
           <span className="truncate">DocuNorm DE v0.2</span>

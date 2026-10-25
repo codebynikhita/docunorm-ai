@@ -310,7 +310,7 @@ export function StandaloneAuditorStudio({
   return (
     <div className="flex-1 flex h-full overflow-hidden bg-[var(--background)] font-sans">
       {/* 1. Left Sidebar: Audit History & Framework Selector */}
-      <aside className="w-72 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none">
+      <aside className="w-64 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none">
         <div className="p-4 space-y-4 flex-1 overflow-auto">
           {/* New Thread Action */}
           <button
@@ -499,11 +499,11 @@ export function StandaloneAuditorStudio({
                 </select>
                 {documentId ? (
                   <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold hidden lg:inline">
-                    PDF BEREIT
+                    {lang === "DE" ? "PDF BEREIT" : "PDF ACTIVE"}
                   </span>
                 ) : (
                   <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold hidden lg:inline">
-                    KEIN DOKUMENT
+                    {lang === "DE" ? "KEIN DOKUMENT" : "NO PDF"}
                   </span>
                 )}
               </div>
@@ -796,7 +796,7 @@ export function StandaloneAuditorStudio({
       </main>
 
       {/* 3. Right Drawer: Verifiable Evidence & Document Context */}
-      <aside className="w-80 shrink-0 bg-[var(--surface-dark)] border-l border-[var(--surface-border)] flex flex-col justify-between select-none">
+      <aside className="w-72 shrink-0 bg-[var(--surface-dark)] border-l border-[var(--surface-border)] flex flex-col justify-between select-none">
         <div className="p-4 space-y-4 flex-1 overflow-auto">
           <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-2.5">
             <div className="flex items-center gap-2">
