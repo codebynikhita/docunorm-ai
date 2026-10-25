@@ -141,7 +141,15 @@ export function StandaloneAuditorStudio({
   const [activeThreadId, setActiveThreadId] = useState<string>("thread-1");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const activeThread = threads.find((t) => t.id === activeThreadId) || threads[0];
+  const fallbackThread: ThreadInquiry = {
+    id: "thread-default",
+    title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
+    framework: framework,
+    timestamp: lang === "DE" ? "Jetzt" : "Just now",
+    messages: [],
+  };
+
+  const activeThread = threads.find((t) => t.id === activeThreadId) || threads[0] || fallbackThread;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -165,25 +173,25 @@ export function StandaloneAuditorStudio({
   const handleDeleteThread = (threadIdToDelete: string) => {
     setThreads((prev) => {
       const filtered = prev.filter((t) => t.id !== threadIdToDelete);
+      if (filtered.length === 0) {
+        const freshId = `thread-${Date.now()}`;
+        const freshThread: ThreadInquiry = {
+          id: freshId,
+          title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
+          framework: framework,
+          timestamp: lang === "DE" ? "Jetzt" : "Just now",
+          messages: [],
+        };
+        setActiveThreadId(freshId);
+        setSelectedCitation(null);
+        return [freshThread];
+      }
+
       if (threadIdToDelete === activeThreadId) {
-        if (filtered.length > 0) {
-          setActiveThreadId(filtered[0].id);
-          setSelectedCitation(
-            filtered[0].messages.find((m) => m.citations?.length)?.citations?.[0] || null
-          );
-        } else {
-          const freshId = `thread-${Date.now()}`;
-          const freshThread: ThreadInquiry = {
-            id: freshId,
-            title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
-            framework: framework,
-            timestamp: lang === "DE" ? "Jetzt" : "Just now",
-            messages: [],
-          };
-          setActiveThreadId(freshId);
-          setSelectedCitation(null);
-          return [freshThread];
-        }
+        setActiveThreadId(filtered[0].id);
+        setSelectedCitation(
+          filtered[0]?.messages?.find((m) => m.citations?.length)?.citations?.[0] || null
+        );
       }
       return filtered;
     });
@@ -210,7 +218,7 @@ export function StandaloneAuditorStudio({
         t.id === activeThreadId
           ? {
               ...t,
-              messages: t.messages.filter((m) => m.id !== messageIdToDelete),
+              messages: (t.messages || []).filter((m) => m.id !== messageIdToDelete),
             }
           : t
       )
@@ -246,8 +254,8 @@ export function StandaloneAuditorStudio({
         t.id === activeThreadId
           ? {
               ...t,
-              title: t.messages.length === 0 ? promptToSend.slice(0, 38) + "..." : t.title,
-              messages: [...t.messages, userMsg],
+              title: (t.messages || []).length === 0 ? promptToSend.slice(0, 38) + "..." : t.title,
+              messages: [...(t.messages || []), userMsg],
             }
           : t
       )
@@ -277,7 +285,7 @@ export function StandaloneAuditorStudio({
       setThreads((prev) =>
         prev.map((t) =>
           t.id === activeThreadId
-            ? { ...t, messages: [...t.messages, auditorMsg] }
+            ? { ...t, messages: [...(t.messages || []), auditorMsg] }
             : t
         )
       );
@@ -342,7 +350,7 @@ export function StandaloneAuditorStudio({
                 <Clock className="w-3 h-3 text-[var(--accent-tangerine)]" />
                 <span>{t.studio_history_label} ({threads.length})</span>
               </span>
-              {(threads.length > 1 || threads[0]?.messages.length > 0) && (
+              {(threads.length > 1 || (threads[0]?.messages?.length ?? 0) > 0) && (
                 <button
                   onClick={handleClearAllHistory}
                   title={lang === "DE" ? "Gesamte Historie leeren" : "Clear all history"}
@@ -369,7 +377,7 @@ export function StandaloneAuditorStudio({
                     key={item.id}
                     onClick={() => {
                       setActiveThreadId(item.id);
-                      setSelectedCitation(item.messages.find((m) => m.citations?.length)?.citations?.[0] || null);
+                      setSelectedCitation((item.messages || []).find((m) => m.citations?.length)?.citations?.[0] || null);
                     }}
                     className={`group relative w-full text-left p-2.5 rounded-xl text-xs font-mono transition-all cursor-pointer border ${
                       isActive
@@ -545,7 +553,7 @@ export function StandaloneAuditorStudio({
 
         {/* Message Thread */}
         <div className="flex-1 overflow-auto p-6 space-y-6">
-          {activeThread.messages.length === 0 ? (
+          {(activeThread?.messages || []).length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-8 max-w-lg mx-auto">
               <div className="w-16 h-16 rounded-2xl bg-[var(--accent-tangerine)]/10 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] mb-4 shadow-md">
                 <Bot className="w-8 h-8" />
@@ -606,7 +614,7 @@ export function StandaloneAuditorStudio({
               )}
             </div>
           ) : (
-            activeThread.messages.map((msg) => {
+            (activeThread?.messages || []).map((msg) => {
               const isUser = msg.sender === "user";
               // If lang is EN, default to English translation unless toggled off
               const isTranslated =
