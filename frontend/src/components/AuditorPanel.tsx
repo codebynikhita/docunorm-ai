@@ -312,10 +312,15 @@ export function AuditPanel({
               <button
                 key={idx}
                 onClick={() => executeAudit(suggested)}
-                className="w-full text-[11px] text-[var(--foreground)] opacity-80 hover:opacity-100 bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/60 rounded-md px-3 py-2 text-left transition-all font-mono shadow-sm flex items-center justify-between cursor-pointer group"
+                className={`w-full text-[11px] text-[var(--foreground)] bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)]/60 rounded-md px-3 py-2 text-left transition-all font-mono shadow-sm flex items-center justify-between cursor-pointer group ${
+                  !documentId ? "opacity-50" : "opacity-80 hover:opacity-100"
+                }`}
+                title={documentId ? suggested : (lang === "DE" ? "Bitte zuerst ein Dokument wählen" : "Please select a document first")}
               >
                 <span className="truncate">{suggested}</span>
-                <span className="text-[var(--accent-tangerine)] opacity-0 group-hover:opacity-100 font-bold ml-2">→</span>
+                <span className="text-[var(--accent-tangerine)] opacity-0 group-hover:opacity-100 font-bold ml-2">
+                  {documentId ? "→" : "PDF!"}
+                </span>
               </button>
             ))}
           </div>
@@ -327,11 +332,24 @@ export function AuditPanel({
         <div className="relative">
           <textarea
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (auditError) setAuditError(null);
+            }}
             onKeyDown={handleKeyDown}
-            placeholder={t.input_placeholder}
+            placeholder={
+              documentId
+                ? t.input_placeholder
+                : lang === "DE"
+                ? "⚠️ Bitte zuerst ein PDF-Dokument auswählen..."
+                : "⚠️ Please upload or select a PDF document first..."
+            }
             rows={3}
-            className="w-full bg-[var(--surface-card)] border border-[var(--surface-border)] focus:border-[var(--accent-tangerine)] rounded-lg px-3 py-2.5 text-xs text-[var(--foreground)] placeholder:opacity-40 focus:outline-none resize-none transition-colors font-mono leading-relaxed"
+            className={`w-full bg-[var(--surface-card)] border rounded-lg px-3 py-2.5 text-xs text-[var(--foreground)] placeholder:opacity-40 focus:outline-none resize-none transition-colors font-mono leading-relaxed ${
+              !documentId
+                ? "border-amber-500/40"
+                : "border-[var(--surface-border)] focus:border-[var(--accent-tangerine)]"
+            }`}
           />
           <button
             onClick={() => executeAudit(query)}

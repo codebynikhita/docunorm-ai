@@ -280,6 +280,8 @@ export default function Home() {
               lang={lang}
               documentId={documentId}
               documentName={documentName}
+              availableDocuments={availableDocuments}
+              onSelectDocument={handleSelectDocument}
               onSwitchToWorkbench={() => setLayoutMode("workbench")}
               onOpenWorkbenchWithCitation={(page, bbox) => {
                 setCurrentPage(page);

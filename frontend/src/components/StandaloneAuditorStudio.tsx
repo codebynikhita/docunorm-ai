@@ -5,6 +5,7 @@ import {
   Scale,
   Send,
   CheckCircle,
+  AlertCircle,
   ExternalLink,
   Bot,
   User,
@@ -30,6 +31,8 @@ export interface StandaloneAuditorProps {
   lang?: Language;
   documentId?: string | null;
   documentName?: string;
+  availableDocuments?: any[];
+  onSelectDocument?: (doc: any) => void;
   onOpenWorkbenchWithCitation?: (page: number, bbox: [number, number, number, number]) => void;
   onSwitchToWorkbench?: () => void;
 }
@@ -109,6 +112,8 @@ export function StandaloneAuditorStudio({
   lang = "DE",
   documentId,
   documentName = "",
+  availableDocuments = [],
+  onSelectDocument,
   onOpenWorkbenchWithCitation,
   onSwitchToWorkbench,
 }: StandaloneAuditorProps) {
@@ -116,87 +121,23 @@ export function StandaloneAuditorStudio({
   const [framework, setFramework] = useState<"DORA" | "LkSG" | "ZUGFeRD">("DORA");
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [auditWarning, setAuditWarning] = useState<string | null>(null);
   const [translatedMap, setTranslatedMap] = useState<Record<string, boolean>>({});
   const [selectedCitation, setSelectedCitation] = useState<AuditCitationResponse | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Initial Threads (Fresh clean thread by default, with sample audits accessible in history)
+  // Initial Threads - Clean state without fake pre-populated answers
   const [threads, setThreads] = useState<ThreadInquiry[]>([
     {
-      id: "thread-new",
+      id: "thread-1",
       title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
       framework: "DORA",
       timestamp: lang === "DE" ? "Jetzt" : "Just now",
       messages: [],
     },
-    {
-      id: "thread-1",
-      title: lang === "DE" ? "DORA Art. 30 Ausstiegsfrist & Migration" : "DORA Art. 30 Exit Period & Migration",
-      framework: "DORA",
-      timestamp: lang === "DE" ? "Vorherige Prüfung" : "Sample Audit",
-      messages: [
-        {
-          id: "m-1",
-          sender: "user",
-          text: "Welche Kündigungs- und Übergangsfristen für den Ausstieg sind gem. DORA Art. 30 Abs. 2 geregelt?",
-          timestamp: "16:30",
-        },
-        {
-          id: "m-2",
-          sender: "auditor",
-          text: "• [SOURCE_1]: Gemäß DORA Art. 30 Abs. 2 ist eine ordentliche Kündigungsfrist von 60 Tagen zum Quartalsende vereinbart.\n• [SOURCE_2]: Im Beendigungsfall garantiert der Auftragnehmer eine vollumfängliche Migrationsunterstützung für mindestens 90 Tage ohne Unterbrechung des Geschäftsbetriebs.",
-          citations: [
-            {
-              source_tag: "[SOURCE_1]",
-              page_number: 2,
-              bounding_box: [50, 115, 528, 203],
-              content:
-                "Jede Vertragspartei kann diesen Vertrag mit einer ordentlichen Kündigungsfrist von sechzig (60) Tagen zum Quartalsende kündigen.",
-            },
-            {
-              source_tag: "[SOURCE_2]",
-              page_number: 2,
-              bounding_box: [50, 115, 528, 203],
-              content:
-                "Der Auftragnehmer garantiert im Falle der Beendigung eine umfassende Unterstützungspflicht bei der Migration von Datenbeständen und Anwendungen auf den Auftraggeber oder einen benannten Dritte-Dienstleister für mindestens neunzig (90) Tage ohne Unterbrechung des Geschäftsbetriebs.",
-            },
-          ],
-          timestamp: "16:31",
-        },
-      ],
-    },
-    {
-      id: "thread-2",
-      title: lang === "DE" ? "Haftung & 0,2% Verzugsstrafen" : "Liability & 0.2% Delay Penalties",
-      framework: "DORA",
-      timestamp: lang === "DE" ? "Muster" : "Sample Audit",
-      messages: [
-        {
-          id: "m-3",
-          sender: "user",
-          text: "Wie hoch ist die maximale Verzugsstrafe und welche Haftungsbeschränkungen greifen nicht?",
-          timestamp: "Gestern",
-        },
-        {
-          id: "m-4",
-          sender: "auditor",
-          text: "• [SOURCE_1]: Bei schuldhafter Nichteinhaltung vereinbarter Fristen zahlt der Auftragnehmer 0,2 % der jährlichen Vergütung pro Werktag, gedeckelt auf maximal 5 % des Gesamtauftragswerts.\n• [SOURCE_2]: Haftungsausschlüsse greifen ausdrücklich nicht bei grober Fahrlässigkeit, Vorsatz oder Verletzung von Datenschutzgesetzen.",
-          citations: [
-            {
-              source_tag: "[SOURCE_1]",
-              page_number: 2,
-              bounding_box: [50, 225, 528, 283],
-              content:
-                "Vertragsstrafe in Höhe von 0,2 % der jährlichen Vergütung pro Werktag des Verzugs, höchstens jedoch 5 % des jährlichen Gesamtauftragswerts.",
-            },
-          ],
-          timestamp: "Gestern",
-        },
-      ],
-    },
   ]);
 
-  const [activeThreadId, setActiveThreadId] = useState<string>("thread-new");
+  const [activeThreadId, setActiveThreadId] = useState<string>("thread-1");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeThread = threads.find((t) => t.id === activeThreadId) || threads[0];
@@ -209,20 +150,32 @@ export function StandaloneAuditorStudio({
     const newId = `thread-${Date.now()}`;
     const newThread: ThreadInquiry = {
       id: newId,
-      title: "Neuer Prüfvorgang",
+      title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
       framework: framework,
-      timestamp: "Gerade eben",
+      timestamp: lang === "DE" ? "Gerade eben" : "Just now",
       messages: [],
     };
     setThreads([newThread, ...threads]);
     setActiveThreadId(newId);
     setSelectedCitation(null);
+    setAuditWarning(null);
   };
 
   const handleSendQuery = async (customPrompt?: string) => {
     const promptToSend = (customPrompt || query).trim();
     if (!promptToSend) return;
 
+    // Strict Zero-Hallucination Guard: Require a selected PDF before executing compliance audit
+    if (!documentId) {
+      setAuditWarning(
+        lang === "DE"
+          ? "Kein PDF-Dokument ausgewählt! Bitte wählen Sie oben ein Dokument aus oder laden Sie einen Vertrag hoch, um eine KI-Konformitätsprüfung durchzuführen."
+          : "No PDF document selected! Please select a document from the top bar or upload a contract before conducting an AI audit."
+      );
+      return;
+    }
+
+    setAuditWarning(null);
     const userMessageId = `msg-user-${Date.now()}`;
     const userMsg = {
       id: userMessageId,
@@ -248,81 +201,14 @@ export function StandaloneAuditorStudio({
     setLoading(true);
 
     try {
-      let resultText = "";
-      let citationsList: AuditCitationResponse[] = [];
-
       const historyPayload = (activeThread?.messages || []).map((m) => ({
         role: m.sender as "user" | "auditor",
         text: m.text,
       }));
 
-      if (documentId) {
-        const res = await auditDocument(documentId, promptToSend, framework, historyPayload);
-        resultText = res.finding_summary;
-        citationsList = res.citations || [];
-      } else {
-        // Fallback demo response with multi-turn follow-up awareness
-        const pLower = promptToSend.toLowerCase();
-        if (pLower.includes("migration") || pLower.includes("übergang") || pLower.includes("zeitraum") || pLower.includes("period")) {
-          resultText =
-            lang === "DE"
-              ? "• [SOURCE_1]: Ergänzend zur Kündigungsregelung: Die Migrationsunterstützung (§ 8 Abs. 4) beträgt verbindlich mindestens 90 Kalendertage nach Vertragsbeendigung.\n• [SOURCE_2]: Der Auftragnehmer hat alle Datenbestände und Konfigurationen in interoperablen Standardformaten ohne zusätzliche Übergabekosten zu transferieren."
-              : "• [SOURCE_1]: In direct follow-up to the termination terms: Mandatory migration support (§ 8 Para. 4) spans at least 90 calendar days post-termination.\n• [SOURCE_2]: The vendor must transfer all digital records and database dumps in open interoperable standards without operational interruption or handover surcharges.";
-          citationsList = [
-            {
-              source_tag: "[SOURCE_1]",
-              page_number: 2,
-              bounding_box: [50, 115, 528, 203],
-              content: "Migrationsunterstützung von mindestens 90 Kalendertagen (§ 8 Abs. 4).",
-            },
-            {
-              source_tag: "[SOURCE_2]",
-              page_number: 2,
-              bounding_box: [50, 310, 528, 390],
-              content: "Datenübergabe in interoperablen Standardformaten ohne zusätzliche Kosten.",
-            },
-          ];
-        } else if (pLower.includes("verzug") || pLower.includes("strafe") || pLower.includes("penalty") || pLower.includes("delay") || pLower.includes("haftung")) {
-          resultText =
-            lang === "DE"
-              ? "• [SOURCE_1]: Die Pönalen bei Leistungsverzug betragen 0,2 % pro Werktag, gedeckelt auf höchstens 5 % des jährlichen Auftragswerts (§ 12).\n• [SOURCE_2]: Haftungsausschlüsse greifen ausdrücklich nicht bei grober Fahrlässigkeit, Vorsatz oder Datenschutzverstößen gem. DSGVO Art. 82."
-              : "• [SOURCE_1]: Delay penalties are assessed at 0.2% per business day, capped at a maximum of 5% of annual contract volume (§ 12).\n• [SOURCE_2]: Liability limitations explicitly do not apply in cases of gross negligence, intentional misconduct, or GDPR Art. 82 violations.";
-          citationsList = [
-            {
-              source_tag: "[SOURCE_1]",
-              page_number: 3,
-              bounding_box: [50, 180, 528, 260],
-              content: "Vertragsstrafe von 0,2 % pro Werktag, Maximaldeckelung 5 % des Jahresvolumens.",
-            },
-          ];
-        } else if (pLower.includes("sub") || pLower.includes("unterauftrag") || pLower.includes("outsourc")) {
-          resultText =
-            lang === "DE"
-              ? "• [SOURCE_1]: Unterauftragsvergaben bedürfen der vorherigen schriftlichen Zustimmung mit 30-tägiger Prüffrist (§ 6 Abs. 2).\n• [SOURCE_2]: Der Hauptauftragnehmer haftet für Unterdienstleister uneingeschränkt wie für eigenes Verschulden (DORA Art. 30 Abs. 3)."
-              : "• [SOURCE_1]: Sub-contracting strictly requires prior written approval with a 30-day objection window under DORA Art. 30 Para. 3.\n• [SOURCE_2]: The primary contractor maintains strict liability for sub-contractor defaults.";
-          citationsList = [
-            {
-              source_tag: "[SOURCE_1]",
-              page_number: 1,
-              bounding_box: [50, 240, 528, 310],
-              content: "Zustimmungsvorbehalt für Unterbeauftragung und 30 Tage Einspruchsfrist.",
-            },
-          ];
-        } else {
-          resultText =
-            lang === "DE"
-              ? "• [SOURCE_1]: Gemäß DORA Art. 30 Abs. 2 ist eine Ausstiegsfrist von 60 Tagen mit garantierter Migrationsunterstützung geregelt.\n• [SOURCE_2]: Der IKT-Dienstleister ist verpflichtet, Datenbestände geordnet und ohne Unterbrechung des Geschäftsbetriebs zu übergeben."
-              : "• [SOURCE_1]: Under DORA Art. 30 Para. 2, an exit transition period of 60 days with mandatory migration support is stipulated.\n• [SOURCE_2]: The ICT vendor is legally obligated to transfer records without operational disruption.";
-          citationsList = [
-            {
-              source_tag: "[SOURCE_1]",
-              page_number: 2,
-              bounding_box: [50, 115, 528, 203],
-              content: "Kündigungsfrist von 60 Tagen mit 90 Tagen Migrationsunterstützung.",
-            },
-          ];
-        }
-      }
+      const res = await auditDocument(documentId, promptToSend, framework, historyPayload);
+      const resultText = res.finding_summary;
+      const citationsList = res.citations || [];
 
       const auditorMsg = {
         id: `msg-auditor-${Date.now()}`,
@@ -345,6 +231,7 @@ export function StandaloneAuditorStudio({
       }
     } catch (err: any) {
       console.error("Auditor error:", err);
+      setAuditWarning(err.message || "Failed to execute audit inquiry.");
     } finally {
       setLoading(false);
     }
@@ -446,10 +333,15 @@ export function StandaloneAuditorStudio({
                 <button
                   key={idx}
                   onClick={() => handleSendQuery(p.prompt)}
-                  className="w-full text-left p-2 rounded-lg bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--surface-border)] hover:border-[var(--accent-cyan)] text-[10.5px] font-mono text-[var(--foreground)] opacity-75 hover:opacity-100 transition-all cursor-pointer truncate"
-                  title={p.prompt}
+                  className={`w-full text-left p-2 rounded-lg bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--surface-border)] hover:border-[var(--accent-cyan)] text-[10.5px] font-mono text-[var(--foreground)] opacity-75 hover:opacity-100 transition-all cursor-pointer truncate ${!documentId ? "opacity-50 hover:border-amber-500/50" : ""}`}
+                  title={documentId ? p.prompt : (lang === "DE" ? "⚠️ Kein PDF ausgewählt (Bitte zuerst Dokument wählen)" : "⚠️ No PDF selected (Select document first)")}
                 >
-                  {p.label}
+                  <div className="flex items-center justify-between">
+                    <span className="truncate">{p.label}</span>
+                    {!documentId && (
+                      <span className="text-[9px] text-amber-500 font-bold ml-1">PDF!</span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>
@@ -472,23 +364,62 @@ export function StandaloneAuditorStudio({
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--background)]">
         {/* Studio Top Bar */}
         <div className="h-14 border-b border-[var(--surface-border)] bg-[var(--surface-card)] px-6 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] shrink-0">
-              <Scale className="w-4 h-4 stroke-[2.5]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)]">
-                  {t.studio_title}
-                </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-tangerine)]">
-                  {framework} Grounded
-                </span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] shrink-0">
+                <Scale className="w-4 h-4 stroke-[2.5]" />
               </div>
-              <p className="text-[11px] font-mono opacity-50 truncate max-w-[320px]">
-                {documentName || (lang === "DE" ? "Kein Dokument ausgewählt (Allgemeine Auskunft)" : "No document selected (General Mode)")}
-              </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)]">
+                    {t.studio_title}
+                  </h2>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-tangerine)]">
+                    {framework} Grounded
+                  </span>
+                </div>
+              </div>
             </div>
+
+            {/* Document Selector in Studio Header */}
+            {availableDocuments && availableDocuments.length > 0 && (
+              <div className="hidden md:flex items-center gap-2 pl-3 border-l border-[var(--surface-border)]">
+                <FileText className="w-3.5 h-3.5 text-[var(--accent-tangerine)] shrink-0" />
+                <select
+                  value={documentId || ""}
+                  onChange={(e) => {
+                    setAuditWarning(null);
+                    if (e.target.value === "") {
+                      if (onSelectDocument) onSelectDocument(null);
+                    } else {
+                      const doc = availableDocuments.find((d) => d.id === e.target.value);
+                      if (doc && onSelectDocument) onSelectDocument(doc);
+                    }
+                  }}
+                  className={`bg-[var(--surface-dark)] border text-xs rounded-lg px-2.5 py-1.5 font-mono max-w-[220px] lg:max-w-[300px] truncate shadow-sm cursor-pointer transition-colors ${
+                    documentId
+                      ? "border-emerald-500/50 text-[var(--foreground)]"
+                      : "border-amber-500/60 text-amber-500 animate-pulse"
+                  }`}
+                >
+                  <option value="">{lang === "DE" ? "⚠️ Kein PDF gewählt (Dokument wählen...)" : "⚠️ No PDF (Select document...)"}</option>
+                  {availableDocuments.map((doc) => (
+                    <option key={doc.id} value={doc.id}>
+                      {doc.filename}
+                    </option>
+                  ))}
+                </select>
+                {documentId ? (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold hidden lg:inline">
+                    PDF BEREIT
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold hidden lg:inline">
+                    KEIN DOKUMENT
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -516,6 +447,22 @@ export function StandaloneAuditorStudio({
           </div>
         </div>
 
+        {/* Warning Banner if Audit Attempted without Document */}
+        {auditWarning && (
+          <div className="mx-6 mt-3 p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-500 text-xs font-mono flex items-center justify-between shadow-sm animate-in fade-in duration-150">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{auditWarning}</span>
+            </div>
+            <button
+              onClick={() => setAuditWarning(null)}
+              className="p-1 hover:opacity-100 opacity-60 font-bold cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Message Thread */}
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {activeThread.messages.length === 0 ? (
@@ -529,20 +476,54 @@ export function StandaloneAuditorStudio({
               <p className="text-xs text-[var(--foreground)] opacity-60 leading-relaxed font-sans mb-6">
                 {t.studio_empty_desc}
               </p>
-              <div className="grid grid-cols-2 gap-2 w-full text-left">
-                {PRESET_PROMPTS[lang].slice(0, 4).map((p, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSendQuery(p.prompt)}
-                    className="p-3 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] text-xs font-mono text-[var(--foreground)] opacity-80 hover:opacity-100 transition-all cursor-pointer shadow-sm"
-                  >
-                    <div className="text-[10px] text-[var(--accent-tangerine)] font-bold mb-1">
-                      {p.framework}
-                    </div>
-                    <div className="truncate text-[11px]">{p.label}</div>
-                  </button>
-                ))}
-              </div>
+
+              {!documentId ? (
+                /* Clear callout when NO PDF is selected */
+                <div className="w-full p-5 rounded-2xl bg-[var(--surface-card)] border border-amber-500/30 shadow-md text-left space-y-3.5">
+                  <div className="flex items-center gap-2 text-amber-500 font-mono text-xs font-bold">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{lang === "DE" ? "Kein PDF-Dokument ausgewählt" : "No PDF Document Selected"}</span>
+                  </div>
+                  <p className="text-xs text-[var(--foreground)] opacity-80 font-sans leading-relaxed">
+                    {lang === "DE"
+                      ? "Für eine revisionssichere Prüfung gem. DORA Art. 30 und BaFin-Kriterien muss zuerst ein Vertrag ausgewählt werden. Ohne Dokument werden keine Vermutungen oder Schein-Ergebnisse generiert."
+                      : "For an audit-proof compliance review under DORA Art. 30 and BaFin criteria, a contract must be selected first. No hypothetical or ungrounded answers will be generated without a document."}
+                  </p>
+                  {availableDocuments && availableDocuments.length > 0 && onSelectDocument && (
+                    <button
+                      onClick={() => onSelectDocument(availableDocuments[0])}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[var(--accent-tangerine)] hover:opacity-95 text-[var(--accent-contrast)] font-mono text-xs font-bold shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>{lang === "DE" ? `„${availableDocuments[0].filename}“ auswählen` : `Select "${availableDocuments[0].filename}"`}</span>
+                    </button>
+                  )}
+                  {onSwitchToWorkbench && (
+                    <button
+                      onClick={onSwitchToWorkbench}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <ArrowUpRight className="w-4 h-4" />
+                      <span>{lang === "DE" ? "Zur PDF-Prüfbank & Dokument hochladen" : "Go to PDF Workbench & Upload"}</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 w-full text-left">
+                  {PRESET_PROMPTS[lang].slice(0, 4).map((p, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSendQuery(p.prompt)}
+                      className="p-3 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] text-xs font-mono text-[var(--foreground)] opacity-80 hover:opacity-100 transition-all cursor-pointer shadow-sm"
+                    >
+                      <div className="text-[10px] text-[var(--accent-tangerine)] font-bold mb-1">
+                        {p.framework}
+                      </div>
+                      <div className="truncate text-[11px]">{p.label}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             activeThread.messages.map((msg) => {
@@ -664,29 +645,43 @@ export function StandaloneAuditorStudio({
             <div className="relative">
               <textarea
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  if (auditWarning) setAuditWarning(null);
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSendQuery();
                   }
                 }}
-                placeholder={t.studio_input_placeholder}
+                placeholder={
+                  documentId
+                    ? t.studio_input_placeholder
+                    : lang === "DE"
+                    ? "⚠️ Bitte wählen Sie zuerst oben ein PDF-Dokument aus, um Fragen zu stellen..."
+                    : "⚠️ Please select a PDF document from the top bar first to submit audit inquiries..."
+                }
                 rows={2}
-                className="w-full bg-[var(--surface-dark)] border border-[var(--surface-border)] focus:border-[var(--accent-tangerine)] rounded-xl px-4 py-3 pr-12 text-xs text-[var(--foreground)] font-mono leading-relaxed focus:outline-none resize-none shadow-inner transition-colors"
+                className={`w-full bg-[var(--surface-dark)] border rounded-xl px-4 py-3 pr-12 text-xs text-[var(--foreground)] font-mono leading-relaxed focus:outline-none resize-none shadow-inner transition-colors ${
+                  !documentId
+                    ? "border-amber-500/40 placeholder:text-amber-500/60"
+                    : "border-[var(--surface-border)] focus:border-[var(--accent-tangerine)]"
+                }`}
               />
               <button
                 onClick={() => handleSendQuery()}
                 disabled={!query.trim() || loading}
                 className="absolute right-3 bottom-3 p-2 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-30 text-[var(--accent-contrast)] transition-all shadow-sm cursor-pointer"
+                title={documentId ? (lang === "DE" ? "Prüfung ausführen" : "Run Audit Inquiry") : (lang === "DE" ? "Bitte zuerst PDF auswählen" : "Please select PDF first")}
               >
                 <Send className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
             <p className="text-[10px] font-mono text-[var(--foreground)] opacity-50 text-center">
               {lang === "DE"
-                ? "Revisionssicher gem. BaFin Rundschreiben & DORA Art. 30 · Zero-Hallucination-Standard."
-                : "Audit-proof under BaFin circulars & DORA Art. 30 · Zero-Hallucination Standard."}
+                ? "Revisionssicher gem. BaFin Rundschreiben & DORA Art. 30 · Zero-Hallucination-Standard (Erfordert aktiven PDF-Vertrag)."
+                : "Audit-proof under BaFin circulars & DORA Art. 30 · Zero-Hallucination Standard (Requires active PDF contract)."}
             </p>
           </div>
         </div>
