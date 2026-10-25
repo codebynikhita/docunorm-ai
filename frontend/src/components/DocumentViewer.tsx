@@ -20,6 +20,7 @@ import {
   Search,
   MapPin,
   ShieldCheck,
+  ShieldAlert,
   Sparkles,
 } from "lucide-react";
 
@@ -47,6 +48,7 @@ interface DocumentViewerProps {
   onSelectDocument?: (doc: any) => void;
   onPageChange?: (newPage: number) => void;
   onClearHighlight?: () => void;
+  onOpenDoraExit?: () => void;
 }
 
 export function DocumentViewer({
@@ -61,6 +63,7 @@ export function DocumentViewer({
   onUploadFile,
   onSelectDocument,
   onPageChange,
+  onOpenDoraExit,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -336,6 +339,19 @@ export function DocumentViewer({
               </span>
             </button>
           </div>
+
+          {onOpenDoraExit && (
+            <button
+              onClick={onOpenDoraExit}
+              className="px-2.5 py-1 rounded font-mono text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1.5 bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30 hover:border-[var(--accent-cyan)] shadow-sm"
+              title="DORA Art. 30(2) & BaFin Exit Strategy Regulatory Audit"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+              <span className="hidden xl:inline">
+                {lang === "DE" ? "DORA Art. 30(2) Exit-Prüfung" : "DORA Art. 30(2) Exit Audit"}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* 2-Step Upload Flow (Select -> Submit) */}

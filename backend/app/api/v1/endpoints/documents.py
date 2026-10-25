@@ -22,6 +22,8 @@ from app.schemas.document import (
     SearchResponse,
     SearchResultChunk,
 )
+from app.schemas.dora import DoraExitAuditReport
+from app.services.dora_exit_engine import dora_exit_engine
 from app.services.auditor import (
     build_audit_prompt,
     generate_llm_audit_finding,
@@ -646,6 +648,93 @@ async def audit_document(
         finding_summary=finding_summary,
         citations=citations,
     )
+
+
+@router.post(
+    "/{document_id}/dora-exit-audit",
+    response_model=DoraExitAuditReport,
+    summary="Execute DORA Art. 30(2) & BaFin Exit Strategy Audit",
+)
+@router.get(
+    "/{document_id}/dora-exit-audit",
+    response_model=DoraExitAuditReport,
+    summary="Retrieve DORA Art. 30(2) & BaFin Exit Strategy Audit",
+)
+async def audit_dora_exit_strategy(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> DoraExitAuditReport:
+    """
+    Executes a comprehensive DORA Art. 30(2) and BaFin supervisory exit strategy audit:
+    1. Fetches all chunks of the target document.
+    2. Runs the 5-point sovereign DORA Exit Strategy Rule Engine.
+    3. Returns compliance rating, readiness score, and clause-level evidence.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+    )
+    result = await db.execute(stmt)
+    chunks = result.scalars().all()
+
+    if not chunks:
+        doc = await db.get(Document, document_id)
+        if not doc or not doc.file_path or not Path(doc.file_path).exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document '{document_id}' not found.",
+            )
+        parse_res = pdf_parser.parse_pdf(doc.file_path)
+        for blk in parse_res.blocks:
+            anon = privacy_firewall.anonymize_text(blk.text)
+            c = DocumentChunk(
+                id=uuid4(),
+                document_id=doc.id,
+                tenant_id=tenant.id,
+                chunk_index=blk.block_index,
+                page_number=blk.page_number,
+                bounding_box=blk.bounding_box,
+                content=anon.sanitized_text,
+                token_count=len(anon.sanitized_text.split()),
+            )
+            db.add(c)
+        await db.commit()
+        result = await db.execute(stmt)
+        chunks = result.scalars().all()
+
+    chunk_dicts = [
+        {
+            "chunk_id": str(c.id),
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+            "content": c.content,
+        }
+        for c in chunks
+    ]
+
+    report = dora_exit_engine.audit_chunks(document_id=document_id, chunks=chunk_dicts)
+
+    # Log immutable audit event
+    audit_entry = AuditLog(
+        id=uuid4(),
+        tenant_id=tenant.id,
+        user_id=user.id,
+        action="DORA_EXIT_STRATEGY_AUDITED",
+        resource_type="DOCUMENT",
+        resource_id=str(document_id),
+        details={
+            "overall_score": report.overall_score,
+            "compliance_rating": report.compliance_rating,
+            "checks_count": len(report.checks),
+        },
+    )
+    db.add(audit_entry)
+    await db.commit()
+
+    return report
 
 
 @router.get(

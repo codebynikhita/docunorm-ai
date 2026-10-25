@@ -9,6 +9,7 @@ import { ExecutiveDashboard } from "@/components/ExecutiveDashboard";
 import { IngestionModal } from "@/components/IngestionModal";
 import { AuditCertificateModal } from "@/components/AuditCertificateModal";
 import { ZugferdInspectorModal } from "@/components/ZugferdInspectorModal";
+import { DoraExitInspectorModal } from "@/components/DoraExitInspectorModal";
 import { AuthModal } from "@/components/AuthModal";
 import { LandingPage } from "@/components/LandingPage";
 import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
@@ -38,6 +39,7 @@ export default function Home() {
   const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isZugferdModalOpen, setIsZugferdModalOpen] = useState(false);
+  const [isDoraExitModalOpen, setIsDoraExitModalOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
   const [isAuditorOpen, setIsAuditorOpen] = useState(true);
@@ -237,7 +239,9 @@ export default function Home() {
               setActiveTab(tab);
               if (tab === "auditor") {
                 setLayoutMode("auditor");
-              } else if (tab === "dora" || tab === "lksg") {
+              } else if (tab === "dora") {
+                setIsDoraExitModalOpen(true);
+              } else if (tab === "lksg") {
                 setLayoutMode("executive");
               } else if (tab === "zugferd") {
                 setIsZugferdModalOpen(true);
@@ -293,6 +297,7 @@ export default function Home() {
                 activeHighlight={activeHighlight}
                 onUploadFile={handleUploadFile}
                 onPageChange={(page) => setCurrentPage(page)}
+                onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -338,6 +343,7 @@ export default function Home() {
                 activeHighlight={activeHighlight}
                 onUploadFile={handleUploadFile}
                 onPageChange={(page) => setCurrentPage(page)}
+                onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
               />
             </main>
           )}
@@ -375,6 +381,26 @@ export default function Home() {
         onClose={() => setIsZugferdModalOpen(false)}
         lang={lang}
         documentName={documentName || "Siemens_Master_ICT_Agreement_2026.pdf"}
+      />
+
+      {/* EU DORA Art. 30(2) & BaFin Exit Strategy Regulatory Inspector Modal */}
+      <DoraExitInspectorModal
+        isOpen={isDoraExitModalOpen}
+        onClose={() => setIsDoraExitModalOpen(false)}
+        lang={lang}
+        documentId={documentId || undefined}
+        documentName={documentName || "Siemens_Master_ICT_Agreement_2026.pdf"}
+        onJumpToCitation={(page, bbox) => {
+          setCurrentPage(page);
+          if (bbox) {
+            setActiveHighlight({
+              page_number: page,
+              box: bbox,
+              label: "DORA Art. 30(2) Clause Evidence",
+            });
+          }
+          setLayoutMode("workbench");
+        }}
       />
     </div>
   );

@@ -198,3 +198,41 @@ export async function getCurrentUser(token: string): Promise<UserProfile | null>
     return null;
   }
 }
+
+export interface DoraExitCheckResult {
+  rule_id: string;
+  name_de: string;
+  name_en: string;
+  description_de: string;
+  description_en: string;
+  status: "COMPLIANT" | "PARTIALLY_COMPLIANT" | "NON_COMPLIANT";
+  score: number;
+  extracted_clause: string | null;
+  citation_tag: string | null;
+  page_number: number | null;
+  bounding_box: [number, number, number, number] | null;
+  recommendation_de: string;
+  recommendation_en: string;
+}
+
+export interface DoraExitAuditReport {
+  document_id: string;
+  overall_score: number;
+  compliance_rating: string;
+  evaluated_at: string;
+  dora_article: string;
+  checks: DoraExitCheckResult[];
+  summary_de: string;
+  summary_en: string;
+}
+
+export async function getDoraExitAudit(documentId: string): Promise<DoraExitAuditReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/dora-exit-audit`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `DORA Exit Audit failed with status ${res.status}`);
+  }
+  return res.json();
+}
