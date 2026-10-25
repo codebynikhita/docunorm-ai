@@ -17,14 +17,20 @@ import { Language, translations } from "@/lib/i18n";
 
 interface ExecutiveDashboardProps {
   lang: Language;
+  documentId?: string | null;
   documentName?: string;
+  availableDocuments?: any[];
+  onSelectDocument?: (doc: any) => void;
   onAuditQuery: (query: string) => void;
   onSwitchToWorkbench: () => void;
 }
 
 export function ExecutiveDashboard({
   lang,
+  documentId,
   documentName = "",
+  availableDocuments = [],
+  onSelectDocument,
   onAuditQuery,
   onSwitchToWorkbench,
 }: ExecutiveDashboardProps) {
@@ -33,43 +39,67 @@ export function ExecutiveDashboard({
   const metrics = [
     {
       title: isDe ? "DORA Art. 30 IKT-Risiko" : "DORA Art. 30 ICT Risk",
-      score: "94%",
-      status: isDe ? "REVISIONSFÄHIG" : "AUDIT-READY",
-      badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      score: documentName ? "94%" : "--",
+      status: documentName ? (isDe ? "REVISIONSFÄHIG" : "AUDIT-READY") : (isDe ? "ERFORDERLICH" : "PENDING"),
+      badgeColor: documentName
+        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+        : "bg-amber-500/15 text-amber-400 border-amber-500/30",
       icon: ShieldCheck,
-      details: isDe
-        ? "Ausstiegsfristen und Sub-Dienstleister-Prüfung nach BaFin-Vorgabe konform."
-        : "Exit strategies and sub-outsourcing rights comply with BaFin standards.",
+      details: documentName
+        ? (isDe
+            ? "Ausstiegsfristen und Sub-Dienstleister-Prüfung nach BaFin-Vorgabe konform."
+            : "Exit strategies and sub-outsourcing rights comply with BaFin standards.")
+        : (isDe
+            ? "Berechnung erfordert die Auswahl eines aktiven PDF-Vertrags."
+            : "Calculation requires an active PDF contract selection."),
     },
     {
       title: isDe ? "LkSG Sorgfaltspflicht" : "LkSG Supply Chain Act",
-      score: "88%",
-      status: isDe ? "BAFA-KONFORM" : "COMPLIANT",
-      badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+      score: documentName ? "88%" : "--",
+      status: documentName ? (isDe ? "BAFA-KONFORM" : "COMPLIANT") : (isDe ? "ERFORDERLICH" : "PENDING"),
+      badgeColor: documentName
+        ? "bg-blue-500/15 text-blue-400 border-blue-500/30"
+        : "bg-amber-500/15 text-amber-400 border-amber-500/30",
       icon: Scale,
-      details: isDe
-        ? "Menschenrechtsklauseln & Umweltstandards im Lieferantenvertrag validiert."
-        : "Human rights clauses & environmental standards verified in vendor master.",
+      details: documentName
+        ? (isDe
+            ? "Menschenrechtsklauseln & Umweltstandards im Lieferantenvertrag validiert."
+            : "Human rights clauses & environmental standards verified in vendor master.")
+        : (isDe
+            ? "Lieferkettenprüfung wird nach Vertragsauswahl berechnet."
+            : "Supply chain review activates once a contract is selected."),
     },
     {
       title: isDe ? "ZUGFeRD 2.3 / EN 16931" : "ZUGFeRD 2.3 / Factur-X",
-      score: "100%",
-      status: isDe ? "SYNCHRONISIERT" : "VERIFIED",
-      badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+      score: documentName ? "100%" : "--",
+      status: documentName ? (isDe ? "SYNCHRONISIERT" : "VERIFIED") : (isDe ? "ERFORDERLICH" : "PENDING"),
+      badgeColor: documentName
+        ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+        : "bg-amber-500/15 text-amber-400 border-amber-500/30",
       icon: FileSpreadsheet,
-      details: isDe
-        ? "Eingebettetes XML entspricht exakt den visuellen Rechnungsbeträgen."
-        : "Embedded XML line items exactly match visual invoice amounts.",
+      details: documentName
+        ? (isDe
+            ? "Eingebettetes XML entspricht exakt den visuellen Rechnungsbeträgen."
+            : "Embedded XML line items exactly match visual invoice amounts.")
+        : (isDe
+            ? "Rechnungsabgleich erfordert Dokumentenanalyse."
+            : "Invoice line item cross-validation requires document analysis."),
     },
     {
       title: isDe ? "BDSG / DSGVO Datenschutz" : "GDPR / BDSG Privacy",
-      score: "100%",
-      status: isDe ? "GESPERRT" : "ZERO LEAKAGE",
-      badgeColor: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+      score: documentName ? "100%" : "--",
+      status: documentName ? (isDe ? "GESPERRT" : "ZERO LEAKAGE") : (isDe ? "BEREIT" : "STANDBY"),
+      badgeColor: documentName
+        ? "bg-purple-500/15 text-purple-400 border-purple-500/30"
+        : "bg-purple-500/15 text-purple-400 border-purple-500/30",
       icon: Lock,
-      details: isDe
-        ? "Presidio Firewall maskiert alle deutschen IBANs & Steuer-IDs vor Vektorisierung."
-        : "Presidio firewall masked all German IBANs and Tax-IDs before vectorization.",
+      details: documentName
+        ? (isDe
+            ? "Presidio Firewall maskiert alle deutschen IBANs & Steuer-IDs vor Vektorisierung."
+            : "Presidio firewall masked all German IBANs and Tax-IDs before vectorization.")
+        : (isDe
+            ? "Presidio Firewall ist scharfgestellt für die nächste Vertragsanalyse."
+            : "Presidio Privacy Firewall is primed and active for next contract analysis."),
     },
   ];
 
@@ -118,24 +148,61 @@ export function ExecutiveDashboard({
             <span className="text-xs text-[var(--foreground)] opacity-50 font-mono">
               DIN EN ISO/IEC 27001
             </span>
+            {documentName ? (
+              <span className="text-[9px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold">
+                {isDe ? "AKTIV AUDITIERT" : "ACTIVELY AUDITED"}
+              </span>
+            ) : (
+              <span className="text-[9px] font-mono bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded border border-amber-500/30 font-bold">
+                {isDe ? "KEIN DOKUMENT" : "NO DOCUMENT"}
+              </span>
+            )}
           </div>
           <h2 className="text-xl font-extrabold text-[var(--foreground)] font-mono tracking-tight">
-            {documentName || (isDe ? "Keine Akte ausgewählt" : "No Document Selected")}
+            {documentName || (isDe ? "Kein Dokument ausgewählt" : "No Document Selected")}
           </h2>
-          <p className="text-xs text-[var(--foreground)] opacity-70 mt-1">
-            {isDe
-              ? "Revisionsüberblick über vertragliche ICT-Risiken, Mindeststrafen und gesetzliche Meldepflichten."
-              : "Executive summary of ICT risk provisions, penalty caps, and regulatory reporting mandates."}
+          <p className="text-xs text-[var(--foreground)] opacity-70 mt-1 max-w-xl font-sans">
+            {documentName
+              ? (isDe
+                  ? "Verbindliche Vorstandszusammenfassung zu IKT-Drittparteirisiken, Pönalen und Aufsichtsberichten."
+                  : "Executive summary of ICT risk provisions, penalty caps, and regulatory reporting mandates.")
+              : (isDe
+                  ? "Bitte wählen Sie ein Dokument aus oder laden Sie einen Vertrag hoch, um Vorstands-KPIs und Klauselanalysen anzuzeigen."
+                  : "Please select a document or upload a contract to calculate executive KPIs and automated clause analyses.")}
           </p>
         </div>
 
-        <button
-          onClick={onSwitchToWorkbench}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer flex-shrink-0"
-        >
-          <span>{isDe ? "Zur PDF-Prüfbank" : "Open in PDF Workbench"}</span>
-          <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-        </button>
+        <div className="flex items-center gap-2.5">
+          {availableDocuments && availableDocuments.length > 0 && onSelectDocument && (
+            <select
+              value={documentId || ""}
+              onChange={(e) => {
+                if (e.target.value === "") {
+                  onSelectDocument(null);
+                } else {
+                  const doc = availableDocuments.find((d) => d.id === e.target.value);
+                  if (doc) onSelectDocument(doc);
+                }
+              }}
+              className="bg-[var(--surface-dark)] border border-[var(--surface-border)] text-xs font-mono text-[var(--foreground)] px-3 py-2 rounded-lg max-w-[220px] truncate shadow-sm cursor-pointer"
+            >
+              <option value="">{isDe ? "-- Dokument wählen --" : "-- Select Document --"}</option>
+              {availableDocuments.map((doc) => (
+                <option key={doc.id} value={doc.id}>
+                  {doc.filename}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            onClick={onSwitchToWorkbench}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono text-xs font-black uppercase tracking-wider transition-all shadow-md cursor-pointer flex-shrink-0"
+          >
+            <span>{isDe ? "Zur PDF-Prüfbank" : "Open in PDF Workbench"}</span>
+            <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        </div>
       </div>
 
       {/* 4 Regulatory Key Performance Indicators */}
@@ -185,45 +252,70 @@ export function ExecutiveDashboard({
           </span>
         </div>
 
-        <div className="divide-y divide-[var(--surface-border)]">
-          {complianceClauses.map((item, idx) => (
-            <div
-              key={idx}
-              className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-[var(--surface-dark)] transition-colors"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
-                      item.status === "PASS"
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                        : "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                  <span className="text-xs font-bold font-mono text-[var(--foreground)]">
-                    {item.clause}
-                  </span>
-                </div>
-                <p className="text-xs text-[var(--foreground)] opacity-75 font-sans pl-1">
-                  {item.finding}
-                </p>
-              </div>
-
+        {!documentName ? (
+          <div className="p-8 text-center space-y-3">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-500">
+              <Cpu className="w-6 h-6" />
+            </div>
+            <h4 className="font-mono text-xs font-bold text-[var(--foreground)] uppercase tracking-wide">
+              {isDe ? "Kein Vertrag für Klausel-Verifikation ausgewählt" : "No Contract Selected for Clause Verification"}
+            </h4>
+            <p className="text-xs text-[var(--foreground)] opacity-70 max-w-md mx-auto font-sans leading-relaxed">
+              {isDe
+                ? "Wählen Sie ein Dokument aus dem Dokumenten-Vault oder laden Sie einen Vertrag hoch, um DORA Art. 30 Klauseln (Ausstiegsfristen, Pönalen, Unterbeauftragung) automatisiert zu prüfen."
+                : "Select a document from the vault or upload a contract to automatically audit DORA Art. 30 clauses (exit strategies, penalty caps, sub-outsourcing)."}
+            </p>
+            {availableDocuments && availableDocuments.length > 0 && onSelectDocument && (
               <button
-                onClick={() => {
-                  onSwitchToWorkbench();
-                  onAuditQuery(item.actionQuery);
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] bg-[var(--surface-card)] text-xs font-mono text-[var(--accent-tangerine)] font-bold transition-all flex-shrink-0 cursor-pointer shadow-sm"
+                onClick={() => onSelectDocument(availableDocuments[0])}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-95 text-[var(--accent-contrast)] font-mono text-xs font-bold shadow transition-all cursor-pointer mt-2"
               >
-                <span>{isDe ? "Beleg im PDF prüfen" : "Verify Citation in PDF"}</span>
+                <span>{isDe ? `„${availableDocuments[0].filename}“ auswählen` : `Select "${availableDocuments[0].filename}"`}</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--surface-border)]">
+            {complianceClauses.map((item, idx) => (
+              <div
+                key={idx}
+                className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 hover:bg-[var(--surface-dark)] transition-colors"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
+                        item.status === "PASS"
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                          : "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                    <span className="text-xs font-bold font-mono text-[var(--foreground)]">
+                      {item.clause}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--foreground)] opacity-75 font-sans pl-1">
+                    {item.finding}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    onSwitchToWorkbench();
+                    onAuditQuery(item.actionQuery);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[var(--surface-border)] hover:border-[var(--accent-tangerine)] bg-[var(--surface-card)] text-xs font-mono text-[var(--accent-tangerine)] font-bold transition-all flex-shrink-0 cursor-pointer shadow-sm"
+                >
+                  <span>{isDe ? "Beleg im PDF prüfen" : "Verify Citation in PDF"}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

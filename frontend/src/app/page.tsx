@@ -298,7 +298,10 @@ export default function Home() {
             <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
               <ExecutiveDashboard
                 lang={lang}
+                documentId={documentId}
                 documentName={documentName}
+                availableDocuments={availableDocuments}
+                onSelectDocument={handleSelectDocument}
                 onAuditQuery={() => setLayoutMode("auditor")}
                 onSwitchToWorkbench={() => setLayoutMode("workbench")}
               />

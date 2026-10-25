@@ -63,7 +63,7 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
   ];
 
   return (
-    <aside className="w-56 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none transition-all duration-200">
+    <aside className="w-64 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none transition-all duration-200">
       <div className="p-3.5 space-y-5">
         {/* Navigation Category */}
         <div className="space-y-1">
@@ -79,22 +79,22 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-mono transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-xs font-mono transition-all cursor-pointer overflow-hidden ${
                     isActive
                       ? "bg-[var(--surface-card)] border-l-2 border-[var(--accent-tangerine)] text-[var(--foreground)] font-bold shadow-sm"
                       : "text-[var(--foreground)] opacity-65 hover:opacity-100 hover:bg-[var(--surface-card)]/50 border-l-2 border-transparent"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2 min-w-0 mr-2">
                     <Icon
-                      className={`w-3.5 h-3.5 transition-colors ${
+                      className={`w-3.5 h-3.5 shrink-0 transition-colors ${
                         isActive ? "text-[var(--accent-tangerine)]" : "opacity-60"
                       }`}
                     />
                     <span className="text-[11px] truncate">{item.label}</span>
                   </div>
                   <span
-                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                    className={`text-[9px] font-mono px-1.5 py-0.5 rounded shrink-0 ${
                       isActive
                         ? "bg-[var(--accent-tangerine)]/15 text-[var(--accent-tangerine)] border border-[var(--accent-tangerine)]/30 font-bold"
                         : "bg-[var(--surface-card)] text-[var(--foreground)] opacity-60 border border-[var(--surface-border)]"
@@ -145,12 +145,12 @@ export function Sidebar({ lang, activeTab, onTabChange, documentCount }: Sidebar
       </div>
 
       {/* Footer Info with German Legal Impressum link style */}
-      <div className="p-3 border-t border-[var(--surface-border)] text-[10px] font-mono text-[var(--foreground)] opacity-60 flex items-center justify-between bg-[var(--surface-dark)]">
-        <span className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-lime)]"></span>
-          DocuNorm DE v0.2
+      <div className="p-3 border-t border-[var(--surface-border)] text-[10px] font-mono text-[var(--foreground)] opacity-60 flex items-center justify-between bg-[var(--surface-dark)] overflow-hidden">
+        <span className="flex items-center gap-1.5 truncate mr-2 min-w-0">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-lime)] shrink-0"></span>
+          <span className="truncate">DocuNorm DE v0.2</span>
         </span>
-        <span className="text-[9px] bg-[var(--accent-tangerine)]/10 px-1.5 py-0.5 rounded border border-[var(--accent-tangerine)]/30 text-[var(--accent-tangerine)] font-bold tracking-wider">
+        <span className="text-[9px] bg-[var(--accent-tangerine)]/10 px-1.5 py-0.5 rounded border border-[var(--accent-tangerine)]/30 text-[var(--accent-tangerine)] font-bold tracking-wider shrink-0">
           BAFIN-READY
         </span>
       </div>
