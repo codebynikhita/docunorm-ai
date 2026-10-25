@@ -120,13 +120,20 @@ export function StandaloneAuditorStudio({
   const [selectedCitation, setSelectedCitation] = useState<AuditCitationResponse | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // Initial Threads
+  // Initial Threads (Fresh clean thread by default, with sample audits accessible in history)
   const [threads, setThreads] = useState<ThreadInquiry[]>([
     {
-      id: "thread-1",
-      title: "DORA Art. 30 Ausstiegsfrist & Migration",
+      id: "thread-new",
+      title: lang === "DE" ? "Neuer Prüfvorgang" : "New Audit Inquiry",
       framework: "DORA",
-      timestamp: "Heute, 16:30",
+      timestamp: lang === "DE" ? "Jetzt" : "Just now",
+      messages: [],
+    },
+    {
+      id: "thread-1",
+      title: lang === "DE" ? "DORA Art. 30 Ausstiegsfrist & Migration" : "DORA Art. 30 Exit Period & Migration",
+      framework: "DORA",
+      timestamp: lang === "DE" ? "Vorherige Prüfung" : "Sample Audit",
       messages: [
         {
           id: "m-1",
@@ -160,9 +167,9 @@ export function StandaloneAuditorStudio({
     },
     {
       id: "thread-2",
-      title: "Haftung & 0,2% Verzugsstrafen",
+      title: lang === "DE" ? "Haftung & 0,2% Verzugsstrafen" : "Liability & 0.2% Delay Penalties",
       framework: "DORA",
-      timestamp: "Gestern",
+      timestamp: lang === "DE" ? "Muster" : "Sample Audit",
       messages: [
         {
           id: "m-3",
@@ -189,7 +196,7 @@ export function StandaloneAuditorStudio({
     },
   ]);
 
-  const [activeThreadId, setActiveThreadId] = useState<string>("thread-1");
+  const [activeThreadId, setActiveThreadId] = useState<string>("thread-new");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeThread = threads.find((t) => t.id === activeThreadId) || threads[0];
