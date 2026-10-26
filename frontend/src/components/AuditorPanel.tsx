@@ -245,9 +245,15 @@ export function AuditPanel({
                 </div>
                 <div className="flex-1 p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] border-l-2 border-l-[var(--accent-tangerine)] space-y-2.5 shadow-md">
                   <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-2">
-                    <span className="text-xs font-bold text-[var(--accent-lime)] flex items-center gap-1.5 font-mono">
-                      <CheckCircle className="w-3.5 h-3.5 text-[var(--accent-lime)]" /> {msg.framework} Verified
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-mono">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> {msg.framework} Verified
+                      </span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
+                        Gemini 2.0 Flash
+                      </span>
+                    </div>
 
                     <div className="flex items-center gap-1.5">
                       {/* Instant German <-> English Translation Toggle */}

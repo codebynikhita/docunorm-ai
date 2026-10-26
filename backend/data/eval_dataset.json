@@ -1,0 +1,18 @@
+[
+  {
+    "id": "TEST_001_EXIT_PERIOD",
+    "query": "Sind die Kündigungsfristen nach DORA Art. 30 zulässig?",
+    "context": "[SOURCE_1] (Page 2): § 8 Abs. 2: Kündigungsfrist 60 Tage, Migrationsunterstützung 90 Tage.",
+    "expected_status": "KONFORM",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["60 Tage", "90 Tage"]
+  },
+  {
+    "id": "TEST_002_PENALTY_CAP",
+    "query": "Wie hoch ist die maximale Verzugsstrafe?",
+    "context": "[SOURCE_1] (Page 5): § 12: Vertragsstrafe von 0,2 % pro Werktag, max. 5 % der Jahresvergütung.",
+    "expected_status": "KONFORM",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["0,2 %", "5 %"]
+  }
+]

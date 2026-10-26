@@ -1,0 +1,74 @@
+[
+  {
+    "id": "COMPLEX-TRAP-01-DEEMED-CONSENT",
+    "pillar": "Pillar IV (Cascading Subcontracting Trap)",
+    "context": "Ziffer 14.3 (Unterauftragsvergabe): Der IKT-Dienstleister teilt die beabsichtigte Beauftragung weiterer Unterauftragnehmer elektronisch mit. Widerspricht das Finanzinstitut nicht innerhalb einer Frist von 5 Werktagen ab Zugang der Mitteilung schriftlich unter Darlegung schwerwiegender Gründe, gilt die Zustimmung als unwiderruflich erteilt (Zustimmungsfiktion).",
+    "query": "Ist diese Zustimmungsfiktion mit 5-tägiger Widerspruchsfrist nach DORA Art. 30 Abs. 2 lit. a und BaFin BAIT zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["zustimmungsfiktion", "dora"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-TRAP-02-HIDDEN-EXIT-TOLL",
+    "pillar": "Pillar IV (Disguised Exit Toll)",
+    "context": "§ 21 Abs. 4 (Datenrückgabe bei Vertragsende): Der IKT-Auftragnehmer unterstützt die Datenmigration für 90 Tage. Für den Personal- und Infrastrukturaufwand der Bereitstellung der relationalen Primärdatenbanken wird eine pauschale Bereitstellungsgebühr in Höhe von 120.000 € zzgl. MwSt. erhoben, zahlbar vor Beginn jeglicher Datenextraktion.",
+    "query": "Verstößt diese Bereitstellungsgebühr von 120.000 € gegen das Verbot von Austrittsbarrieren nach DORA Art. 30 Abs. 2 lit. h?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["gebühr", "exit"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-TRAP-03-AUDIT-DEPOSIT-BARRIER",
+    "pillar": "Pillar IV (Restricted Audit Access)",
+    "context": "§ 16 Vor-Ort-Audits: Vor-Ort-Prüfungen durch das Finanzinstitut oder die Aufsichtsbehörde (BaFin/EZB) sind gestattet, bedingen jedoch die vorherige Hinterlegung einer nicht erstattungsfähigen Prüfkaution von 50.000 € zur Deckung interner Begleitkosten und dürfen maximal einmal im Kalenderjahr stattfinden.",
+    "query": "Entspricht diese Kautionspflicht für Vor-Ort-Prüfungen den aufsichtsrechtlichen Prüfrechten nach KWG § 25b und DORA Art. 30 Abs. 3 lit. e?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["prüf", "kaution"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-TRAP-04-CLOUD-ACT-CONFLICT",
+    "pillar": "Pillar IV (Cross-Border CLOUD Act Conflict)",
+    "context": "§ 8 Datenhaltung & Verschlüsselung: Die Kundendaten ruhen ausschließlich in Rechenzentren im Großraum Frankfurt am Main. Die kryptographischen Hauptschlüssel (Master Encryption Keys) werden jedoch aus Redundanzgründen beim US-Mutterkonzern in Virginia (USA) verwaltet und unterliegen US-Herausgabeverlangen gem. US CLOUD Act.",
+    "query": "Ist diese Auslagerung trotz Serverstandort Frankfurt mit DORA Art. 30 Abs. 2 lit. c und DSGVO vereinbar?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["schlüssel", "cloud act"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-TRAP-05-SLA-EXCLUSION-LOOPHOLE",
+    "pillar": "Pillar IV (SLA Calculation Loophole)",
+    "context": "Anlage 2 SLA: Die Verfügbarkeit beträgt 99,9 % im Jahresmittel. Ausdrücklich von der Ausfallzeit ausgenommen sind alle 'dringenden oder unvorhergesehenen Notfallwartungen', unabhängig von deren Dauer, sowie sämtliche Störungen bei Vorleistungslieferanten des Anbieters.",
+    "query": "Ist diese Berechnungsformel für Verfügbarkeitsausfälle nach DORA Art. 30 Abs. 2 lit. d aufsichtsrechtlich haltbar?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["verfügbarkeit", "sla"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-TRAP-06-SOURCE-CODE-ESCROW",
+    "pillar": "Pillar IV (Conditional Escrow)",
+    "context": "§ 12 Software-Hinterlegung (Escrow): Der Quellcode der Bankensoftware wird bei einem deutschen Treuhänder hinterlegt. Eine Herausgabe an das Institut erfolgt ausschließlich im Falle der rechtskräftigen Eröffnung des Insolvenzverfahrens ohne Vorhandensein eines Rechtsnachfolgers.",
+    "query": "Reicht diese eng gefasste Escrow-Herausgabeklausel für kritische Bankfunktionen zur Absicherung der Geschäftskontinuität aus?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["escrow", "insolvenz"],
+    "expected_status": "BEDINGT KONFORM"
+  },
+  {
+    "id": "COMPLEX-GOLDEN-07-GOLD-STANDARD-EXIT",
+    "pillar": "Pillar IV (Institutional Gold Standard)",
+    "context": "§ 28 Disengagement & Migration: 1. Kündigungsfrist von 90 Tagen zum Monatsende. 2. Garantierte unentgeltliche Migrationsunterstützung für bis zu 180 Tage nach Vertragsbeendigung. 3. Vollständige Datenherausgabe in strukturierten offenen Formaten (Parquet/JSON). 4. Vor-Ort-Begleitung des Übergangs auf den Nachfolge-Dienstleister ohne gesonderte Vergütung.",
+    "query": "Erfüllt dieser Übergangsplan den institutionellen Goldstandard für DORA Art. 30 Abs. 2 lit. h?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["migration", "dora"],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-ZUGFERD-08-INVALID-VAT-TAX",
+    "pillar": "Electronic Invoicing (Tax Compliance)",
+    "context": "ZUGFeRD 2.3 XML: Profil EXTENDED. Rechnungsbetrag: 450.000,00 EUR. USt-IdNr des Leistenden: Keine Angabe ('in Gründung'). Steuersatz: 0% ohne Nennung eines gesetzlichen Steuerbefreiungsgrundes gem. UStG.",
+    "query": "Ist diese elektronische Rechnung nach deutschem Steuerrecht und EN 16931 buchungsfähig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["ust", "rechnung"],
+    "expected_status": "DEFIZITÄR"
+  }
+]

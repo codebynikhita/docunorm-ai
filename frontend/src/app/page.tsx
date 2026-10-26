@@ -10,6 +10,9 @@ import { IngestionModal } from "@/components/IngestionModal";
 import { AuditCertificateModal } from "@/components/AuditCertificateModal";
 import { ZugferdInspectorModal } from "@/components/ZugferdInspectorModal";
 import { DoraExitInspectorModal } from "@/components/DoraExitInspectorModal";
+import { DoraSubcontractorModal } from "@/components/DoraSubcontractorModal";
+import { AuditRightsModal } from "@/components/AuditRightsModal";
+import { CommandPalette } from "@/components/CommandPalette";
 import { AuthModal } from "@/components/AuthModal";
 import { LandingPage } from "@/components/LandingPage";
 import { LoginPage } from "@/components/LoginPage";
@@ -41,9 +44,13 @@ export default function Home() {
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isZugferdModalOpen, setIsZugferdModalOpen] = useState(false);
   const [isDoraExitModalOpen, setIsDoraExitModalOpen] = useState(false);
+  const [isDoraSubcontractorModalOpen, setIsDoraSubcontractorModalOpen] = useState(false);
+  const [isAuditRightsModalOpen, setIsAuditRightsModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
   const [isAuditorOpen, setIsAuditorOpen] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<{
     page_number: number;
     box: [number, number, number, number];
@@ -56,6 +63,11 @@ export default function Home() {
     const savedLang = localStorage.getItem("docunorm_lang") as Language;
     if (savedLang === "DE" || savedLang === "EN") {
       setLang(savedLang);
+    }
+
+    const savedSidebar = localStorage.getItem("docunorm_sidebar_collapsed");
+    if (savedSidebar === "true") {
+      setIsSidebarCollapsed(true);
     }
 
     const savedUser = localStorage.getItem("docunorm_user");
@@ -86,15 +98,37 @@ export default function Home() {
     }
   };
 
-  // Load available documents list for dropdown (clean empty state by default)
+  // Load available documents list and auto-select active or first document
   useEffect(() => {
     async function initDocumentList() {
       const docs = await listDocuments();
       if (docs && docs.length > 0) {
         setAvailableDocuments(docs);
+        const savedDocId = localStorage.getItem("docunorm_active_document_id");
+        const validSavedId = savedDocId && savedDocId !== "null" && savedDocId !== "undefined" ? savedDocId : null;
+        const docToSelect = (validSavedId && docs.find((d: any) => d.id === validSavedId)) || docs[0];
+        if (docToSelect) {
+          setDocumentId(docToSelect.id);
+          setDocumentName(docToSelect.filename);
+          setTotalPages(docToSelect.total_pages || 1);
+          setCurrentPage(1);
+          localStorage.setItem("docunorm_active_document_id", docToSelect.id);
+        }
       }
     }
     initDocumentList();
+  }, []);
+
+  // Silicon Valley Command Palette (⌘K / Ctrl+K) Global Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Route Guard: Ensure unauthenticated users cannot access Workbench/Auditor without signing in
@@ -111,6 +145,7 @@ export default function Home() {
       setTotalPages(1);
       setCurrentPage(1);
       setActiveHighlight(null);
+      localStorage.removeItem("docunorm_active_document_id");
       return;
     }
     setDocumentId(doc.id);
@@ -118,6 +153,7 @@ export default function Home() {
     setTotalPages(doc.total_pages || 1);
     setCurrentPage(1);
     setActiveHighlight(null);
+    localStorage.setItem("docunorm_active_document_id", doc.id);
   };
 
   const handleSelectCitation = (citation: CitationItem) => {
@@ -192,6 +228,14 @@ export default function Home() {
     setLayoutMode("workbench");
   };
 
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("docunorm_sidebar_collapsed", String(next));
+      return next;
+    });
+  };
+
   return (
     <div
       data-theme={theme}
@@ -210,6 +254,9 @@ export default function Home() {
         user={user}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={handleToggleSidebar}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       {/* Upload Error Banner if present */}
@@ -254,6 +301,8 @@ export default function Home() {
           <Sidebar
             lang={lang}
             activeTab={activeTab}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={handleToggleSidebar}
             onTabChange={(tab) => {
               setActiveTab(tab);
               if (tab === "auditor") {
@@ -261,7 +310,7 @@ export default function Home() {
               } else if (tab === "dora") {
                 setIsDoraExitModalOpen(true);
               } else if (tab === "lksg") {
-                setLayoutMode("executive");
+                setIsDoraSubcontractorModalOpen(true);
               } else if (tab === "zugferd") {
                 setIsZugferdModalOpen(true);
               } else if (tab === "audit_log") {
@@ -322,6 +371,8 @@ export default function Home() {
                 onUploadFile={handleUploadFile}
                 onPageChange={(page) => setCurrentPage(page)}
                 onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
+                onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
+                onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -368,6 +419,8 @@ export default function Home() {
                 onUploadFile={handleUploadFile}
                 onPageChange={(page) => setCurrentPage(page)}
                 onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
+                onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
+                onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
               />
             </main>
           )}
@@ -396,7 +449,10 @@ export default function Home() {
         isOpen={isCertificateOpen}
         onClose={() => setIsCertificateOpen(false)}
         lang={lang}
-        documentName={documentName || "Siemens_Master_ICT_Agreement_2026.pdf"}
+        documentId={documentId || undefined}
+        documentName={documentName}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
       />
 
       {/* ZUGFeRD 2.3 XML vs Visual PDF Discrepancy Inspector Modal */}
@@ -404,7 +460,10 @@ export default function Home() {
         isOpen={isZugferdModalOpen}
         onClose={() => setIsZugferdModalOpen(false)}
         lang={lang}
-        documentName={documentName || "Siemens_Master_ICT_Agreement_2026.pdf"}
+        documentId={documentId || undefined}
+        documentName={documentName}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
       />
 
       {/* EU DORA Art. 30(2) & BaFin Exit Strategy Regulatory Inspector Modal */}
@@ -413,7 +472,9 @@ export default function Home() {
         onClose={() => setIsDoraExitModalOpen(false)}
         lang={lang}
         documentId={documentId || undefined}
-        documentName={documentName || "Siemens_Master_ICT_Agreement_2026.pdf"}
+        documentName={documentName}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
         onJumpToCitation={(page, bbox) => {
           setCurrentPage(page);
           if (bbox) {
@@ -425,6 +486,59 @@ export default function Home() {
           }
           setLayoutMode("workbench");
         }}
+      />
+
+      {/* EU DORA Art. 30(3) & BaFin Sub-Outsourcing & Cascading Risk Inspector Modal */}
+      <DoraSubcontractorModal
+        isOpen={isDoraSubcontractorModalOpen}
+        onClose={() => setIsDoraSubcontractorModalOpen(false)}
+        lang={lang}
+        documentId={documentId || undefined}
+        documentName={documentName}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
+        onJumpToCitation={(page) => {
+          setCurrentPage(page);
+          setLayoutMode("workbench");
+        }}
+      />
+
+      {/* KWG § 25b & EU DORA Art. 30(3)(e) Supervisory Audit Rights & DIN 5008 Letter Modal */}
+      <AuditRightsModal
+        isOpen={isAuditRightsModalOpen}
+        onClose={() => setIsAuditRightsModalOpen(false)}
+        lang={lang}
+        documentId={documentId || undefined}
+        documentName={documentName}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
+        onJumpToCitation={(page) => {
+          setCurrentPage(page);
+          setLayoutMode("workbench");
+        }}
+      />
+
+      {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        lang={lang}
+        onToggleLang={() => handleToggleLang(lang === "DE" ? "EN" : "DE")}
+        onOpenWorkbench={() => {
+          if (!user) setLayoutMode("login");
+          else setLayoutMode("workbench");
+        }}
+        onOpenAuditor={() => {
+          if (!user) setLayoutMode("login");
+          else setLayoutMode("auditor");
+        }}
+        onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
+        onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
+        onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
+        onOpenZugferd={() => setIsZugferdModalOpen(true)}
+        onOpenCertificate={() => setIsCertificateOpen(true)}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
       />
     </div>
   );

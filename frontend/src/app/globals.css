@@ -17,19 +17,19 @@
   --font-heading: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* 2. Bauhaus Paper (Prestigious German Architectural Light Mode - Executive & Professional) */
+/* 2. Institutional Platinum (Crisp Modern German Banking Light Mode - High-Precision & Prestigious) */
 [data-theme="bauhaus"] {
-  --background: #f7f6f2; /* Warm German ivory architectural paper */
-  --foreground: #0f172a; /* Deep Prussian slate ink */
-  --accent-tangerine: #b91c1c; /* Refined Institutional Seal Crimson */
+  --background: #f8fafc; /* Crisp Modern Slate-50 */
+  --foreground: #0f172a; /* Deep Slate-900 */
+  --accent-tangerine: #2563eb; /* Institutional Cobalt Hero */
   --accent-contrast: #ffffff;
-  --accent-lime: #15803d; /* Forest Emerald */
-  --accent-cyan: #1d4ed8; /* Deep Cobalt Blue (replaces neon cyan) */
-  --surface-dark: #eeebe2; /* Muted stone paper */
-  --surface-card: #ffffff; /* Pristine white card */
-  --surface-border: #ded9cd; /* Subtle architectural border */
-  --canvas-bg: #f0ece1; /* Warm drafting table */
-  --grid-line: rgba(0, 0, 0, 0.025);
+  --accent-lime: #16a34a; /* Forest Emerald */
+  --accent-cyan: #0284c7; /* Sky Cyan */
+  --surface-dark: #f1f5f9; /* Slate-100 */
+  --surface-card: #ffffff; /* Pure Pristine White */
+  --surface-border: #e2e8f0; /* Crisp Slate-200 Border */
+  --canvas-bg: #f8fafc; /* Crisp Modern Canvas */
+  --grid-line: rgba(148, 163, 184, 0.08);
   --font-heading: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -77,14 +77,13 @@ body {
   background: var(--accent-tangerine);
 }
 
-/* Technical Drafting Table Canvas */
+/* Modern High-Precision Viewport Canvas */
 .cyber-canvas {
   background-color: var(--canvas-bg);
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.05) 0%, transparent 70%),
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 100% 100%, 28px 28px, 28px 28px;
+    radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.04) 0%, transparent 60%),
+    radial-gradient(var(--grid-line) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px;
 }
 
 /* High-Voltage Neon Evidence Highlight */
@@ -101,5 +100,62 @@ body {
   }
   50% {
     box-shadow: 0 0 0 2px var(--accent-tangerine), 0 0 35px rgba(255, 85, 0, 0.95), inset 0 0 22px rgba(255, 85, 0, 0.45);
+  }
+}
+
+/* Regulatory DIN A4 Institutional Print Styles */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    overflow: visible !important;
+    height: auto !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 10pt !important;
+  }
+
+  /* Hide app frame, sidebars, headers, floating bars, and interactive buttons */
+  aside,
+  nav,
+  header,
+  button,
+  select,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Transform fixed modal overlays into standard printable document flow */
+  .fixed {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .overflow-hidden,
+  .overflow-y-auto {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* Ensure card backgrounds and borders print with high clarity */
+  div,
+  section,
+  article {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

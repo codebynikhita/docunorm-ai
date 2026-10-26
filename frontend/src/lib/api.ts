@@ -236,3 +236,104 @@ export async function getDoraExitAudit(documentId: string): Promise<DoraExitAudi
   }
   return res.json();
 }
+
+export interface SubcontractorCheckResult {
+  rule_id: string;
+  name_de: string;
+  name_en: string;
+  description_de: string;
+  description_en: string;
+  status: "COMPLIANT" | "PARTIALLY_COMPLIANT" | "NON_COMPLIANT";
+  score: number;
+  extracted_clause: string | null;
+  citation_tag: string | null;
+  page_number: number | null;
+  recommendation_de: string;
+  recommendation_en: string;
+}
+
+export interface CascadingChainNode {
+  node_id: string;
+  name: string;
+  tier: number;
+  service_type: string;
+  location: string;
+  critical_function: boolean;
+  approval_status: string;
+  risk_level: "NIEDRIG" | "MITTEL" | "HOCH" | "KRITISCH";
+}
+
+export interface DoraSubcontractorAuditReport {
+  document_id: string;
+  overall_score: number;
+  compliance_rating: string;
+  evaluated_at: string;
+  dora_article: string;
+  checks: SubcontractorCheckResult[];
+  cascading_nodes: CascadingChainNode[];
+  concentration_risk_level: "NIEDRIG" | "MODERAT" | "ERHÖHT" | "KRITISCH";
+  summary_de: string;
+  summary_en: string;
+}
+
+export async function getDoraSubcontractorAudit(documentId: string): Promise<DoraSubcontractorAuditReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/dora-subcontractor-audit`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `DORA Subcontractor Audit failed with status ${res.status}`);
+  }
+  return res.json();
+}
+
+export interface AuditRightCheckResult {
+  rule_id: string;
+  name_de: string;
+  name_en: string;
+  description_de: string;
+  description_en: string;
+  status: "COMPLIANT" | "PARTIALLY_COMPLIANT" | "NON_COMPLIANT";
+  score: number;
+  extracted_clause: string | null;
+  citation_tag: string | null;
+  page_number: number | null;
+  recommendation_de: string;
+  recommendation_en: string;
+}
+
+export interface InspectionNoticeLetter {
+  letter_id: string;
+  sender_institution: string;
+  recipient_vendor: string;
+  reference_number: string;
+  inspection_date: string;
+  legal_basis: string;
+  scope_of_inspection: string[];
+  german_letter_content: string;
+  english_letter_content: string;
+}
+
+export interface DoraAuditRightsReport {
+  document_id: string;
+  overall_score: number;
+  compliance_rating: string;
+  evaluated_at: string;
+  dora_article: string;
+  checks: AuditRightCheckResult[];
+  notice_letter: InspectionNoticeLetter;
+  summary_de: string;
+  summary_en: string;
+}
+
+export async function getDoraAuditRights(documentId: string): Promise<DoraAuditRightsReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/dora-audit-rights`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `DORA Audit Rights Evaluation failed with status ${res.status}`);
+  }
+  return res.json();
+}
+

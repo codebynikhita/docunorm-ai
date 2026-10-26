@@ -23,7 +23,11 @@ from app.schemas.document import (
     SearchResultChunk,
 )
 from app.schemas.dora import DoraExitAuditReport
+from app.schemas.subcontractor import DoraSubcontractorAuditReport
+from app.schemas.audit_rights import DoraAuditRightsReport
 from app.services.dora_exit_engine import dora_exit_engine
+from app.services.subcontractor_engine import subcontractor_engine
+from app.services.audit_rights_engine import audit_rights_engine
 from app.services.auditor import (
     build_audit_prompt,
     generate_llm_audit_finding,
@@ -729,6 +733,185 @@ async def audit_dora_exit_strategy(
             "overall_score": report.overall_score,
             "compliance_rating": report.compliance_rating,
             "checks_count": len(report.checks),
+        },
+    )
+    db.add(audit_entry)
+    await db.commit()
+
+    return report
+
+
+@router.post(
+    "/{document_id}/dora-subcontractor-audit",
+    response_model=DoraSubcontractorAuditReport,
+    summary="Execute DORA Art. 30(3) Sub-Outsourcing & 4th-Party Cascading Risk Audit",
+)
+@router.get(
+    "/{document_id}/dora-subcontractor-audit",
+    response_model=DoraSubcontractorAuditReport,
+    summary="Retrieve DORA Art. 30(3) Sub-Outsourcing & 4th-Party Cascading Risk Audit",
+)
+async def audit_dora_subcontractor(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> DoraSubcontractorAuditReport:
+    """
+    Executes a forensic DORA Art. 30(3) Sub-Outsourcing & 4th-Party Cascading Risk Audit:
+    1. Fetches all parsed chunks of the target document.
+    2. Audits advance notice, veto powers, vicarious liability, audit flow-through, and supply-chain mapping.
+    3. Reconstructs multi-tier cascading vendor nodes and concentration risk levels.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+    )
+    result = await db.execute(stmt)
+    chunks = result.scalars().all()
+
+    if not chunks:
+        doc = await db.get(Document, document_id)
+        if not doc or not doc.file_path or not Path(doc.file_path).exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document '{document_id}' not found.",
+            )
+        parse_res = pdf_parser.parse_pdf(doc.file_path)
+        for blk in parse_res.blocks:
+            anon = privacy_firewall.anonymize_text(blk.text)
+            c = DocumentChunk(
+                id=uuid4(),
+                document_id=doc.id,
+                tenant_id=tenant.id,
+                chunk_index=blk.block_index,
+                page_number=blk.page_number,
+                bounding_box=blk.bounding_box,
+                content=anon.sanitized_text,
+                token_count=len(anon.sanitized_text.split()),
+            )
+            db.add(c)
+        await db.commit()
+        result = await db.execute(stmt)
+        chunks = result.scalars().all()
+
+    chunk_dicts = [
+        {
+            "chunk_id": str(c.id),
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+            "content": c.content,
+        }
+        for c in chunks
+    ]
+
+    report = subcontractor_engine.audit_chunks(document_id=document_id, chunks=chunk_dicts)
+
+    # Log immutable audit event
+    audit_entry = AuditLog(
+        id=uuid4(),
+        tenant_id=tenant.id,
+        user_id=user.id,
+        action="DORA_SUBCONTRACTOR_CASCADING_AUDITED",
+        resource_type="DOCUMENT",
+        resource_id=str(document_id),
+        details={
+            "overall_score": report.overall_score,
+            "compliance_rating": report.compliance_rating,
+            "concentration_risk": report.concentration_risk_level,
+            "cascading_nodes_count": len(report.cascading_nodes),
+        },
+    )
+    db.add(audit_entry)
+    await db.commit()
+
+    return report
+
+
+@router.post(
+    "/{document_id}/dora-audit-rights",
+    response_model=DoraAuditRightsReport,
+    summary="Execute DORA Art. 30(3)(e) & KWG § 25b Supervisory Audit Rights Audit",
+)
+@router.get(
+    "/{document_id}/dora-audit-rights",
+    response_model=DoraAuditRightsReport,
+    summary="Retrieve DORA Art. 30(3)(e) & KWG § 25b Supervisory Audit Rights Audit",
+)
+async def audit_dora_rights(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> DoraAuditRightsReport:
+    """
+    Executes a comprehensive DORA Art. 30(3)(e) and KWG § 25b Supervisory Audit Rights evaluation:
+    1. Unrestricted on-site datacentre inspection access.
+    2. Direct statutory rights for BaFin, ECB, and external auditors.
+    3. Prohibition of obstructionist audit fees, deposits, or cost barriers.
+    4. Right to participate in collective / pooled audits without vendor veto.
+    5. Access to raw cryptographically signed logs, security documentation, and CISO interviews.
+    6. Automatically generates a formal DIN 5008 official BaFin inspection demand letter.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+    )
+    result = await db.execute(stmt)
+    chunks = result.scalars().all()
+
+    if not chunks:
+        doc = await db.get(Document, document_id)
+        if not doc or not doc.file_path or not Path(doc.file_path).exists():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Document '{document_id}' not found.",
+            )
+        parse_res = pdf_parser.parse_pdf(doc.file_path)
+        for blk in parse_res.blocks:
+            anon = privacy_firewall.anonymize_text(blk.text)
+            c = DocumentChunk(
+                id=uuid4(),
+                document_id=doc.id,
+                tenant_id=tenant.id,
+                chunk_index=blk.block_index,
+                page_number=blk.page_number,
+                bounding_box=blk.bounding_box,
+                content=anon.sanitized_text,
+                token_count=len(anon.sanitized_text.split()),
+            )
+            db.add(c)
+        await db.commit()
+        result = await db.execute(stmt)
+        chunks = result.scalars().all()
+
+    chunk_dicts = [
+        {
+            "chunk_id": str(c.id),
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+            "content": c.content,
+        }
+        for c in chunks
+    ]
+
+    report = audit_rights_engine.audit_chunks(document_id=document_id, chunks=chunk_dicts)
+
+    # Log immutable audit event
+    audit_entry = AuditLog(
+        id=uuid4(),
+        tenant_id=tenant.id,
+        user_id=user.id,
+        action="DORA_AUDIT_RIGHTS_EVALUATED",
+        resource_type="DOCUMENT",
+        resource_id=str(document_id),
+        details={
+            "overall_score": report.overall_score,
+            "compliance_rating": report.compliance_rating,
+            "checks_count": len(report.checks),
+            "letter_id": report.notice_letter.letter_id,
         },
     )
     db.add(audit_entry)

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { loginUser, signupUser, UserProfile } from "@/lib/api";
 import { Language } from "@/lib/i18n";
+import { DocuNormLogo } from "@/components/DocuNormLogo";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -137,9 +138,7 @@ export function AuthModal({
         {/* Header */}
         <div className="p-5 border-b border-[var(--surface-border)] bg-[var(--surface-dark)] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center font-mono font-black text-sm text-[var(--accent-tangerine)] shadow-sm">
-              §
-            </div>
+            <DocuNormLogo size="xs" showText={false} />
             <div>
               <h3 className="font-extrabold text-sm tracking-wide text-[var(--foreground)] font-mono uppercase">
                 DocuNorm Gateway

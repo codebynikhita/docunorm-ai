@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { loginUser, signupUser, UserProfile } from "@/lib/api";
+import { DocuNormLogo } from "@/components/DocuNormLogo";
 
 interface LoginPageProps {
   lang: Language;
@@ -152,8 +153,8 @@ export function LoginPage({ lang, onAuthSuccess, onBackToOverview }: LoginPagePr
       <div className="max-w-md w-full mx-auto bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-2xl shadow-2xl overflow-hidden relative z-10 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="p-6 border-b border-[var(--surface-border)] bg-[var(--surface-dark)] text-center space-y-1">
-          <div className="w-12 h-12 rounded-xl bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] mx-auto mb-2 shadow-sm">
-            <Lock className="w-6 h-6 stroke-[2.5]" />
+          <div className="flex justify-center mb-3">
+            <DocuNormLogo size="md" showText={false} />
           </div>
           <h2 className="text-xl font-black font-mono tracking-tight text-[var(--foreground)] uppercase">
             {tab === "login"

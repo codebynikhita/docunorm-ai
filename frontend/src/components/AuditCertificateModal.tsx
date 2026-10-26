@@ -11,14 +11,21 @@ import {
   Calendar,
   Hash,
   Award,
+  FileText,
+  AlertCircle,
+  X,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
+import { DocuNormLogo } from "@/components/DocuNormLogo";
 
 interface AuditCertificateModalProps {
   isOpen: boolean;
   onClose: () => void;
   lang: Language;
+  documentId?: string;
   documentName?: string;
+  availableDocuments?: any[];
+  onSelectDocument?: (doc: any) => void;
   sha256Hash?: string;
 }
 
@@ -26,7 +33,10 @@ export function AuditCertificateModal({
   isOpen,
   onClose,
   lang,
-  documentName = "Siemens_Master_ICT_Agreement_2026.pdf",
+  documentId,
+  documentName = "",
+  availableDocuments = [],
+  onSelectDocument,
   sha256Hash = "8f3e2b9c7a10d48f6501a33b91e4d29c8e1047fa58d60c2b189a071c3ef9482d",
 }: AuditCertificateModalProps) {
   if (!isOpen) return null;
@@ -44,16 +54,68 @@ export function AuditCertificateModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl bg-white text-slate-900 rounded-xl shadow-2xl border-4 border-slate-900 p-8 space-y-6 animate-in zoom-in-95 duration-200 font-sans print:m-0 print:border-none print:shadow-none">
-        {/* Certificate Header with German Federal Aesthetic */}
-        <div className="border-b-2 border-slate-900 pb-5 flex items-start justify-between">
+      <div className="w-full max-w-2xl bg-white text-slate-900 rounded-xl shadow-2xl border-4 border-slate-900 p-8 space-y-6 animate-in zoom-in-95 duration-200 font-sans print:m-0 print:border-none print:shadow-none relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors print:hidden cursor-pointer"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {!documentId ? (
+          <div className="py-12 px-4 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 shadow-inner">
+              <Award className="w-7 h-7" />
+            </div>
+            <div className="space-y-1.5 max-w-md">
+              <h4 className="font-mono font-bold text-sm text-slate-900 uppercase tracking-wide">
+                {isDe ? "Kein Dokument für Revisionszertifikat Geladen" : "No Document Loaded for Certificate"}
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed font-sans">
+                {isDe
+                  ? "Wählen Sie ein Dokument aus dem Tresor, um das offizielle BaFin & DIN 66399 Konformitäts-Zertifikat mit kryptografischer SHA-256 Prüfsumme zu generieren."
+                  : "Select a document from the vault to generate the official BaFin & DIN 66399 compliance certificate with cryptographic SHA-256 fingerprint."}
+              </p>
+            </div>
+
+            {availableDocuments && availableDocuments.length > 0 ? (
+              <div className="pt-2 flex flex-col items-center gap-2">
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-bold">
+                  {isDe ? "Verfügbares Dokument wählen:" : "Select Available Document:"}
+                </span>
+                <div className="flex flex-wrap gap-2 justify-center max-w-md">
+                  {availableDocuments.map((doc) => (
+                    <button
+                      key={doc.id}
+                      onClick={() => onSelectDocument && onSelectDocument(doc)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-300 text-xs font-mono text-slate-900 font-bold transition-all shadow-sm cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-slate-700" />
+                      <span className="truncate max-w-[200px]">{doc.filename}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 rounded-lg bg-slate-100 border border-slate-200 text-xs font-mono text-amber-700 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>
+                  {isDe
+                    ? "Laden Sie zuerst einen IKT-Vertrag im Dokument-Tresor hoch."
+                    : "Please upload an ICT contract into the Document Vault first."}
+                </span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Certificate Header with German Federal Aesthetic */}
+            <div className="border-b-2 border-slate-900 pb-5 flex items-start justify-between">
           <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded bg-slate-900 text-white font-mono font-black text-xs flex items-center justify-center">
-                §
-              </span>
+            <div className="flex items-center gap-2 mb-1">
+              <DocuNormLogo size="xs" showBadge={false} showSubtitle={false} isHoverable={false} />
               <span className="font-mono text-xs font-black tracking-widest uppercase text-slate-700">
-                DOCUNORM.DE • REVISIONS-PROTOKOLL
+                • REVISIONS-PROTOKOLL
               </span>
             </div>
             <h1 className="text-2xl font-black tracking-tight text-slate-950 uppercase font-mono">
@@ -209,6 +271,8 @@ export function AuditCertificateModal({
             <span>{isDe ? "Zertifikat Drucken / PDF" : "Print / Save PDF"}</span>
           </button>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

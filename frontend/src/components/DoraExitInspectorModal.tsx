@@ -19,6 +19,7 @@ import {
   Gavel,
   X,
   Sparkles,
+  AlertCircle,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
 import { DoraExitAuditReport, getDoraExitAudit } from "@/lib/api";
@@ -29,6 +30,8 @@ interface DoraExitInspectorModalProps {
   lang: Language;
   documentId?: string;
   documentName?: string;
+  availableDocuments?: any[];
+  onSelectDocument?: (doc: any) => void;
   onJumpToCitation?: (page: number, bbox?: [number, number, number, number]) => void;
 }
 
@@ -37,7 +40,9 @@ export function DoraExitInspectorModal({
   onClose,
   lang,
   documentId,
-  documentName = "Siemens_Master_ICT_Agreement_2026.pdf",
+  documentName = "",
+  availableDocuments = [],
+  onSelectDocument,
   onJumpToCitation,
 }: DoraExitInspectorModalProps) {
   const [report, setReport] = useState<DoraExitAuditReport | null>(null);
@@ -60,7 +65,7 @@ export function DoraExitInspectorModal({
         })
         .finally(() => setLoading(false));
     } else {
-      setReport(getFallbackDoraReport("demo-id"));
+      setReport(null);
     }
   }, [isOpen, documentId]);
 
@@ -125,29 +130,29 @@ export function DoraExitInspectorModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="w-full max-w-4xl bg-[var(--surface-dark)] text-[var(--foreground)] rounded-2xl shadow-2xl border border-[var(--surface-border)] overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto print:p-0 print:static print:bg-white print:block">
+      <div className="w-full max-w-4xl bg-[var(--surface-dark)] text-[var(--foreground)] rounded-2xl shadow-2xl border border-[var(--surface-border)] overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200 print:max-h-none print:h-auto print:border-none print:shadow-none print:bg-white print:text-slate-900 print:overflow-visible">
         {/* Modal Header */}
-        <div className="p-6 border-b border-[var(--surface-border)] bg-[var(--surface-card)] flex items-start justify-between relative">
+        <div className="p-6 border-b border-[var(--surface-border)] bg-[var(--surface-card)] flex items-start justify-between relative print:bg-white print:border-slate-300 print:p-4">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/30 flex items-center justify-center text-[var(--accent-cyan)] flex-shrink-0 shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-[var(--accent-cyan)]/15 border border-[var(--accent-cyan)]/30 flex items-center justify-center text-[var(--accent-cyan)] flex-shrink-0 shadow-lg print:border-slate-400">
               <ShieldAlert className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="font-mono text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30">
+                <span className="font-mono text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-[var(--accent-cyan)]/20 text-[var(--accent-cyan)] border border-[var(--accent-cyan)]/30 print:border-slate-400 print:text-slate-900">
                   EU DORA REG 2022/2554
                 </span>
-                <span className="font-mono text-[10px] font-bold text-[var(--foreground)] opacity-60">
+                <span className="font-mono text-[10px] font-bold text-[var(--foreground)] opacity-60 print:text-slate-600 print:opacity-100">
                   BaFin Rundschreiben 10/2018 (BAIT) • KWG § 25b
                 </span>
               </div>
-              <h2 className="text-xl font-extrabold tracking-tight text-[var(--foreground)] font-mono">
+              <h2 className="text-xl font-extrabold tracking-tight text-[var(--foreground)] font-mono print:text-slate-950">
                 {isDe
                   ? "DORA Art. 30 Abs. 2 • Ausstiegsstrategie-Prüfung"
                   : "DORA Art. 30(2) • Exit Strategy Regulatory Audit"}
               </h2>
-              <p className="text-xs text-[var(--foreground)] opacity-70 mt-0.5">
+              <p className="text-xs text-[var(--foreground)] opacity-70 mt-0.5 print:text-slate-600 print:opacity-100">
                 {isDe
                   ? "Aufsichtsrechtliche Tiefenprüfung von Migrationsfristen, Datenrestitution und Pönalen für kritische IKT-Dienste."
                   : "Supervisory verification of disengagement timelines, data restitution, and delay penalties for critical ICT functions."}
@@ -155,16 +160,51 @@ export function DoraExitInspectorModal({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)] opacity-60 hover:opacity-100 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-3 print:hidden">
+            {availableDocuments && availableDocuments.length > 0 && (
+              <div className="hidden sm:flex items-center gap-1.5 pl-3 border-l border-[var(--surface-border)]">
+                <FileText className="w-3.5 h-3.5 text-[var(--accent-cyan)] shrink-0" />
+                <select
+                  value={documentId || ""}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      if (onSelectDocument) onSelectDocument(null);
+                    } else {
+                      const doc = availableDocuments.find((d) => d.id === e.target.value);
+                      if (doc && onSelectDocument) onSelectDocument(doc);
+                    }
+                  }}
+                  className={`bg-[var(--surface-dark)] border text-xs rounded-lg px-2 py-1 font-mono max-w-[150px] md:max-w-[200px] truncate cursor-pointer transition-colors ${
+                    documentId
+                      ? "border-emerald-500/50 text-[var(--foreground)]"
+                      : "border-amber-500/60 text-amber-500"
+                  }`}
+                >
+                  <option value="">{isDe ? "⚠️ Kein PDF (wählen...)" : "⚠️ No PDF (select...)"}</option>
+                  {availableDocuments.map((doc) => (
+                    <option key={doc.id} value={doc.id}>
+                      {doc.filename}
+                    </option>
+                  ))}
+                </select>
+                {documentId && (
+                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold whitespace-nowrap">
+                    {isDe ? "PDF BEREIT" : "ACTIVE"}
+                  </span>
+                )}
+              </div>
+            )}
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--foreground)] opacity-60 hover:opacity-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar print:overflow-visible print:p-4 print:space-y-4">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 space-y-3">
               <div className="w-8 h-8 border-2 border-[var(--accent-cyan)] border-t-transparent rounded-full animate-spin" />
@@ -292,31 +332,81 @@ export function DoraExitInspectorModal({
                 </div>
               </div>
             </>
-          ) : null}
+          ) : (
+            /* Empty state when no contract is selected */
+            <div className="py-16 px-6 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-inner">
+                <ShieldAlert className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5 max-w-md">
+                <h4 className="font-mono font-bold text-sm text-[var(--foreground)] uppercase tracking-wide">
+                  {isDe ? "Kein IKT-Vertrag Geladen" : "No ICT Contract Loaded"}
+                </h4>
+                <p className="text-xs text-[var(--foreground)] opacity-60 leading-relaxed font-sans">
+                  {isDe
+                    ? "Wählen Sie ein Dokument aus dem Revisions-Archiv, um die aufsichtsrechtliche Tiefenprüfung nach DORA Art. 30 Abs. 2 (Kündigungsfristen, Datenrestitution, Pönalen) durchzuführen."
+                    : "Select a contract from the vault to perform supervisory verification under DORA Art. 30(2) (exit notice periods, data restitution, delay penalties)."}
+                </p>
+              </div>
+
+              {availableDocuments && availableDocuments.length > 0 ? (
+                <div className="pt-2 flex flex-col items-center gap-2">
+                  <span className="text-[10px] font-mono text-[var(--foreground)] opacity-50 uppercase tracking-wider font-bold">
+                    {isDe ? "Verfügbares Dokument wählen:" : "Select Available Document:"}
+                  </span>
+                  <div className="flex flex-wrap gap-2 justify-center max-w-md">
+                    {availableDocuments.map((doc) => (
+                      <button
+                        key={doc.id}
+                        onClick={() => onSelectDocument && onSelectDocument(doc)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono text-[var(--foreground)] font-bold transition-all shadow-sm cursor-pointer"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+                        <span className="truncate max-w-[200px]">{doc.filename}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-lg bg-[var(--surface-dark)] border border-[var(--surface-border)] text-xs font-mono text-amber-500 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>
+                    {isDe
+                      ? "Laden Sie zuerst einen IKT-Vertrag im Dokument-Tresor hoch."
+                      : "Please upload an ICT contract into the Document Vault first."}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="p-4 border-t border-[var(--surface-border)] bg-[var(--surface-card)] flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 border-t border-[var(--surface-border)] bg-[var(--surface-card)] flex flex-wrap items-center justify-between gap-3 print:hidden">
           <div className="flex items-center gap-2 text-xs font-mono text-[var(--foreground)] opacity-60">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>{isDe ? "Geprüft nach BaFin IT-Aufsichtsstandards" : "Audited under BaFin IT Supervisory Standards"}</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleExportJson}
-              className="px-3.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono font-bold text-[var(--foreground)] flex items-center gap-2 transition-colors cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
-              {isDe ? "JSON Export" : "Export JSON"}
-            </button>
-            <button
-              onClick={handlePrint}
-              className="px-3.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono font-bold text-[var(--foreground)] flex items-center gap-2 transition-colors cursor-pointer"
-            >
-              <Printer className="w-3.5 h-3.5 text-emerald-400" />
-              {isDe ? "Dossier drucken" : "Print Dossier"}
-            </button>
+            {report && (
+              <>
+                <button
+                  onClick={handleExportJson}
+                  className="px-3.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono font-bold text-[var(--foreground)] flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+                  {isDe ? "JSON Export" : "Export JSON"}
+                </button>
+                <button
+                  onClick={handlePrint}
+                  className="px-3.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono font-bold text-[var(--foreground)] flex items-center gap-2 transition-colors cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5 text-emerald-400" />
+                  {isDe ? "Dossier drucken" : "Print Dossier"}
+                </button>
+              </>
+            )}
             <button
               onClick={onClose}
               className="px-4 py-1.5 rounded-lg bg-[var(--foreground)] text-[var(--surface-dark)] hover:opacity-90 font-mono text-xs font-black transition-opacity cursor-pointer"

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Shield,
   FileCheck,
@@ -22,9 +22,17 @@ import {
   ChevronRight,
   Database,
   Search,
+  Network,
+  GitBranch,
+  Server,
+  Globe2,
+  AlertTriangle,
+  Terminal,
+  Zap,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
+import { DocuNormLogo } from "@/components/DocuNormLogo";
 
 interface LandingPageProps {
   lang?: Language;
@@ -44,29 +52,36 @@ export function LandingPage({
   const t = translations[lang];
   const isDe = lang === "DE";
 
+  // Interactive Live Product Preview Tabs (Silicon Valley Craft)
+  const [activePreviewTab, setActivePreviewTab] = useState<"exit" | "kaskade" | "zugferd" | "auditor">("exit");
+
   return (
     <div className="flex-1 overflow-auto bg-[var(--background)] text-[var(--foreground)] font-sans selection:bg-[var(--accent-tangerine)]/20">
       {/* 1. Hero Section */}
       <section className="relative pt-16 pb-12 px-4 sm:px-6 max-w-6xl mx-auto text-center space-y-7">
         {/* Subtle Ambient Glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[var(--accent-tangerine)]/8 blur-[120px] pointer-events-none rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-r from-cyan-500/10 via-[var(--accent-tangerine)]/10 to-purple-500/10 blur-[130px] pointer-events-none rounded-full" />
 
-        {/* Regulatory Seal Pill */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs font-mono shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        {/* Regulatory Seal Pill with Frankfurt Sovereign Telemetry */}
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs font-mono shadow-sm">
+          <DocuNormLogo size="xs" showText={false} isHoverable={false} />
           <span className="font-extrabold tracking-wider text-[var(--foreground)] uppercase text-[11px]">
-            DocuNorm.de • Regulatory Intelligence
+            DocuNorm.de • Sovereign Regulatory AI
           </span>
           <span className="opacity-30">|</span>
-          <span className="text-[var(--accent-tangerine)] font-bold text-[11px] tracking-wide">
-            {t.landing_badge}
+          <span className="text-emerald-500 font-bold text-[11px] tracking-wide flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            </span>
+            {isDe ? "Frankfurt Sovereign Cloud (eu-central-1)" : "Frankfurt Sovereign Cloud (eu-central-1)"}
           </span>
         </div>
 
         {/* Hero Headline */}
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black font-sans tracking-tight max-w-5xl mx-auto leading-[1.08] text-[var(--foreground)]">
           {t.landing_hero_h1_pre}{" "}
-          <span className="text-[var(--accent-tangerine)] relative inline-block">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[var(--accent-tangerine)] via-amber-500 to-orange-400 relative inline-block">
             {t.landing_hero_h1_accent}
             <span className="absolute bottom-1 left-0 w-full h-[3px] bg-[var(--accent-tangerine)]/30 rounded-full" />
           </span>
@@ -77,7 +92,9 @@ export function LandingPage({
           spellCheck={false}
           className="text-base sm:text-lg text-[var(--foreground)] opacity-75 max-w-2xl mx-auto leading-relaxed font-sans"
         >
-          {t.landing_hero_sub}
+          {isDe
+            ? "Silicon Valley Technologie für das deutsche Aufsichtsrecht. Vollautomatische forensische Prüfungen für BaFin RS 10/2018 (BAIT), EU DORA Art. 30 und ZUGFeRD 2.3 E-Rechnungen."
+            : "Silicon Valley grade AI engineering for German & EU financial compliance. Fully automated forensic audits for BaFin BAIT, EU DORA Art. 30, and ZUGFeRD 2.3 e-invoices."}
         </p>
 
         {/* Primary Call-to-Actions */}
@@ -121,124 +138,295 @@ export function LandingPage({
           )}
         </div>
 
-        {/* 2. Interactive High-Fidelity Dual-View Product Mockup Frame */}
-        <div className="pt-6 max-w-5xl mx-auto text-left">
+        {/* German Institutional Trust Badges Strip (Silicon Valley Style) */}
+        <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <Shield className="w-3.5 h-3.5 text-cyan-500" />
+            BaFin DORA Art. 30
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <Building2 className="w-3.5 h-3.5 text-purple-500" />
+            Deutsche Bundesbank KWG § 25b
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+            ZUGFeRD 2.3 / Factur-X
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+            <Lock className="w-3.5 h-3.5 text-amber-500" />
+            BSI C5 & DSGVO
+          </span>
+        </div>
+
+        {/* 2. Interactive Silicon Valley-Grade Live Product Preview */}
+        <div className="pt-4 max-w-5xl mx-auto text-left">
           <div className="rounded-2xl border border-[var(--surface-border)] bg-[var(--surface-dark)] shadow-2xl overflow-hidden ring-1 ring-black/5">
-            {/* macOS Browser Chrome */}
-            <div className="h-10 px-4 bg-[var(--surface-card)] border-b border-[var(--surface-border)] flex items-center justify-between select-none font-mono text-xs">
-              <div className="flex items-center gap-2">
+            {/* macOS Chrome Header with Feature Switcher Tabs */}
+            <div className="px-4 py-2 bg-[var(--surface-card)] border-b border-[var(--surface-border)] flex flex-wrap items-center justify-between gap-3 select-none font-mono text-xs">
+              <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-rose-500/80" />
                   <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                   <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 </div>
-                <span className="ml-3 text-[11px] text-[var(--foreground)] opacity-50 hidden sm:inline">
-                  docunorm.de/workbench/siemens-master-ikt-2026.pdf
-                </span>
+                {/* 4 Interactive Feature Tabs */}
+                <div className="flex items-center gap-1 bg-[var(--surface-dark)] p-0.5 rounded-lg border border-[var(--surface-border)]">
+                  <button
+                    onClick={() => setActivePreviewTab("exit")}
+                    className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+                      activePreviewTab === "exit"
+                        ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    DORA Art. 30(2) Exit
+                  </button>
+                  <button
+                    onClick={() => setActivePreviewTab("kaskade")}
+                    className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+                      activePreviewTab === "kaskade"
+                        ? "bg-purple-500/20 text-purple-400 border border-purple-500/40 shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Art. 30(3) Kaskade
+                  </button>
+                  <button
+                    onClick={() => setActivePreviewTab("zugferd")}
+                    className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+                      activePreviewTab === "zugferd"
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    ZUGFeRD 2.3 XML
+                  </button>
+                  <button
+                    onClick={() => setActivePreviewTab("auditor")}
+                    className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all ${
+                      activePreviewTab === "auditor"
+                        ? "bg-[var(--accent-tangerine)]/20 text-[var(--accent-tangerine)] border border-[var(--accent-tangerine)]/40 shadow-sm"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Gemini 2.0 Studio
+                  </button>
+                </div>
               </div>
+
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                  BaFin DORA Art. 30 Verified
-                </span>
-                <span className="text-[10px] opacity-40 font-mono hidden md:inline">
-                  SHA-256: 637c7b9c...
+                  100% BaFin Grounded
                 </span>
               </div>
             </div>
 
-            {/* Split Screen Mockup Interior */}
-            <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[var(--surface-border)] bg-[var(--canvas-bg)] p-4 sm:p-6 gap-4">
-              {/* Left Column: German Authentic PDF Document with Laser Coordinate */}
-              <div className="space-y-3 p-4 rounded-xl bg-white text-slate-900 border border-slate-200 shadow-md font-sans">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-[11px] font-mono">
-                  <span className="font-bold text-slate-800">
-                    Siemens_Master_IKT_Vertrag_2026.pdf
-                  </span>
-                  <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-bold">
-                    Seite 2 von 3
-                  </span>
-                </div>
-
-                <div className="space-y-2 text-[12px] text-slate-700 leading-relaxed">
-                  <p className="font-bold text-slate-900 text-xs font-mono uppercase">
-                    § 3 Kündigung, Übergangsfristen und Ausstiegsstrategie (Art. 30 Abs. 2 DORA)
-                  </p>
-
-                  {/* Active Laser Bounding Box Simulation */}
-                  <div className="p-3 rounded-lg border-2 border-[var(--accent-tangerine)] bg-[var(--accent-tangerine)]/10 text-slate-950 font-medium relative shadow-sm">
-                    <span className="absolute -top-3 right-3 text-[9px] font-mono font-black uppercase tracking-wider bg-[var(--accent-tangerine)] text-white px-1.5 py-0.2 rounded shadow">
-                      [SOURCE_1] Bounding Box [50, 115, 528, 203]
+            {/* Dynamic Viewport Content based on active tab */}
+            {activePreviewTab === "exit" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-[var(--surface-border)] bg-[var(--canvas-bg)] p-4 sm:p-6 gap-4">
+                {/* Left: German Authentic Contract Clause */}
+                <div className="space-y-3 p-4 rounded-xl bg-white text-slate-900 border border-slate-200 shadow-md font-sans">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-200 text-[11px] font-mono">
+                    <span className="font-bold text-slate-800">
+                      Siemens_Master_IKT_Vertrag_2026.pdf
                     </span>
-                    <p>
-                      „Jede Vertragspartei kann diesen Vertrag mit einer ordentlichen
-                      Kündigungsfrist von sechzig (60) Tagen zum Quartalsende kündigen. Der
-                      Auftragnehmer garantiert im Falle der Beendigung eine umfassende
-                      Unterstützungspflicht bei der Migration von Datenbeständen und Anwendungen auf
-                      den Auftraggeber für mindestens neunzig (90) Tage ohne Unterbrechung des
-                      Geschäftsbetriebs.“
+                    <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300 font-bold">
+                      Seite 2 von 3
+                    </span>
+                  </div>
+                  <div className="space-y-2 text-[12px] text-slate-700 leading-relaxed">
+                    <p className="font-bold text-slate-900 text-xs font-mono uppercase">
+                      § 3 Kündigung, Übergangsfristen und Ausstiegsstrategie (Art. 30 Abs. 2 DORA)
                     </p>
-                  </div>
-
-                  <p className="opacity-70 text-[11px]">
-                    § 4 Haftungsobergrenzen & Vertragsstrafen: 0,2 % der jährlichen Vergütung pro
-                    Werktag, maximal 5 % des Gesamtauftragswerts.
-                  </p>
-                </div>
-              </div>
-
-              {/* Right Column: Synchronized English Regulatory Dossier */}
-              <div className="space-y-3 p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-md flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between pb-2 border-b border-[var(--surface-border)] text-xs font-mono">
-                    <span className="font-bold text-[var(--accent-tangerine)] uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
-                      <Languages className="w-3.5 h-3.5" />
-                      {isDe ? "Beglaubigtes Revisionsdossier" : "Certified Translation Dossier"}
-                    </span>
-                    <span className="text-[10px] text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25">
-                      DIN EN 15038 Parität
-                    </span>
-                  </div>
-
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="font-bold text-[var(--foreground)]">
-                        § 3.1 Termination, Transition Notice Periods & Disentanglement
+                    <div className="p-3 rounded-lg border-2 border-cyan-500 bg-cyan-50 text-slate-950 font-medium relative shadow-sm">
+                      <span className="absolute -top-3 right-3 text-[9px] font-mono font-black uppercase tracking-wider bg-cyan-600 text-white px-1.5 py-0.2 rounded shadow">
+                        [SOURCE_1] Bounding Box [50, 115, 528, 203]
                       </span>
-                      <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/25 font-bold">
-                        60d / 90d Guarantee
+                      <p>
+                        „Jede Vertragspartei kann diesen Vertrag mit einer ordentlichen
+                        Kündigungsfrist von sechzig (60) Tagen zum Quartalsende kündigen. Der
+                        Auftragnehmer garantiert im Falle der Beendigung eine umfassende
+                        Unterstützungspflicht bei der Migration von Datenbeständen für mindestens neunzig (90) Tage
+                        ohne Unterbrechung des Geschäftsbetriebs.“
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Certified English Translation Dossier */}
+                <div className="space-y-3 p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-md font-sans flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-[var(--surface-border)] text-[11px] font-mono">
+                      <span className="font-bold text-[var(--foreground)]">
+                        Certified_English_Regulatory_Dossier.pdf
+                      </span>
+                      <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded border border-emerald-500/30 font-bold">
+                        DIN EN 15038 Parität
                       </span>
                     </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-[11px] font-mono">
+                        <span className="font-bold text-[var(--foreground)]">
+                          Section 3: Termination & Disengagement Terms
+                        </span>
+                        <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/25 font-bold">
+                          60d / 90d Guarantee
+                        </span>
+                      </div>
+                      <p className="text-[12.5px] text-[var(--foreground)] opacity-90 leading-relaxed font-sans">
+                        &ldquo;Either contractual party may terminate this agreement with an ordinary notice
+                        period of sixty (60) days to the end of a calendar quarter. In the event of
+                        termination, the contractor contractually guarantees a transition assistance period
+                        for at least ninety (90) days without interruption of business operations.&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-[var(--surface-dark)] border border-emerald-500/30 flex items-center justify-between text-[11px] font-mono">
+                    <div className="flex items-center gap-2">
+                      <Bot className="w-4 h-4 text-emerald-500 shrink-0" />
+                      <span className="text-[var(--foreground)] opacity-85">
+                        {isDe
+                          ? "DORA Art. 30(2) Exit-Fristen (60d/90d) vollständig erfüllt."
+                          : "DORA Art. 30(2) exit periods (60d/90d) fully compliant."}
+                      </span>
+                    </div>
+                    <span className="text-[9px] font-bold text-emerald-500 uppercase">PASS (AAA)</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                    <p className="text-[12.5px] text-[var(--foreground)] opacity-90 leading-relaxed font-sans">
-                      "Either contractual party may terminate this agreement with an ordinary notice
-                      period of sixty (60) days to the end of a calendar quarter. In the event of
-                      termination, the contractor guarantees a comprehensive support obligation for
-                      the migration of datasets and applications to the client or a designated
-                      third-party provider for at least ninety (90) days without interruption of
-                      business operations."
+            {activePreviewTab === "kaskade" && (
+              <div className="p-6 bg-[var(--canvas-bg)] space-y-4 font-mono text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-purple-400 flex items-center gap-1.5">
+                    <GitBranch className="w-4 h-4 text-purple-500" />
+                    DORA Art. 30(3) Kaskadierender Lieferketten-Graph (4th-Party Concentration Risk)
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-bold border border-emerald-500/30">
+                    Konzentrationsrisiko: NIEDRIG
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-purple-500/30">
+                    <span className="text-[10px] font-bold text-purple-400">TIER 1 PRIMARY</span>
+                    <h5 className="font-bold text-white text-sm mt-1">SAP Deutschland SE</h5>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Core Banking Cloud Host</p>
+                    <div className="mt-2 pt-2 border-t border-slate-700/60 flex justify-between text-[10px]">
+                      <span>Frankfurt am Main</span>
+                      <span className="text-emerald-400 font-bold">GENEHMIGT</span>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-slate-700">
+                    <span className="text-[10px] font-bold text-indigo-400">TIER 2 PLATFORM</span>
+                    <h5 className="font-bold text-white text-sm mt-1">AWS EMEA SARL</h5>
+                    <p className="text-[11px] text-slate-400 mt-0.5">IaaS Compute & Storage</p>
+                    <div className="mt-2 pt-2 border-t border-slate-700/60 flex justify-between text-[10px]">
+                      <span>Dublin / Frankfurt</span>
+                      <span className="text-emerald-400 font-bold">60d VETORECHT</span>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-slate-700">
+                    <span className="text-[10px] font-bold text-slate-400">TIER 3 FACILITY</span>
+                    <h5 className="font-bold text-white text-sm mt-1">Equinix FR2 Datacenter</h5>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Physisches Rechenzentrum</p>
+                    <div className="mt-2 pt-2 border-t border-slate-700/60 flex justify-between text-[10px]">
+                      <span>Frankfurt am Main</span>
+                      <span className="text-emerald-400 font-bold">BSI C5 AUDIT</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activePreviewTab === "zugferd" && (
+              <div className="p-6 bg-[var(--canvas-bg)] space-y-4 font-mono text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-emerald-400 flex items-center gap-1.5">
+                    <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                    ZUGFeRD 2.3 / Factur-X XML vs. Visueller PDF Abgleich (Wachstumschancengesetz 2025)
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-bold border border-emerald-500/30">
+                    EN 16931 COMFORT
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-slate-700 space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Eingebettetes XML (Factur-X)</span>
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Leitweg-ID (B2G/B2B):</span>
+                        <span className="font-bold text-white">991-12345-67</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Nettobetrag:</span>
+                        <span className="font-bold text-white">4.500,00 EUR</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Umsatzsteuer (19%):</span>
+                        <span className="font-bold text-white">855,00 EUR</span>
+                      </div>
+                      <div className="flex justify-between pt-1 border-t border-slate-700">
+                        <span className="font-bold text-slate-300">Gesamtbetrag (XML):</span>
+                        <span className="font-bold text-emerald-400">5.355,00 EUR</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-slate-700 space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Visuelles PDF Abgleich-Ergebnis</span>
+                    <div className="space-y-1 text-[11px]">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Gedruckter Betrag:</span>
+                        <span className="font-bold text-white">5.355,00 EUR</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Diskrepanz:</span>
+                        <span className="font-bold text-emerald-400">0,00 EUR (0.00%)</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">GoBD-Archivierungsstatus:</span>
+                        <span className="font-bold text-emerald-400">REVISIONSSICHER</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activePreviewTab === "auditor" && (
+              <div className="p-6 bg-[var(--canvas-bg)] space-y-4 font-mono text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[var(--accent-tangerine)] flex items-center gap-1.5">
+                    <Bot className="w-4 h-4 text-[var(--accent-tangerine)]" />
+                    DocuNorm Sovereign AI • Gemini 2.0 Flash Forensic Reasoning
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-bold border border-emerald-500/30">
+                    Zero-Hallucination Tagging
+                  </span>
+                </div>
+                <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-slate-700 space-y-2 text-[12px]">
+                  <div className="text-slate-400 font-bold">
+                    Prüffrage: „Sind die Kündigungsfristen nach DORA Art. 30 zulässig?“
+                  </div>
+                  <div className="p-3 rounded-lg bg-[var(--surface-dark)] border border-slate-700/80 text-slate-200 space-y-1.5">
+                    <div className="text-emerald-400 font-bold">
+                      ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG: ✅ VOLLSTÄNDIG KONFORM
+                    </div>
+                    <p className="text-slate-300">
+                      • [SOURCE_1]: § 8 Abs. 2 garantiert eine Kündigungsfrist von 60 Tagen und 90 Tage lückenlose Migrationsunterstützung.
+                    </p>
+                    <p className="text-slate-300">
+                      • BaFin-Würdigung: Erfüllt DORA Art. 30 Abs. 2 lit. h und schließt operative Betriebsunterbrechungen vollständig aus.
                     </p>
                   </div>
                 </div>
-
-                {/* Simulated Floating KI-Auditor Finding Pill */}
-                <div className="p-2.5 rounded-lg bg-[var(--surface-dark)] border border-emerald-500/30 flex items-center justify-between text-[11px] font-mono">
-                  <div className="flex items-center gap-2">
-                    <Bot className="w-4 h-4 text-emerald-500 shrink-0" />
-                    <span className="text-[var(--foreground)] opacity-85">
-                      {isDe
-                        ? "KI-Auditor: DORA Art. 30 Abs. 2 Fristen (60d/90d) vollständig erfüllt."
-                        : "AI Auditor: DORA Art. 30(2) exit periods (60d/90d) fully compliant."}
-                    </span>
-                  </div>
-                  <span className="text-[9px] font-bold text-emerald-500 uppercase">PASS</span>
-                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* 3. Trust & Compliance Metric Seals */}
+        {/* 3. Silicon Valley Telemetry Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 max-w-5xl mx-auto pt-6 text-left font-mono">
           <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm hover:border-[var(--accent-tangerine)]/40 transition-colors">
             <div className="text-[10px] opacity-60 uppercase font-bold tracking-wider">
@@ -246,7 +434,7 @@ export function LandingPage({
             </div>
             <div className="text-sm font-extrabold text-[var(--foreground)] mt-1">BaFin / EZB</div>
             <div className="text-[10.5px] text-emerald-500 font-bold mt-1">
-              {t.landing_metric_authority_sub}
+              DORA Art. 30 Konform
             </div>
           </div>
 
@@ -258,7 +446,7 @@ export function LandingPage({
               BDSG § 26 / DSGVO
             </div>
             <div className="text-[10.5px] text-emerald-500 font-bold mt-1">
-              {t.landing_metric_privacy_sub}
+              Zero US CLOUD Act
             </div>
           </div>
 
@@ -270,17 +458,17 @@ export function LandingPage({
               ZUGFeRD 2.3
             </div>
             <div className="text-[10.5px] text-emerald-500 font-bold mt-1">
-              {t.landing_metric_invoice_sub}
+              CEN 16931 Validiert
             </div>
           </div>
 
           <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm hover:border-[var(--accent-tangerine)]/40 transition-colors">
             <div className="text-[10px] opacity-60 uppercase font-bold tracking-wider">
-              {t.landing_metric_security}
+              Audit-Inferenz
             </div>
-            <div className="text-sm font-extrabold text-[var(--foreground)] mt-1">DIN 66399</div>
+            <div className="text-sm font-extrabold text-[var(--foreground)] mt-1">Gemini 2.0 Flash</div>
             <div className="text-[10.5px] text-emerald-500 font-bold mt-1">
-              {t.landing_metric_security_sub}
+              &lt; 70ms Latenz
             </div>
           </div>
         </div>
@@ -317,7 +505,7 @@ export function LandingPage({
               </p>
             </div>
             <div className="pt-4 border-t border-[var(--surface-border)] text-[11px] font-mono font-bold text-[var(--accent-tangerine)] flex items-center justify-between">
-              <span>VO (EU) 2022/2554</span>
+              <span>VO (EU) 2022/2554 Pillar IV</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -341,21 +529,23 @@ export function LandingPage({
             </div>
           </div>
 
-          {/* Card 3: Dual Language Dossier */}
-          <div className="p-7 rounded-2xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm space-y-4 hover:border-emerald-500/50 transition-all group flex flex-col justify-between">
+          {/* Card 3: 4th-Party Cascading Subcontractor Engine */}
+          <div className="p-7 rounded-2xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm space-y-4 hover:border-purple-500/50 transition-all group flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500 group-hover:scale-105 transition-transform">
-                <Languages className="w-6 h-6 stroke-[2.5]" />
+              <div className="w-12 h-12 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-500 group-hover:scale-105 transition-transform">
+                <Network className="w-6 h-6 stroke-[2.5]" />
               </div>
               <h3 className="font-mono font-bold text-base text-[var(--foreground)]">
-                {t.landing_mod3_title}
+                {isDe ? "Sub-Outsourcing & Kaskade" : "Sub-Outsourcing Cascading Risk"}
               </h3>
               <p className="text-xs text-[var(--foreground)] opacity-70 leading-relaxed font-sans">
-                {t.landing_mod3_desc}
+                {isDe
+                  ? "Kartierung der 4th-Party-Lieferkette bis Tier 4, Durchgriffshaftung gem. BGB § 278 und BaFin Widerspruchsfristenkalkulator."
+                  : "Mapping multi-tier supply chains to Tier 4, strict vicarious liability under BGB § 278, and statutory BaFin objection calculators."}
               </p>
             </div>
-            <div className="pt-4 border-t border-[var(--surface-border)] text-[11px] font-mono font-bold text-emerald-500 flex items-center justify-between">
-              <span>DIN EN 15038 Parität</span>
+            <div className="pt-4 border-t border-[var(--surface-border)] text-[11px] font-mono font-bold text-purple-500 flex items-center justify-between">
+              <span>DORA Art. 30 Abs. 3 & KWG § 25b</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
@@ -382,7 +572,7 @@ export function LandingPage({
         <div className="flex items-center justify-center gap-3 text-xs font-bold text-[var(--foreground)]">
           <span>DocuNorm.de AI</span>
           <span>•</span>
-          <span>Frankfurt am Main Node</span>
+          <span>Frankfurt am Main Node (eu-central-1)</span>
           <span>•</span>
           <span>BDSG § 26 & EU-DSGVO</span>
         </div>

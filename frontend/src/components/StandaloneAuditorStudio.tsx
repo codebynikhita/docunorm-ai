@@ -23,6 +23,11 @@ import {
   Copy,
   Check,
   Trash2,
+  PanelLeftClose,
+  PanelLeft,
+  PanelRightClose,
+  PanelRight,
+  X,
 } from "lucide-react";
 import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
@@ -126,6 +131,8 @@ export function StandaloneAuditorStudio({
   const [translatedMap, setTranslatedMap] = useState<Record<string, boolean>>({});
   const [selectedCitation, setSelectedCitation] = useState<AuditCitationResponse | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+  const [isEvidenceOpen, setIsEvidenceOpen] = useState(true);
 
   // Initial Threads - Clean state without fake pre-populated answers
   const [threads, setThreads] = useState<ThreadInquiry[]>([
@@ -310,7 +317,11 @@ export function StandaloneAuditorStudio({
   return (
     <div className="flex-1 flex h-full overflow-hidden bg-[var(--background)] font-sans">
       {/* 1. Left Sidebar: Audit History & Framework Selector */}
-      <aside className="w-64 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none">
+      <aside
+        className={`w-64 shrink-0 bg-[var(--surface-dark)] border-r border-[var(--surface-border)] flex flex-col justify-between select-none transition-all duration-200 ${
+          !isHistoryOpen ? "hidden" : ""
+        }`}
+      >
         <div className="p-4 space-y-4 flex-1 overflow-auto">
           {/* New Thread Action */}
           <button
@@ -350,16 +361,25 @@ export function StandaloneAuditorStudio({
                 <Clock className="w-3 h-3 text-[var(--accent-tangerine)]" />
                 <span>{t.studio_history_label} ({threads.length})</span>
               </span>
-              {(threads.length > 1 || (threads[0]?.messages?.length ?? 0) > 0) && (
+              <div className="flex items-center gap-1.5">
+                {(threads.length > 1 || (threads[0]?.messages?.length ?? 0) > 0) && (
+                  <button
+                    onClick={handleClearAllHistory}
+                    title={lang === "DE" ? "Gesamte Historie leeren" : "Clear all history"}
+                    className="text-[9px] font-mono text-rose-400 opacity-60 hover:opacity-100 transition-opacity cursor-pointer flex items-center gap-1 hover:underline"
+                  >
+                    <Trash2 className="w-2.5 h-2.5" />
+                    <span>{lang === "DE" ? "Leeren" : "Clear"}</span>
+                  </button>
+                )}
                 <button
-                  onClick={handleClearAllHistory}
-                  title={lang === "DE" ? "Gesamte Historie leeren" : "Clear all history"}
-                  className="text-[9px] font-mono text-rose-400 opacity-60 hover:opacity-100 transition-opacity cursor-pointer flex items-center gap-1 hover:underline"
+                  onClick={() => setIsHistoryOpen(false)}
+                  title={lang === "DE" ? "Historie einklappen" : "Collapse History"}
+                  className="p-1 rounded hover:bg-[var(--surface-card)] text-[var(--foreground)] opacity-50 hover:opacity-100 transition-colors cursor-pointer"
                 >
-                  <Trash2 className="w-2.5 h-2.5" />
-                  <span>{lang === "DE" ? "Leeren" : "Clear"}</span>
+                  <PanelLeftClose className="w-3.5 h-3.5" />
                 </button>
-              )}
+              </div>
             </div>
             <div className="space-y-1 pt-1">
               {threads.map((item) => {
@@ -451,18 +471,30 @@ export function StandaloneAuditorStudio({
       {/* 2. Center Stage: Harvey / ChatGPT Legal Conversational Workspace */}
       <main className="flex-1 flex flex-col h-full overflow-hidden bg-[var(--background)]">
         {/* Studio Top Bar */}
-        <div className="h-14 border-b border-[var(--surface-border)] bg-[var(--surface-card)] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3 overflow-hidden">
+        <div className="h-14 border-b border-[var(--surface-border)] bg-[var(--surface-card)] px-4 lg:px-6 flex items-center justify-between shrink-0 gap-3">
           <div className="flex items-center gap-3 shrink-0">
+            {!isHistoryOpen && (
+              <button
+                onClick={() => setIsHistoryOpen(true)}
+                title={lang === "DE" ? "Historie einblenden" : "Expand History"}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs font-mono text-[var(--foreground)] font-bold transition-all shadow-sm cursor-pointer shrink-0"
+              >
+                <PanelLeft className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+                <span className="text-[11px] hidden sm:inline">{lang === "DE" ? "Historie" : "History"}</span>
+              </button>
+            )}
+
             <div className="flex items-center gap-2.5 shrink-0">
               <div className="w-8 h-8 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] shrink-0">
                 <Scale className="w-4 h-4 stroke-[2.5]" />
               </div>
               <div className="flex items-center gap-2">
-                <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)] whitespace-nowrap">
+                <h2 className="font-extrabold text-xs tracking-wider uppercase font-mono text-[var(--foreground)] whitespace-nowrap shrink-0">
                   {t.studio_title}
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-tangerine)] whitespace-nowrap">
-                  {framework} Grounded
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] whitespace-nowrap shrink-0 flex items-center gap-1 shadow-sm">
+                  <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
+                  Gemini 2.0 Flash • {framework} Grounded
                 </span>
               </div>
             </div>
@@ -482,7 +514,7 @@ export function StandaloneAuditorStudio({
                       if (doc && onSelectDocument) onSelectDocument(doc);
                     }
                   }}
-                  className={`bg-[var(--surface-dark)] border text-xs rounded-lg px-2 py-1.5 font-mono max-w-[150px] md:max-w-[190px] lg:max-w-[240px] truncate shadow-sm cursor-pointer transition-colors ${
+                  className={`bg-[var(--surface-dark)] border text-xs rounded-lg px-2 py-1.5 font-mono max-w-[130px] md:max-w-[170px] lg:max-w-[210px] truncate shadow-sm cursor-pointer transition-colors ${
                     documentId
                       ? "border-emerald-500/50 text-[var(--foreground)]"
                       : "border-amber-500/60 text-amber-500"
@@ -495,13 +527,9 @@ export function StandaloneAuditorStudio({
                     </option>
                   ))}
                 </select>
-                {documentId ? (
+                {documentId && (
                   <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 font-bold whitespace-nowrap shrink-0">
                     {lang === "DE" ? "PDF BEREIT" : "ACTIVE"}
-                  </span>
-                ) : (
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30 font-bold whitespace-nowrap shrink-0">
-                    {lang === "DE" ? "KEIN PDF" : "NO PDF"}
                   </span>
                 )}
               </div>
@@ -509,10 +537,20 @@ export function StandaloneAuditorStudio({
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {!isEvidenceOpen && (
+              <button
+                onClick={() => setIsEvidenceOpen(true)}
+                title={lang === "DE" ? "Belege einblenden" : "Show Evidence"}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs font-mono text-[var(--foreground)] font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
+                <span className="text-[11px] hidden sm:inline">{lang === "DE" ? "Belege" : "Evidence"}</span>
+              </button>
+            )}
             {onSwitchToWorkbench && (
               <button
                 onClick={onSwitchToWorkbench}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] font-mono text-xs font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] font-mono text-xs font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0"
               >
                 <span>{t.studio_btn_workbench}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -525,7 +563,7 @@ export function StandaloneAuditorStudio({
                 }
               }}
               title="Download Certified Audit Dossier in PDF"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono text-xs font-bold transition-all shadow cursor-pointer uppercase tracking-wider whitespace-nowrap"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono text-xs font-bold transition-all shadow cursor-pointer uppercase tracking-wider whitespace-nowrap shrink-0"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{t.studio_btn_pdf}</span>
@@ -643,10 +681,16 @@ export function StandaloneAuditorStudio({
                   >
                     {!isUser && (
                       <div className="flex items-center justify-between pb-2 border-b border-[var(--surface-border)] text-xs">
-                        <span className="font-mono font-bold text-emerald-500 flex items-center gap-1.5">
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          <span>{framework} {lang === "DE" ? "Geprüft (Audit-Beleg)" : "Verified (Audit Evidence)"}</span>
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-emerald-500 flex items-center gap-1.5">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            <span>{framework} {lang === "DE" ? "Aufsichtsbericht" : "Forensic Audit"}</span>
+                          </span>
+                          <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] flex items-center gap-1">
+                            <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
+                            Gemini 2.0 Flash
+                          </span>
+                        </div>
 
                         <div className="flex items-center gap-2">
                           <button
@@ -699,7 +743,10 @@ export function StandaloneAuditorStudio({
                           {msg.citations.map((c, idx) => (
                             <button
                               key={idx}
-                              onClick={() => setSelectedCitation(c)}
+                              onClick={() => {
+                                setSelectedCitation(c);
+                                setIsEvidenceOpen(true);
+                              }}
                               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[10.5px] transition-all cursor-pointer shadow-sm ${
                                 selectedCitation?.source_tag === c.source_tag
                                   ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] border-[var(--accent-tangerine)] font-bold"
@@ -794,18 +841,31 @@ export function StandaloneAuditorStudio({
       </main>
 
       {/* 3. Right Drawer: Verifiable Evidence & Document Context */}
-      <aside className="w-72 shrink-0 bg-[var(--surface-dark)] border-l border-[var(--surface-border)] flex flex-col justify-between select-none">
+      <aside
+        className={`w-72 shrink-0 bg-[var(--surface-dark)] border-l border-[var(--surface-border)] flex flex-col justify-between select-none transition-all duration-200 ${
+          !isEvidenceOpen ? "hidden" : ""
+        }`}
+      >
         <div className="p-4 space-y-4 flex-1 overflow-auto">
           <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-2.5">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-[var(--accent-tangerine)]" />
-              <span className="font-mono font-bold text-xs uppercase tracking-wide text-[var(--foreground)]">
+            <div className="flex items-center gap-2 min-w-0">
+              <BookOpen className="w-4 h-4 text-[var(--accent-tangerine)] shrink-0" />
+              <span className="font-mono font-bold text-xs uppercase tracking-wide text-[var(--foreground)] whitespace-nowrap truncate">
                 {t.studio_evidence_title}
               </span>
             </div>
-            <span className="text-[9.5px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25 font-bold">
-              {t.studio_evidence_verified}
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-[9.5px] font-mono text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/25 font-bold">
+                {t.studio_evidence_verified}
+              </span>
+              <button
+                onClick={() => setIsEvidenceOpen(false)}
+                title={lang === "DE" ? "Belege schließen" : "Close Evidence"}
+                className="p-1 rounded-md hover:bg-[var(--surface-card)] text-[var(--foreground)] opacity-60 hover:opacity-100 transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
           {selectedCitation ? (

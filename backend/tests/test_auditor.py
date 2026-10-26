@@ -117,3 +117,77 @@ async def test_followup_synthesis_recognizes_contextual_topics():
 
     assert "[SOURCE_1]" in finding
     assert "90 calendar days" in finding or "migration" in finding.lower()
+
+
+def test_detect_document_language_bidirectional():
+    """
+    Verifies that English documents (IELTS, TU Chemnitz SOP, English MSA)
+    are detected as EN, while German contracts are detected as DE.
+    """
+    from app.services.auditor import detect_document_language
+
+    german_sample = "SIEMENS AG · RECHTSABTEILUNG COMPLIANCE RAHMENVEREINBARUNG ÜBER INFORMATIONSTECHNOLOGIE"
+    assert detect_document_language(german_sample) == "DE"
+
+    german_contract = "Der Auftragnehmer erbringt hochverfügbare Tier-3 Cloud-Infrastrukturdienste für den Auftraggeber."
+    assert detect_document_language(german_contract) == "DE"
+
+    english_ielts = "Test Report Form NOTE Centre Number Candidate Details Family Name First Name(s) Overall Band Score"
+    assert detect_document_language(english_ielts) == "EN"
+
+    english_sop = "CHEMNITZ UNIVERSITY OF TECHNOLOGY (TU CHEMNITZ) Faculty of Computer Science Admissions Committee Statement of Purpose"
+    assert detect_document_language(english_sop) == "EN"
+
+    english_msa = "Master Information & ICT Services Agreement Governing Law: Federal Republic of Germany Scope of Services"
+    assert detect_document_language(english_msa) == "EN"
+
+
+@pytest.mark.asyncio
+async def test_translate_chunks_bidirectional_en_to_de_and_de_to_en():
+    """
+    Verifies bidirectional translation:
+    - English input is translated into German (NOT redundantly into English).
+    - German input is translated into English.
+    """
+    from app.services.auditor import translate_chunks_to_english
+
+    # 1. English Input: Should translate to German!
+    english_chunks = [
+        {
+            "id": "e1",
+            "page_number": 1,
+            "chunk_index": 0,
+            "content": "Test Report Form Candidate Details Family Name First Name Overall Band Score CEFR Level",
+        },
+        {
+            "id": "e2",
+            "page_number": 1,
+            "chunk_index": 1,
+            "content": "Master Information & ICT Services Agreement Scope of Services Termination and Exit Strategy",
+        },
+    ]
+
+    en_res = await translate_chunks_to_english(english_chunks)
+    assert len(en_res) == 2
+    assert en_res[0]["source_language"] == "EN"
+    assert en_res[0]["target_language"] == "DE"
+    # Verify German translated output
+    assert "PRÜFUNGSZEUGNIS" in en_res[0]["translated_content"].upper() or "PRÜFUNGSKANDIDATIN" in en_res[0]["translated_content"].upper()
+    assert "HAUPTRAHMENVEREINBARUNG" in en_res[1]["translated_content"].upper() or "INFORMATIONSTECHNOLOGIE" in en_res[1]["translated_content"].upper()
+
+    # 2. German Input: Should translate to English!
+    german_chunks = [
+        {
+            "id": "g1",
+            "page_number": 1,
+            "chunk_index": 0,
+            "content": "Rahmenvereinbarung über Informationstechnologie zwischen der Siemens AG und CloudScale GmbH.",
+        }
+    ]
+
+    de_res = await translate_chunks_to_english(german_chunks)
+    assert len(de_res) == 1
+    assert de_res[0]["source_language"] == "DE"
+    assert de_res[0]["target_language"] == "EN"
+    assert "Master" in de_res[0]["translated_content"] or "Information" in de_res[0]["translated_content"]
+
