@@ -3,6 +3,7 @@
 import React from "react";
 import {
   Shield,
+  ShieldCheck,
   FileText,
   FileSpreadsheet,
   History,
@@ -19,8 +20,8 @@ import { Language, translations } from "@/lib/i18n";
 
 interface SidebarProps {
   lang: Language;
-  activeTab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor";
-  onTabChange: (tab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor") => void;
+  activeTab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights";
+  onTabChange: (tab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights") => void;
   documentCount: number;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -53,7 +54,13 @@ export function Sidebar({
       id: "dora" as const,
       label: "DORA Art. 30",
       icon: Shield,
-      badge: "BaFin",
+      badge: "Exit (30.2)",
+    },
+    {
+      id: "audit_rights" as const,
+      label: lang === "DE" ? "Prüfrechte KWG § 25b" : "Audit Rights (DIN 5008)",
+      icon: ShieldCheck,
+      badge: "Art. 30.3e",
     },
     {
       id: "zugferd" as const,

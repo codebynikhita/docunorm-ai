@@ -31,7 +31,7 @@ export default function Home() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
-    "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor"
+    "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights"
   >("documents");
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>("");
@@ -309,6 +309,8 @@ export default function Home() {
                 setLayoutMode("auditor");
               } else if (tab === "dora") {
                 setIsDoraExitModalOpen(true);
+              } else if (tab === "audit_rights") {
+                setIsAuditRightsModalOpen(true);
               } else if (tab === "lksg") {
                 setIsDoraSubcontractorModalOpen(true);
               } else if (tab === "zugferd") {
@@ -497,8 +499,15 @@ export default function Home() {
         documentName={documentName}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
-        onJumpToCitation={(page) => {
+        onJumpToCitation={(page, bbox) => {
           setCurrentPage(page);
+          if (bbox) {
+            setActiveHighlight({
+              page_number: page,
+              box: bbox,
+              label: "DORA Art. 30(3) Subcontractor Evidence",
+            });
+          }
           setLayoutMode("workbench");
         }}
       />
@@ -512,8 +521,15 @@ export default function Home() {
         documentName={documentName}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
-        onJumpToCitation={(page) => {
+        onJumpToCitation={(page, bbox) => {
           setCurrentPage(page);
+          if (bbox) {
+            setActiveHighlight({
+              page_number: page,
+              box: bbox,
+              label: "KWG § 25b / DORA Art. 30(3)(e) Audit Evidence",
+            });
+          }
           setLayoutMode("workbench");
         }}
       />

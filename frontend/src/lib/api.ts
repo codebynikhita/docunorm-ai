@@ -248,6 +248,7 @@ export interface SubcontractorCheckResult {
   extracted_clause: string | null;
   citation_tag: string | null;
   page_number: number | null;
+  bounding_box?: [number, number, number, number] | null;
   recommendation_de: string;
   recommendation_en: string;
 }
@@ -298,6 +299,7 @@ export interface AuditRightCheckResult {
   extracted_clause: string | null;
   citation_tag: string | null;
   page_number: number | null;
+  bounding_box?: [number, number, number, number] | null;
   recommendation_de: string;
   recommendation_en: string;
 }

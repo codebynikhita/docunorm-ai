@@ -470,8 +470,13 @@ export function DoraSubcontractorModal({
                                   </span>
                                   {onJumpToCitation && check.page_number && (
                                     <button
-                                      onClick={() => onJumpToCitation(check.page_number!)}
-                                      className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5"
+                                      onClick={() => {
+                                        if (onJumpToCitation && check.page_number) {
+                                          onJumpToCitation(check.page_number, check.bounding_box || undefined);
+                                          onClose();
+                                        }
+                                      }}
+                                      className="text-[11px] text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-0.5 cursor-pointer"
                                     >
                                       {isDe ? "Im Vertrag anzeigen" : "View in Contract"}
                                       <ExternalLink className="w-3 h-3" />

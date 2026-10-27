@@ -407,10 +407,13 @@ export function AuditRightsModal({
                               </span>
                               {c.page_number && (
                                 <button
-                                  onClick={() =>
-                                    onJumpToCitation && onJumpToCitation(c.page_number!)
-                                  }
-                                  className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline"
+                                  onClick={() => {
+                                    if (onJumpToCitation && c.page_number) {
+                                      onJumpToCitation(c.page_number, c.bounding_box || undefined);
+                                      onClose();
+                                    }
+                                  }}
+                                  className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 hover:underline cursor-pointer"
                                 >
                                   {isDe ? `Seite ${c.page_number}` : `Page ${c.page_number}`}
                                   <ExternalLink className="w-3 h-3" />
