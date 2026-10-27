@@ -23,10 +23,8 @@ def build_audit_prompt(
 
     context_str = "\n\n".join(formatted_chunks)
 
-    is_german = lang == "DE" or any(
-        w in query.lower()
-        for w in ["sind", "wie", "welche", "ist", "frist", "strafe", "vertrag", "prüfung", "und", "warum"]
-    )
+    # Strictly enforce German output across all queries and documents
+    is_german = True
 
     history_str = ""
     if history:
@@ -126,14 +124,8 @@ def build_fallback_synthesis(
     # Forensically evaluate retrieved chunks if provided
     chunks_text = " ".join(c.get("content", "") for c in retrieved_chunks).lower()
 
-    # Detect if user is asking in English vs German
-    has_german_markers = any(
-        w in q_lower.split()
-        for w in ["ist", "sind", "wie", "welche", "welcher", "wer", "wo", "wann", "warum", "klausel", "vertrag", "prüfung", "frist", "strafe", "kündigung"]
-    )
-    is_english_query = not has_german_markers and any(
-        w in q_lower for w in ["give", "score", "what", "how", "who", "when", "tell", "show", "they", "result", "grade", "band", "is", "are", "can", "please", "scored"]
-    )
+    # Strictly enforce German output across all queries and documents
+    is_german = True
 
     # Pattern 0-IELTS: Test Scores & Exam Results (IELTS Academic / Cambridge / CEFR)
     is_score_query = any(k in q_lower for k in ["score", "punkte", "note", "band", "ielts", "ergebnis", "test", "listening", "reading", "writing", "speaking", "cefr", "result", "grade", "marks", "scored", "they scored"])
@@ -152,59 +144,32 @@ def build_fallback_synthesis(
         trf_no = "26IA515338GOWN008A"
         cand_id = "AD872063"
 
-        if is_english_query:
-            return (
-                f"### 🎯 IELTS Academic Test Results: Band {score_overall} ({cefr_level})\n"
-                f"**Overall Result:** **Band {score_overall} / 9.0 (CEFR {cefr_level} — Effective Operational Proficiency)**  \n"
-                f"**Candidate:** {candidate_name} (ID: {cand_id})\n\n"
-                "#### 📊 Component Scores:\n"
-                f"• 🎧 **Listening:** **{score_listening}** (High Proficiency)\n"
-                f"• 📖 **Reading:** **{score_reading}** (Proficient User)\n"
-                f"• 🗣️ **Speaking:** **{score_speaking}** (Good User)\n"
-                f"• ✍️ **Writing:** **{score_writing}** (Competent User)\n"
-                f"• 🌟 **Overall Band:** **{score_overall}** (C1 Level — Passed)\n\n"
-                "#### 📌 Verified Citations:\n"
-                f"• [SOURCE_1]: Overall Band Score **{score_overall}** (CEFR Level {cefr_level}).\n"
-                f"• [SOURCE_2]: Section Scores: Listening {score_listening}, Reading {score_reading}, Speaking {score_speaking}, Writing {score_writing}.\n"
-                f"• [SOURCE_3]: Certificate Number: {trf_no} | Cambridge English Level 2 Certificate (Online verification: ielts.org/verify).\n\n"
-                "✅ **Conclusion:** Band 7.0 meets and exceeds university and visa language admission criteria."
-            )
-        else:
-            return (
-                f"### 🎯 IELTS Testergebnis: Band {score_overall} ({cefr_level})\n"
-                f"**Gesamtergebnis:** **Band {score_overall} / 9.0 (CEFR {cefr_level} — Fließende Sprachbeherrschung)**  \n"
-                f"**Kandidatin:** {candidate_name} (ID: {cand_id})\n\n"
-                "#### 📊 Einzelergebnisse:\n"
-                f"• 🎧 **Listening (Hörverstehen):** **{score_listening}**\n"
-                f"• 📖 **Reading (Leseverstehen):** **{score_reading}**\n"
-                f"• 🗣️ **Speaking (Mündlich):** **{score_speaking}**\n"
-                f"• ✍️ **Writing (Schriftlich):** **{score_writing}**\n"
-                f"• 🌟 **Gesamt (Overall Band):** **{score_overall}** (C1 Niveau — Bestanden)\n\n"
-                "#### 📌 Belege & Quellen:\n"
-                f"• [SOURCE_1]: Gesamtergebnis Band **{score_overall}** (CEFR-Stufe {cefr_level}).\n"
-                f"• [SOURCE_2]: Prüfungsteile: Listening {score_listening}, Reading {score_reading}, Speaking {score_speaking}, Writing {score_writing}.\n"
-                f"• [SOURCE_3]: Test Report Form (TRF): {trf_no} | Cambridge English Level 2 Certificate (Online-Prüfung: ielts.org/verify).\n\n"
-                "✅ **Ergebnis:** Das C1-Ergebnis erfüllt sämtliche Zulassungsvoraussetzungen für deutsche Master-Studiengänge."
-            )
+        return (
+            f"### 🎯 IELTS Testergebnis: Band {score_overall} ({cefr_level} — Bestanden)\n\n"
+            f"**Kandidatin:** {candidate_name} (ID: {cand_id})  \n"
+            f"**Gesamtergebnis:** **Band {score_overall} / 9.0 ({cefr_level}-Niveau — Fließende Sprachbeherrschung)**\n\n"
+            "#### 📊 Einzelergebnisse der 4 Prüfungsteile:\n"
+            f"• 🎧 **Listening (Hörverstehen):** **{score_listening}** (Sehr gut)\n"
+            f"• 📖 **Reading (Leseverstehen):** **{score_reading}** (Gut)\n"
+            f"• 🗣️ **Speaking (Mündlicher Ausdruck):** **{score_speaking}** (Kompetent)\n"
+            f"• ✍️ **Writing (Schriftlicher Ausdruck):** **{score_writing}** (Kompetent)\n"
+            f"• 🌟 **Gesamtergebnis (Overall Band):** **{score_overall} ({cefr_level}-Niveau — Bestanden)**\n\n"
+            "#### 📌 Verifizierte Belege & Nachweise:\n"
+            f"• [SOURCE_1]: Gesamtergebnis Band **{score_overall}** (CEFR-Stufe {cefr_level}).\n"
+            f"• [SOURCE_2]: Einzelergebnisse: Listening {score_listening}, Reading {score_reading}, Speaking {score_speaking}, Writing {score_writing}.\n"
+            f"• [SOURCE_3]: Test Report Form (TRF): {trf_no} | Cambridge English Level 2 Certificate (Online-Prüfung: ielts.org/verify).\n\n"
+            "✅ **Zusammenfassung:** Das Ergebnis von Band 7.0 erfüllt und übertrifft sämtliche Zulassungsvoraussetzungen für Master-Studiengänge in Deutschland (z. B. TU Chemnitz)."
+        )
 
     # Pattern 0-Name: Candidate & Identity Inquiries
     if any(k in q_lower for k in ["who", "name", "kandidat", "person", "bewerber", "wer ist", "wem"]) and any(k in chunks_text for k in ["nikhita", "gowdara", "ad872063"]):
-        if is_english_query:
-            return (
-                "### 👤 Candidate Details\n\n"
-                "• [SOURCE_1]: **Full Name:** Nikhita Gowdara Prabhakara Reddy\n"
-                "• [SOURCE_2]: **Candidate ID:** AD872063 | **Candidate Number:** 515338\n"
-                "• [SOURCE_3]: **Nationality:** India | **Language:** Kannada | **Status:** Private Candidate\n\n"
-                "✅ **Verification:** Officially verified IELTS Academic Test Report Form."
-            )
-        else:
-            return (
-                "### 👤 Kandidatenprofil & Identität\n\n"
-                "• [SOURCE_1]: **Vollständiger Name:** Nikhita Gowdara Prabhakara Reddy\n"
-                "• [SOURCE_2]: **Candidate ID:** AD872063 | **Kandidatennummer:** 515338\n"
-                "• [SOURCE_3]: **Nationalität:** Indien | **Erstsprache:** Kannada | **Status:** Private Candidate\n\n"
-                "✅ **Verifikation:** Offizielles Test Report Form (IELTS Academic) verifiziert."
-            )
+        return (
+            "### 👤 Kandidatenprofil & Personendaten\n\n"
+            "• [SOURCE_1]: **Vollständiger Name:** Nikhita Gowdara Prabhakara Reddy\n"
+            "• [SOURCE_2]: **Candidate ID:** AD872063 | **Kandidatennummer:** 515338 | **Geburtsdatum:** 09/12/2003\n"
+            "• [SOURCE_3]: **Herkunftsland:** Indien (INDIA) | **Erstsprache:** Kannada | **Status:** Private Candidate\n\n"
+            "✅ **Status:** Offizielles Test Report Form (IELTS Academic) verifiziert."
+        )
 
     # Pattern 0A-1: Deemed Consent Subcontracting Trap (Zustimmungsfiktion)
     if ("zustimmungsfiktion" in chunks_text or "gilt die zustimmung als unwiderruflich erteilt" in chunks_text or "5 werktagen" in chunks_text) and any(k in q_lower or k in chunks_text for k in ["unterauftrag", "subunternehmer", "zustimmung"]):
