@@ -33,8 +33,27 @@ async def main():
         lang="DE"
     )
 
-    print("⚖️ MODEL RESPONSE:")
+    print("⚖️ MODEL RESPONSE 1 (German Query):")
     print(response)
+    print("-" * 70)
+
+    # Test Case 2: English Contract Analyzed with German Findings
+    english_chunk = [{
+        "page_number": 7,
+        "content": "Section 14.1 (Sub-contractors): Provider may engage affiliates and external sub-contractors without prior notice to the customer. All liability for sub-contractors is excluded to the maximum extent permitted by law."
+    }]
+    query_en = "Are the subcontractor engagement and liability disclaimer compliant with DORA Art. 30 and KWG § 25b?"
+    print(f"📝 Query 2 (English): {query_en}\n")
+
+    response_en = await generate_llm_audit_finding(
+        query=query_en,
+        retrieved_chunks=english_chunk,
+        framework="DORA",
+        lang="DE"  # Translated into German statutory findings for German compliance officers
+    )
+
+    print("⚖️ MODEL RESPONSE 2 (German Statutory Finding for English Contract):")
+    print(response_en)
     print("=" * 70)
 
 if __name__ == "__main__":

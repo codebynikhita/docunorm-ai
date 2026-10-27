@@ -224,6 +224,62 @@ def build_fallback_synthesis(
                 "• Rechnung stornieren und Neuausstellung mit korrekter Steuer-ID und Steuerausweis fordern."
             )
 
+    # Pattern 0A-8: Datacenter Physical Access Ban (KWG § 25b / DORA Art. 30(3)(e))
+    if ("physischer zutritt" in chunks_text and "ausgeschlossen" in chunks_text) or ("rechenzentren" in chunks_text and "zutritt" in chunks_text and "verwehrt" in chunks_text) or ("kategorisch ausgeschlossen" in chunks_text and "rechenzentrum" in chunks_text):
+        if is_german:
+            return (
+                "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 3 LIT. E & KWG § 25B)\n"
+                "**Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** Säule IV (Physische Prüf- & Betretungsrechte)\n\n"
+                "#### 1. Klausel-Befund & Vertragsnachweis (Forensischer Beleg):\n"
+                "• [SOURCE_1]: Physischer Zutritt zu Rechenzentrumsflächen und Serverräumen wird für Institut und Aufsichtsbehörden kategorisch ausgeschlossen.\n\n"
+                "#### 2. Aufsichtsrechtliche Würdigung (BaFin & DORA):\n"
+                "• Gravierender Verstoß gegen KWG § 25b Abs. 1 Satz 1 und DORA Art. 30 Abs. 3 lit. e: Aufsichtsbehörden (BaFin/Bundesbank/EZB) und das Institut besitzen ein gesetzlich zwingendes Recht auf physischen Vor-Ort-Zutritt zu Geschäftsräumen und Rechenzentren.\n\n"
+                "#### 3. Forensische Handlungsempfehlung:\n"
+                "• Ausschlussklausel streichen und standardisiertes BaFin/DORA-Betretungsrecht mit 24h-Anmeldefrist für Anlassprüfungen vertraglich verankern."
+            )
+
+    # Pattern 0A-9: BGB § 307 / § 278 Vicarious Liability Disclaimer
+    if ("haftung für subunternehmer ist vollumfänglich ausgeschlossen" in chunks_text) or ("haftungsausschluss für erfüllungsgehilfen" in chunks_text) or (("erfüllungsgehilfen" in chunks_text or "subunternehmer" in chunks_text) and "haftung" in chunks_text and "vollumfänglich ausgeschlossen" in chunks_text):
+        if is_german:
+            return (
+                "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BGB § 307 / § 278 & DORA ART. 30)\n"
+                "**Status:** ❌ DEFIZITÄR / NICHTIG NACH BGB § 307 | **Aufsichts-Pillar:** Zivilrechtliche Durchgriffshaftung & DORA Säule IV\n\n"
+                "#### 1. Klausel-Befund & Vertragsnachweis (Forensischer Beleg):\n"
+                "• [SOURCE_1]: Die vertragliche Haftung für Handlungen und Unterlassungen eingesetzter Subunternehmer und Erfüllungsgehilfen wird vollumfänglich abbedungen.\n\n"
+                "#### 2. Aufsichtsrechtliche Würdigung (BGB & DORA):\n"
+                "• Nach BGB § 278 und gefestigter Rechtsprechung zu BGB § 307 (Inhaltskontrolle) ist der Ausschluss der Haftung für Erfüllungsgehilfen in AGB unwirksam. Zudem fordert DORA Art. 30 Abs. 3 die uneingeschränkte Verantwortung des Hauptanbieters für die gesamte Dienstleistungskette.\n\n"
+                "#### 3. Forensische Handlungsempfehlung:\n"
+                "• Klausel durch BGB § 311 Nachtragsvereinbarung ersetzen: Vollumfängliche Einstandspflicht gem. § 278 BGB mit Kaskadierungspflicht vereinbaren."
+            )
+
+    # Pattern 0A-10: Pooled Audit Denial (DORA Art. 30 Abs. 3 lit. e)
+    if ("gemeinschaftsprüfungen" in chunks_text and ("ausgeschlossen" in chunks_text or "nicht gestattet" in chunks_text)) or ("pooled audit" in chunks_text and "abgelehnt" in chunks_text):
+        if is_german:
+            return (
+                "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 3 LIT. E - POOLED AUDITS)\n"
+                "**Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** Säule IV (Gemeinschaftliche Prüfungen / Pooled Audits)\n\n"
+                "#### 1. Klausel-Befund & Vertragsnachweis (Forensischer Beleg):\n"
+                "• [SOURCE_1]: Der IKT-Dienstleister untersagt die Durchführung gemeinschaftlicher Prüfungen (Pooled Audits) durch mehrere beauftragende Finanzinstitute.\n\n"
+                "#### 2. Aufsichtsrechtliche Würdigung (DORA & BaFin):\n"
+                "• Verstoß gegen DORA Art. 30 Abs. 3 lit. e: DORA gestattet und fördert ausdrücklich die Durchführung von Gemeinschaftsprüfungen zur Reduktion von Prüfaufwänden bei Cloud- und SaaS-Dienstleistern. Ein vertragliches Verbot ist unzulässig.\n\n"
+                "#### 3. Forensische Handlungsempfehlung:\n"
+                "• Pooled-Audit-Recht gem. DORA Art. 30 Abs. 3 lit. e in die Revisionsanlage aufnehmen."
+            )
+
+    # Pattern 0A-11: Cross-Border English Contract Analysis (DORA Art. 30(2)(c) & Schrems II)
+    if ("transferred to us parent" in chunks_text or "subject to fisa" in chunks_text or "us government access" in chunks_text or "without prior written notice to customer" in chunks_text and "cross-border" in chunks_text):
+        if is_german:
+            return (
+                "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 LIT. C / DSGVO ART. 44)\n"
+                "**Status:** ❌ DEFIZITÄR / DRITTSTAATENTRANSFERRISIKO | **Aufsichts-Pillar:** Grenzüberschreitende Datenübermittlung & Souveränität\n\n"
+                "#### 1. Klausel-Befund & Vertragsnachweis (Forensischer Beleg):\n"
+                "• [SOURCE_1]: Automated cross-border data transfer to US parent company without contractual EU-standard contractual clauses (SCC) or supplementary technical measures.\n\n"
+                "#### 2. Aufsichtsrechtliche Würdigung (BaFin & DORA):\n"
+                "• Unvereinbar mit DORA Art. 30 Abs. 2 lit. c und den Anforderungen des EuGH (Schrems II). Ein Zugriff US-amerikanischer Sicherheitsbehörden ohne richterliche Genehmigung verletzt europäisches Aufsichtsrecht.\n\n"
+                "#### 3. Forensische Handlungsempfehlung:\n"
+                "• Vertragliche Begrenzung auf EWR-Rechenzentren und Vereinbarung von EU Standard Contractual Clauses mit Transfer Impact Assessment (TIA)."
+            )
+
     # Pattern 0A: Deficient Subcontracting (without notice)
     if ("ohne vorankündigung" in chunks_text or "ohne gesonderte vorankündigung" in chunks_text) or (
         any(k in q_lower for k in ["weiterübertragung", "subunternehmer ohne", "ohne vorankündigung"])

@@ -137,6 +137,94 @@ COMPREHENSIVE_DATASET = [
         "query": "Ist diese Abrechnungsform für den deutschen B2B-Verkehr ab 2025 normkonform?",
         "status": "KONFORM",
         "key_terms": ["zugferd 2.3", "en 16931", "leitweg-id", "ustg"]
+    },
+    # Category 11: Pooled Audits & Joint Inspection (DORA Art. 30 Abs. 3 lit. e)
+    {
+        "category": "Pooled Audits",
+        "id": "CORP-POOLED-16",
+        "context": "Audit-Regelung § 19.3: 'Der Dienstleister wirkt aktiv an gemeinsamen Revisionsprüfungen (Pooled Audits) mit, die von mehreren beauftragenden Instituten oder deren gemeinsamen Prüfungsgesellschaften koordiniert werden, um Betriebsunterbrechungen zu minimieren.'",
+        "query": "Entspricht die Mitwirkungspflicht bei Pooled Audits den Anforderungen von DORA Art. 30 Abs. 3 lit. e?",
+        "status": "KONFORM",
+        "key_terms": ["pooled audits", "gemeinsame revisionsprüfungen", "betriebsunterbrechungen"]
+    },
+    {
+        "category": "Pooled Audits",
+        "id": "CORP-POOLED-17",
+        "context": "Klausel 15: 'Gemeinsame Audits mehrerer Kunden oder Dritter sind aus Geheimhaltungsgründen untersagt. Jedes Institut muss separate Vor-Ort-Audits kostenpflichtig beantragen.'",
+        "query": "Ist das Verbot von Gemeinschaftsprüfungen nach DORA Art. 30 Abs. 3 lit. e zulässig?",
+        "status": "DEFIZITÄR",
+        "key_terms": ["untersagt", "geheimhaltung", "separate vor-ort-audits"]
+    },
+    # Category 12: BGB § 307 Inhaltskontrolle & Vicarious Liability (BGB § 278)
+    {
+        "category": "Subcontractor Liability",
+        "id": "CORP-LIABILITY-18",
+        "context": "Haftungsklausel § 8.4: 'Der Dienstleister haftet für das Verschulden seiner Unterauftragnehmer wie für eigenes Verschulden gem. § 278 BGB. Eine Freizeichnung für Nachunternehmer ist ausgeschlossen.'",
+        "query": "Entspricht diese Haftungsdurchgriffsklausel den Anforderungen von BGB § 278 und DORA Art. 30 Abs. 3?",
+        "status": "KONFORM",
+        "key_terms": ["278 bgb", "unterauftragnehmer", "verschulden"]
+    },
+    {
+        "category": "Subcontractor Liability",
+        "id": "CORP-LIABILITY-19",
+        "context": "AGB § 12.1: 'Eine Haftung für Ausfälle oder Datenschutzverletzungen durch Unterauftragnehmer wird vollumfänglich ausgeschlossen.'",
+        "query": "Ist der formularmäßige Haftungsausschluss für Subunternehmer nach BGB § 307 und DORA Art. 30 wirksam?",
+        "status": "DEFIZITÄR",
+        "key_terms": ["ausgeschlossen", "vollumfänglich", "bgb 307"]
+    },
+    # Category 13: Emergency Datacenter Access (KWG § 25b)
+    {
+        "category": "Emergency Access",
+        "id": "CORP-EMERGENCY-20",
+        "context": "Notfall-Zugangsregelung § 23: 'Bei akuten Sicherheitsvorfällen oder behördlicher Anordnung wird Beauftragten des Instituts und der Aufsichtsbehörde (BaFin/Bundesbank) binnen 4 Stunden unangekündigter Zutritt zu allen relevanten Rechenzentrums- und Betriebsstätten gewährt.'",
+        "query": "Genügt die Notfallzugangsregelung den Anforderungen an Vor-Ort-Prüfungen in Krisensituationen nach KWG § 25b?",
+        "status": "KONFORM",
+        "key_terms": ["notfall", "unangekündigt", "bafin", "kwg 25b"]
+    },
+    # Category 14: Prohibition of Obstructionist Audit Fees
+    {
+        "category": "Audit Cost Obstruction",
+        "id": "CORP-AUDITFEE-21",
+        "context": "Ziffer 16.2: 'Für jede behördliche oder institutseigene Vor-Ort-Prüfung berechnet der Betreiber eine Bereitstellungspauschale von 25.000 € pro Prüfungstag zzgl. Reisekosten.'",
+        "query": "Stellt eine tägliche Audit-Pauschale von 25.000 € eine unzulässige Kontrollbehinderung nach KWG § 25b dar?",
+        "status": "DEFIZITÄR",
+        "key_terms": ["pauschale", "prüfungstag", "kontrollbehinderung", "kwg 25b"]
+    },
+    # Category 15: Cross-Border Cloud Transfer and FISA 702 Mitigation
+    {
+        "category": "Cross-Border Transfer",
+        "id": "CORP-CROSSBORDER-22",
+        "context": "Cloud Addendum § 5: 'Alle Daten verbleiben verschlüsselt im EWR. Bei Herausgabeverlangen ausländischer Behörden (z. B. FISA 702 / CLOUD Act) wird unverzüglich das Institut informiert und vor Herausgabe der Rechtsweg zur Prüfung der völkerrechtlichen Zulässigkeit beschritten.'",
+        "query": "Entspricht dieses Schutzregime den Anforderungen des EuGH (Schrems II) und DORA Art. 30 Abs. 2 lit. c?",
+        "status": "KONFORM",
+        "key_terms": ["fisa 702", "cloud act", "rechtsweg", "dora"]
+    },
+    # Category 16: Cryptographic Shredding & Hardware Decommissioning
+    {
+        "category": "Data Sanitization",
+        "id": "CORP-SANITIZATION-23",
+        "context": "Löschkonzept § 14: 'Ausgemusterte Datenträger werden nach DIN 66399 (Sicherheitsstufe H-5) physisch geschreddert oder kryptographisch nach BSI-Vorgaben unwiederbringlich gelöscht unter Ausstellung eines Vernichtungszertifikats.'",
+        "query": "Erfüllt dieses Datenvernichtungsverfahren die IKT-Sicherheitsanforderungen nach DORA Art. 9 und BSI IT-Grundschutz?",
+        "status": "KONFORM",
+        "key_terms": ["din 66399", "kryptographisch", "vernichtungszertifikat", "dora"]
+    },
+    # Category 17: Concentration Risk & Multi-Vendor Strategy (DORA Art. 29)
+    {
+        "category": "Concentration Risk",
+        "id": "CORP-CONCENTRATION-24",
+        "context": "Multicloud-Rahmenklausel § 4: 'Die Systemarchitektur ist containerisiert (Kubernetes) und unterstützt den unterbrechungsfreien Wechsel auf alternative IKT-Infrastrukturanbieter ohne proprietäre Schnittstellenabhängigkeiten.'",
+        "query": "Fördert diese Architektur die Reduktion von Konzentrationsrisiken im Sinne von DORA Art. 29?",
+        "status": "KONFORM",
+        "key_terms": ["konzentrationsrisiko", "containerisiert", "dora art 29"]
+    },
+    # Category 18: Unilateral Contract Price Escalation
+    {
+        "category": "Price Escalation",
+        "id": "CORP-PRICE-25",
+        "context": "Preisklausel § 7.3: 'Der Anbieter kann die Gebühren bei nachgewiesener Inflation gem. Statistischem Bundesamt anpassen, maximal jedoch um 3 % p. a. Bei höheren Erhöhungen steht dem Kunden ein fristloses Sonderkündigungsrecht zu.'",
+        "query": "Ist diese Preisanpassungsklausel nach BGB § 307 und DORA Art. 30 Abs. 2 lit. h wirksam?",
+        "status": "KONFORM",
+        "key_terms": ["statistisches bundesamt", "sonderkündigungsrecht", "bgb 307"]
     }
 ]
 

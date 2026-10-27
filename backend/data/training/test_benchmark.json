@@ -70,5 +70,41 @@
     "must_include_citation": "[SOURCE_1]",
     "must_mention": ["ust", "rechnung"],
     "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-AUDIT-09-DATACENTER-PHYSICAL-BAN",
+    "pillar": "Pillar IV (Datacenter Physical Access Ban)",
+    "context": "§ 17.4 Rechenzentrums-Sicherheit: 'Der physische Zutritt zu Rechenzentrumsflächen durch Vertreter des Instituts oder der Aufsichtsbehörden ist aus betrieblichen Sicherheitsgründen kategorisch ausgeschlossen. Revisionsprüfungen sind ausschließlich als Remote-Loganalysen gestattet.'",
+    "query": "Ist der kategorische Ausschluss physischer Vor-Ort-Zutritte zu Rechenzentren mit KWG § 25b und DORA Art. 30 Abs. 3 lit. e vereinbar?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["rechenzentrum", "kwg § 25b"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-REMEDY-10-BGB-LIABILITY-DISCLAIMER",
+    "pillar": "Pillar IV (BGB § 307 Vicarious Liability Trap)",
+    "context": "AGB-Klausel § 12.3: 'Eine Haftung für Subunternehmer ist vollumfänglich ausgeschlossen. Der Auftragnehmer haftet keinesfalls für Pflichtverletzungen von Erfüllungsgehilfen.'",
+    "query": "Ist dieser Haftungsausschluss für Subunternehmer nach BGB § 307 und DORA Art. 30 wirksam?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["bgb", "erfüllungsgehilfen"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-POOLED-11-JOINT-AUDIT-DENIAL",
+    "pillar": "Pillar IV (Pooled Audit Cooperation Denial)",
+    "context": "Zusatzvereinbarung Revision § 6: 'Gemeinschaftsprüfungen (Pooled Audits) mit anderen beauftragenden Finanzinstituten sind ausgeschlossen. Jede Prüfung muss bilateral und separat beauftragt werden.'",
+    "query": "Ist der vertragliche Ausschluss von Gemeinschaftsprüfungen nach DORA Art. 30 Abs. 3 lit. e zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["dora", "gemeinschaftsprüfung"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-CROSSBORDER-12-ENGLISH-EU-TRANSFER",
+    "pillar": "Pillar IV (Cross-Border English Contract Risk)",
+    "context": "Cloud Addendum Section 9.2: 'Customer transaction metadata is automatically transferred to US parent company and is subject to FISA Section 702 government disclosure requests without prior written notice to customer.'",
+    "query": "Does this automated data transfer to the US conform with EU DORA Art. 30(2)(c) and German BaFin guidelines?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["dora", "drittstaat"],
+    "expected_status": "DEFIZITÄR"
   }
 ]
