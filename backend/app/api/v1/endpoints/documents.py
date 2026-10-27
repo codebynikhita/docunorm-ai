@@ -578,7 +578,7 @@ async def audit_document(
             DocumentChunk.embedding.is_not(None),
         )
         .order_by(distance_expr.asc())
-        .limit(3)
+        .limit(8)
     )
     result = await db.execute(stmt)
     rows = result.all()
@@ -596,9 +596,13 @@ async def audit_document(
     # 2. Prepare chunk mapping for auditor citations
     retrieved_chunks = []
     chunk_map: dict[str, dict] = {}
+    seen_chunk_ids = set()
 
     for idx, (chunk, _) in enumerate(rows, start=1):
-        source_key = f"SOURCE_{idx}"
+        if str(chunk.id) in seen_chunk_ids:
+            continue
+        seen_chunk_ids.add(str(chunk.id))
+        source_key = f"SOURCE_{len(retrieved_chunks) + 1}"
         chunk_data = {
             "chunk_id": str(chunk.id),
             "page_number": chunk.page_number,
@@ -607,6 +611,34 @@ async def audit_document(
         }
         retrieved_chunks.append(chunk_data)
         chunk_map[source_key] = chunk_data
+
+    # Contextual expansion: Bring in sibling chunks from the same page(s)
+    # so structured form fields, tables, grades, and values aren't decoupled from their labels
+    top_pages = {c["page_number"] for c in retrieved_chunks[:3]}
+    if top_pages and len(retrieved_chunks) < 14:
+        sibling_stmt = (
+            select(DocumentChunk)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+                DocumentChunk.page_number.in_(top_pages),
+            )
+            .order_by(DocumentChunk.chunk_index.asc())
+            .limit(25)
+        )
+        sibling_res = await db.execute(sibling_stmt)
+        for sibling in sibling_res.scalars().all():
+            if str(sibling.id) not in seen_chunk_ids and len(retrieved_chunks) < 14:
+                seen_chunk_ids.add(str(sibling.id))
+                source_key = f"SOURCE_{len(retrieved_chunks) + 1}"
+                chunk_data = {
+                    "chunk_id": str(sibling.id),
+                    "page_number": sibling.page_number,
+                    "bounding_box": sibling.bounding_box or [50.0, 100.0, 500.0, 160.0],
+                    "content": sibling.content,
+                }
+                retrieved_chunks.append(chunk_data)
+                chunk_map[source_key] = chunk_data
 
     # 3. Generate grounded regulatory LLM finding (Gemini 1.5 with deterministic fallback)
     history_dicts = [h.model_dump() for h in payload.history] if payload.history else None

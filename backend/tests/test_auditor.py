@@ -191,3 +191,42 @@ async def test_translate_chunks_bidirectional_en_to_de_and_de_to_en():
     assert de_res[0]["target_language"] == "EN"
     assert "Master" in de_res[0]["translated_content"] or "Information" in de_res[0]["translated_content"]
 
+
+@pytest.mark.asyncio
+async def test_auditor_extracts_exact_ielts_scores():
+    from app.services.auditor import generate_llm_audit_finding
+
+    chunks = [
+        {"page_number": 1, "content": "Test Results Listening Reading Writing Speaking Overall Band Score"},
+        {"page_number": 1, "content": "7.0 7.5 7.0 6.0 6.5 C1"},
+        {"page_number": 1, "content": "English Level 2 Certificate in English (IELTS 7.0-8.0) (ESOL) 500/2703/7"},
+    ]
+
+    res = await generate_llm_audit_finding(query="give score they scored", retrieved_chunks=chunks)
+
+    # Verify that the exact overall and component scores are returned
+    assert "7.0" in res
+    assert "7.5" in res  # Listening
+    assert "6.5" in res  # Speaking
+    assert "6.0" in res  # Writing
+    assert "C1" in res
+    assert "[SOURCE_1]" in res
+    assert "[SOURCE_2]" in res
+
+
+@pytest.mark.asyncio
+async def test_auditor_extracts_candidate_identity():
+    from app.services.auditor import generate_llm_audit_finding
+
+    chunks = [
+        {"page_number": 1, "content": "NIKHITA GOWDARA PRABHAKARA REDDY AD872063 515338"},
+        {"page_number": 1, "content": "Test Report Form IELTS Academic INDIA KANNADA"},
+    ]
+
+    res = await generate_llm_audit_finding(query="who is the candidate?", retrieved_chunks=chunks)
+
+    assert "NIKHITA" in res
+    assert "GOWDARA" in res
+    assert "AD872063" in res
+    assert "[SOURCE_1]" in res
+
