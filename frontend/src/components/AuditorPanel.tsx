@@ -43,6 +43,88 @@ interface AuditPanelProps {
   onClose?: () => void;
 }
 
+export function parseInlineMarkdown(text: string) {
+  // Matches **bold text** and [SOURCE_X] citations
+  const regex = /(\*\*[^*]+\*\*|\[SOURCE_\d+\])/g;
+  const parts = text.split(regex);
+
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length >= 4) {
+      const boldContent = part.slice(2, -2);
+      return (
+        <strong key={i} className="font-bold text-[var(--foreground)] bg-white/5 px-1 py-0.5 rounded mx-0.5">
+          {boldContent}
+        </strong>
+      );
+    }
+    if (/^\[SOURCE_\d+\]$/.test(part)) {
+      return (
+        <span
+          key={i}
+          className="inline-flex items-center font-mono font-bold text-[10px] bg-[var(--accent-tangerine)] text-black px-1.5 py-0.5 rounded mx-0.5 shadow-sm"
+        >
+          {part}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
+export function renderMarkdownFormattedText(text: string) {
+  if (!text) return null;
+  const lines = text.split("\n");
+
+  return (
+    <div className="space-y-1 text-xs text-[var(--foreground)] leading-relaxed font-sans">
+      {lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={lineIdx} className="h-1" />;
+        }
+
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h4
+              key={lineIdx}
+              className="font-bold text-sm text-[var(--accent-tangerine)] flex items-center gap-1.5 pt-1.5 pb-0.5"
+            >
+              {parseInlineMarkdown(trimmed.replace(/^###\s+/, ""))}
+            </h4>
+          );
+        }
+
+        if (trimmed.startsWith("#### ")) {
+          return (
+            <h5
+              key={lineIdx}
+              className="font-bold text-xs text-amber-300 pt-1 border-b border-[var(--surface-border)] pb-0.5"
+            >
+              {parseInlineMarkdown(trimmed.replace(/^####\s+/, ""))}
+            </h5>
+          );
+        }
+
+        if (trimmed.startsWith("• ") || trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          const content = trimmed.replace(/^[•\-\*]\s+/, "");
+          return (
+            <div key={lineIdx} className="flex items-start gap-1.5 pl-1 py-0.5">
+              <span className="text-[var(--accent-tangerine)] select-none text-[11px] leading-tight">•</span>
+              <span className="flex-1">{parseInlineMarkdown(content)}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={lineIdx}>
+            {parseInlineMarkdown(line)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 export function AuditPanel({
   lang = "DE",
   documentId,
@@ -277,9 +359,9 @@ export function AuditPanel({
                     </div>
                   </div>
 
-                  <p className="text-xs text-[var(--foreground)] leading-relaxed whitespace-pre-line font-sans">
-                    {displayedSummary}
-                  </p>
+                  <div className="text-xs text-[var(--foreground)] leading-relaxed font-sans">
+                    {renderMarkdownFormattedText(displayedSummary)}
+                  </div>
 
                   {/* Interactive Citations */}
                   {msg.citations && msg.citations.length > 0 && (

@@ -32,6 +32,7 @@ import {
 import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
 import { translateGermanToEnglish } from "@/lib/translator";
+import { renderMarkdownFormattedText } from "@/components/AuditorPanel";
 
 export interface StandaloneAuditorProps {
   lang?: Language;
@@ -729,9 +730,9 @@ export function StandaloneAuditorStudio({
                       </div>
                     )}
 
-                    <p className="text-[13px] text-[var(--foreground)] leading-relaxed font-sans whitespace-pre-line">
-                      {displayedText}
-                    </p>
+                    <div className="text-[13px] text-[var(--foreground)] leading-relaxed font-sans">
+                      {renderMarkdownFormattedText(displayedText)}
+                    </div>
 
                     {/* Interactive Citation Pills */}
                     {msg.citations && msg.citations.length > 0 && (
