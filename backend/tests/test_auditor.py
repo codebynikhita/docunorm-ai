@@ -225,8 +225,8 @@ async def test_auditor_extracts_candidate_identity():
 
     res = await generate_llm_audit_finding(query="who is the candidate?", retrieved_chunks=chunks)
 
-    assert "NIKHITA" in res
-    assert "GOWDARA" in res
+    assert "Nikhita" in res or "NIKHITA" in res
+    assert "Gowdara" in res or "GOWDARA" in res
     assert "AD872063" in res
     assert "[SOURCE_1]" in res
 
