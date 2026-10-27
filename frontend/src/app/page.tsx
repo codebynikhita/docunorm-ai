@@ -17,6 +17,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { LandingPage } from "@/components/LandingPage";
 import { LoginPage } from "@/components/LoginPage";
 import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
+import { RemediationModal } from "@/components/RemediationModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
 import { Bot, Award } from "lucide-react";
@@ -46,6 +47,7 @@ export default function Home() {
   const [isDoraExitModalOpen, setIsDoraExitModalOpen] = useState(false);
   const [isDoraSubcontractorModalOpen, setIsDoraSubcontractorModalOpen] = useState(false);
   const [isAuditRightsModalOpen, setIsAuditRightsModalOpen] = useState(false);
+  const [isRemediationModalOpen, setIsRemediationModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -375,6 +377,7 @@ export default function Home() {
                 onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
                 onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
                 onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
+                onOpenRemediation={() => setIsRemediationModalOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -423,6 +426,7 @@ export default function Home() {
                 onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
                 onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
                 onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
+                onOpenRemediation={() => setIsRemediationModalOpen(true)}
               />
             </main>
           )}
@@ -534,6 +538,15 @@ export default function Home() {
         }}
       />
 
+      {/* BGB § 311 Contract Amendment & Redline Diff Synthesizer Modal */}
+      <RemediationModal
+        isOpen={isRemediationModalOpen}
+        onClose={() => setIsRemediationModalOpen(false)}
+        documentId={documentId}
+        documentName={documentName}
+        lang={lang}
+      />
+
       {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
@@ -551,6 +564,7 @@ export default function Home() {
         onOpenDoraExit={() => setIsDoraExitModalOpen(true)}
         onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
         onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
+        onOpenRemediation={() => setIsRemediationModalOpen(true)}
         onOpenZugferd={() => setIsZugferdModalOpen(true)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}

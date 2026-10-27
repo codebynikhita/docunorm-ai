@@ -339,3 +339,98 @@ export async function getDoraAuditRights(documentId: string): Promise<DoraAuditR
   return res.json();
 }
 
+export interface ClauseRiskItem {
+  chunk_id: string;
+  page_number: number;
+  bounding_box: [number, number, number, number];
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "CLEAN";
+  risk_score: number;
+  title: string;
+  category: string;
+  deficiency_summary_de: string;
+  deficiency_summary_en: string;
+  statutory_ref: string;
+  snippet: string;
+}
+
+export interface DocumentRiskHeatmap {
+  document_id: string;
+  filename: string;
+  overall_risk_score: number;
+  risk_rating: "AAA" | "AA" | "A" | "BBB" | "BB" | "B" | "CCC";
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  page_scores: Record<number, number>;
+  risk_items: ClauseRiskItem[];
+}
+
+export interface DiffToken {
+  type: "equal" | "delete" | "insert";
+  text: string;
+}
+
+export interface AmendmentProposal {
+  rule_id: string;
+  title_de: string;
+  title_en: string;
+  original_text: string;
+  compliant_replacement_de: string;
+  compliant_replacement_en: string;
+  legal_justification_de: string;
+  legal_justification_en: string;
+  bgb_statutory_basis: string;
+  dora_statutory_basis: string;
+  diff_tokens: DiffToken[];
+}
+
+export async function getClauseRiskHeatmap(documentId: string): Promise<DocumentRiskHeatmap> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/clause-risk-heatmap`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Clause Risk Heatmap failed with status ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function generateAmendmentProposal(
+  documentId: string,
+  ruleId: string,
+  originalClause: string
+): Promise<AmendmentProposal> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/generate-amendment`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      rule_id: ruleId,
+      original_clause: originalClause,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Failed to generate amendment with status ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function downloadAmendmentPdf(documentId: string, proposals?: AmendmentProposal[]): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-amendment-pdf`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ proposals: proposals || [] }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to generate amendment contract PDF (status: ${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Nachtragsvereinbarung_BGB_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+

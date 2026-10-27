@@ -39,6 +39,7 @@ interface CommandPaletteProps {
   onOpenDoraExit: () => void;
   onOpenDoraSubcontractor: () => void;
   onOpenAuditRights: () => void;
+  onOpenRemediation?: () => void;
   onOpenZugferd: () => void;
   onOpenCertificate: () => void;
   availableDocuments?: any[];
@@ -55,6 +56,7 @@ export function CommandPalette({
   onOpenDoraExit,
   onOpenDoraSubcontractor,
   onOpenAuditRights,
+  onOpenRemediation,
   onOpenZugferd,
   onOpenCertificate,
   availableDocuments = [],
@@ -133,6 +135,18 @@ export function CommandPalette({
       shortcut: "D A",
       action: () => {
         onOpenAuditRights();
+        onClose();
+      },
+    },
+    {
+      id: "reg-remediation",
+      title_de: "BGB § 311 Vertragsnachbesserung & Redline-Diff (Musterklauseln)",
+      title_en: "BGB § 311 Contract Amendment & Redline Diff (Standard Clauses)",
+      category: "regulatory",
+      icon: Sparkles,
+      shortcut: "B R",
+      action: () => {
+        if (onOpenRemediation) onOpenRemediation();
         onClose();
       },
     },

@@ -35,6 +35,8 @@ import {
   ClauseMetadata,
 } from "@/lib/translator";
 import { getDocumentChunks, getTranslatedDocumentChunks, getDocumentTaskProgress } from "@/lib/api";
+import { ClauseRiskHeatmapBar } from "./ClauseRiskHeatmapBar";
+import { RealTimeStreamHud } from "./RealTimeStreamHud";
 
 interface BoundingBoxHighlight {
   page_number: number;
@@ -59,6 +61,7 @@ interface DocumentViewerProps {
   onOpenDoraExit?: () => void;
   onOpenDoraSubcontractor?: () => void;
   onOpenAuditRights?: () => void;
+  onOpenRemediation?: () => void;
 }
 
 export function DocumentViewer({
@@ -76,6 +79,7 @@ export function DocumentViewer({
   onOpenDoraExit,
   onOpenDoraSubcontractor,
   onOpenAuditRights,
+  onOpenRemediation,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -523,6 +527,16 @@ export function DocumentViewer({
           </div>
         </div>
       </div>
+
+      {/* Forensic Clause Risk Heatmap & Page Anomaly Timeline */}
+      <ClauseRiskHeatmapBar
+        documentId={documentId}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        lang={lang}
+        onPageSelect={(page) => onPageChange && onPageChange(page)}
+        onOpenRemediation={() => onOpenRemediation && onOpenRemediation()}
+      />
 
       {/* Background Task Queue Real-Time Ingestion Progress Banner */}
       {taskProgress && (
@@ -1028,6 +1042,9 @@ export function DocumentViewer({
           </button>
         </div>
       )}
+
+      {/* Real-Time Server-Sent Events (SSE) Audit Progress Stream HUD */}
+      <RealTimeStreamHud documentId={documentId} lang={lang} />
     </div>
   );
 }
