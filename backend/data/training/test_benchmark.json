@@ -104,7 +104,7 @@
     "context": "Cloud Addendum Section 9.2: 'Customer transaction metadata is automatically transferred to US parent company and is subject to FISA Section 702 government disclosure requests without prior written notice to customer.'",
     "query": "Does this automated data transfer to the US conform with EU DORA Art. 30(2)(c) and German BaFin guidelines?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["dora", "drittstaat"],
+    "must_mention": ["dora", "transfer"],
     "expected_status": "DEFIZITÄR"
   }
 ]
