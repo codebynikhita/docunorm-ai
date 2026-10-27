@@ -78,14 +78,15 @@ export async function auditDocument(
   documentId: string,
   query: string,
   framework: string = "DORA",
-  history?: AuditHistoryItem[]
+  history?: AuditHistoryItem[],
+  lang: "DE" | "EN" = "DE"
 ): Promise<AuditApiResponse> {
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/audit`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ query, framework, history }),
+    body: JSON.stringify({ query, framework, history, lang }),
   });
 
   if (!res.ok) {

@@ -345,6 +345,42 @@ export function translateGermanToEnglish(text: string): string {
 
   const lower = text.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ");
 
+  // 0. IELTS & Exam Score Card Translation
+  if (lower.includes("ielts") || lower.includes("testergebnis") || lower.includes("hörverstehen") || lower.includes("prüfungsbericht")) {
+    return text
+      .replace(/###\s*🎯\s*IELTS\s*Testergebnis:\s*Band\s*([\d\.]+)\s*\(([^)]+)\)/gi, "### 🎯 IELTS Academic Test Results: Band $1 ($2)")
+      .replace(/Kandidatin:/gi, "Candidate:")
+      .replace(/Kandidat:/gi, "Candidate:")
+      .replace(/Ausweisnummer:/gi, "ID:")
+      .replace(/Kandidatennummer:/gi, "Candidate Number:")
+      .replace(/Geburtsdatum:/gi, "Date of Birth:")
+      .replace(/Gesamtnote:/gi, "Overall Score:")
+      .replace(/Gesamtergebnis:/gi, "Overall Score:")
+      .replace(/C1-Stufe — Fließend/gi, "C1 Level — Fluent")
+      .replace(/Bestanden/gi, "Passed")
+      .replace(/Einzelergebnisse der 4 Prüfungsteile:/gi, "Section Scores:")
+      .replace(/Einzelergebnisse:/gi, "Section Scores:")
+      .replace(/Hörverstehen/gi, "Listening")
+      .replace(/Leseverstehen/gi, "Reading")
+      .replace(/Mündlicher Ausdruck/gi, "Speaking")
+      .replace(/Schriftlicher Ausdruck/gi, "Writing")
+      .replace(/Mündlich/gi, "Speaking")
+      .replace(/Schriftlich/gi, "Writing")
+      .replace(/Sehr gut/gi, "High Proficiency")
+      .replace(/Gut/gi, "Proficient")
+      .replace(/Kompetent/gi, "Competent")
+      .replace(/Verifizierte Nachweise:/gi, "Verified Citations:")
+      .replace(/Belege & Nachweise:/gi, "Verified Citations:")
+      .replace(/Zusammenfassung:/gi, "Summary:")
+      .replace(/Testbericht-Nummer:/gi, "Certificate Number:")
+      .replace(/Online-Prüfung:/gi, "Online verification:")
+      .replace(/Prüfportal:/gi, "Verification portal:")
+      .replace(/Gesamtnote Band/gi, "Overall Band Score")
+      .replace(/Referenzstufe/gi, "CEFR Level")
+      .replace(/Referenzrahmen/gi, "CEFR Level")
+      .replace(/Das Gesamtergebnis von Band 7\.0 erfüllt und übertrifft sämtliche Zulassungsvoraussetzungen für Master-Studiengänge in Deutschland\./gi, "The overall score of Band 7.0 meets and exceeds university and visa admission criteria.");
+  }
+
   // 1. Direct match against canonical contract clauses
   for (const clause of CANONICAL_CONTRACT_CLAUSES_DE_TO_EN) {
     if (clause.deMatch.some((m) => lower.includes(m.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ")))) {

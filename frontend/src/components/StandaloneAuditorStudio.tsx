@@ -278,7 +278,7 @@ export function StandaloneAuditorStudio({
         text: m.text,
       }));
 
-      const res = await auditDocument(documentId, promptToSend, framework, historyPayload);
+      const res = await auditDocument(documentId, promptToSend, framework, historyPayload, lang);
       const resultText = res.finding_summary;
       const citationsList = res.citations || [];
 

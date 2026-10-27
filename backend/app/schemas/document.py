@@ -82,6 +82,7 @@ class AuditRequest(BaseModel):
     """
     query: str
     framework: str = "DORA"  # DORA, LkSG, ZUGFeRD
+    lang: str = "DE"  # DE or EN
     history: list[AuditHistoryItem] | None = None
 
 

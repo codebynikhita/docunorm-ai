@@ -646,6 +646,7 @@ async def audit_document(
         query=payload.query,
         retrieved_chunks=retrieved_chunks,
         framework=payload.framework,
+        lang=payload.lang,
         history=history_dicts,
     )
 

@@ -179,7 +179,7 @@ export function AuditPanel({
         { role: "user" as const, text: m.question },
         { role: "auditor" as const, text: m.finding_summary },
       ]);
-      const result = await auditDocument(documentId, userQuestion, mode, historyPayload);
+      const result = await auditDocument(documentId, userQuestion, mode, historyPayload, lang);
       const newMessage: AuditMessage = {
         id: `msg-${Date.now()}`,
         question: userQuestion,
