@@ -304,7 +304,8 @@ class RemediationEngine:
             bgb_basis = "BGB § 339, § 343 (Vertragsstrafenrecht)"
             dora_basis = "DORA Art. 30 Abs. 2 lit. e · BaFin VAIT/BAIT"
 
-        diff_tokens = compute_word_diff(original_clause, replacement_de)
+        is_english = any(w in lower for w in ["the ", "shall", "contractor", "audit", "liable", "services", "clause", "prohibited", "client", "inspection"]) and not any(w in lower for w in ["der ", "die ", "das ", "und ", "auftraggeber", "auftragnehmer", "gemäß", "klausel", "prüfung"])
+        diff_tokens = compute_word_diff(original_clause, replacement_en if is_english else replacement_de)
 
         return AmendmentProposal(
             rule_id=rule_id,

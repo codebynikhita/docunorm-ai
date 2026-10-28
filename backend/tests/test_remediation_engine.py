@@ -73,3 +73,15 @@ def test_remediation_engine_generates_amendment_pdf(tmp_path):
 
     assert pdf_path.exists()
     assert pdf_path.stat().st_size > 1000
+
+
+def test_remediation_engine_generates_english_diff():
+    orig_en = "All on-site audits and inspections are strictly excluded."
+    proposal = RemediationEngine.generate_amendment_proposal(
+        rule_id="BAFIN-AUDIT-01",
+        original_clause=orig_en,
+    )
+    assert len(proposal.diff_tokens) > 0
+    # For English clauses, diff is calculated against English replacement
+    inserted_texts = [t.text for t in proposal.diff_tokens if t.type == "insert"]
+    assert any("unrestricted" in t.lower() or "contractor" in t.lower() for t in inserted_texts)

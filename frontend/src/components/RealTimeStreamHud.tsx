@@ -13,6 +13,7 @@ import {
   FileCheck,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
+import { API_BASE_URL } from "@/lib/api";
 
 interface StreamEvent {
   stage: string;
@@ -44,7 +45,7 @@ export function RealTimeStreamHud({
     }
 
     const eventSource = new EventSource(
-      `http://localhost:8000/api/v1/documents/${documentId}/progress-stream`
+      `${API_BASE_URL}/api/v1/documents/${documentId}/progress-stream`
     );
 
     setIsVisible(true);
