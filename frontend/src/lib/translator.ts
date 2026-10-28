@@ -282,10 +282,93 @@ const CANONICAL_CONTRACT_CLAUSES_EN_TO_DE: Array<{ enMatch: string[]; deText: st
 /**
  * Translates English contractual and academic text into formal, authoritative German.
  */
+export function isEnglishText(text: string): boolean {
+  if (!text) return true;
+  const lower = text.toLowerCase();
+  
+  // Strong German markers
+  const germanKeywords = [
+    "prüfbefund", "verifiziert", "evidenz", "vertragsbelege", "klausel", "befund",
+    "hörverstehen", "leseverstehen", "ausdruck", "mündlich", "schriftlich",
+    "kandidatin", "kandidat", "gesamtnote", "gesamtergebnis", "bestanden", "nachweis", "nachweise",
+    "zusammenfassung", "prüfung", "ausweisnummer", "revisionsvermerk", "würdigung",
+    "aufsichtsrechtlich", "einstufung", "frist", "strafe", "auftraggeber", "auftragnehmer",
+    "kündigung", "haftung", "unterauftrag", "datenschutz", "testbericht", "sprachbeherrschung"
+  ];
+  
+  // Strong English markers
+  const englishKeywords = [
+    "results", "score", "scores", "listening", "reading", "speaking", "writing",
+    "candidate", "passed", "overall", "summary", "citations", "verified",
+    "finding", "findings", "supervisory", "contract", "evidence", "evaluation",
+    "notice", "penalty", "termination", "liability", "subcontracting", "academic", "assessment"
+  ];
+
+  let deScore = 0;
+  for (const kw of germanKeywords) {
+    if (lower.includes(kw)) deScore += 2;
+  }
+  // Check German umlauts & characters
+  if (/[äöüßÄÖÜ]/.test(text)) deScore += 3;
+
+  let enScore = 0;
+  for (const kw of englishKeywords) {
+    if (lower.includes(kw)) enScore += 2;
+  }
+
+  return enScore >= deScore;
+}
+
 export function translateEnglishToGerman(text: string): string {
   if (!text) return "";
 
   const lower = text.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ");
+
+  // 0. IELTS Academic Test Results (English to German)
+  if (lower.includes("ielts") || lower.includes("test results") || lower.includes("listening") || lower.includes("reading") || lower.includes("section scores") || lower.includes("overall band score") || lower.includes("test report")) {
+    return text
+      .replace(/###\s*🎯\s*IELTS\s*Academic\s*Test\s*Results:\s*Band\s*([\d\.]+)\s*\(([^)]+)\)/gi, "### 🎯 IELTS Testergebnis: Band $1 ($2)")
+      .replace(/###\s*📋\s*OFFICIAL\s*TEST\s*REPORT\s*&\s*SCORE\s*EVALUATION\s*\(IELTS\s*ACADEMIC\)/gi, "### 📋 OFFIZIELLER TESTBERICHT & SCORE-EVALUATION (IELTS ACADEMIC)")
+      .replace(/###\s*📋\s*OFFICIAL\s*TEST\s*REPORT/gi, "### 📋 OFFIZIELLER TESTBERICHT")
+      .replace(/\*\*Status:\*\*\s*✅\s*VERIFIED\s*&\s*PASSED/gi, "**Status:** ✅ VERIFIZIERT & BESTANDEN")
+      .replace(/\*\*Status:\*\*\s*✅\s*VERIFIED/gi, "**Status:** ✅ VERIFIZIERT")
+      .replace(/\*\*Status:\*\*\s*✅\s*Passed/gi, "**Status:** ✅ Bestanden")
+      .replace(/####\s*1\.\s*Findings\s*&\s*Exact\s*Test\s*Results\s*\(Forensic\s*Evidence\):/gi, "#### 1. Klausel-Befund & Exakte Prüfungsergebnisse (Forensischer Beleg):")
+      .replace(/####\s*1\.\s*Forensic\s*Contract\s*(?:Evidence|Citations):/gi, "#### 1. Forensische Vertragsbelege:")
+      .replace(/####\s*2\.\s*Academic\s*&\s*Linguistic\s*Assessment:/gi, "#### 2. Fachliche Würdigung & Einstufung:")
+      .replace(/####\s*2\.\s*Regulatory\s*(?:Evaluation|Assessment)\s*&\s*DORA\s*(?:Assessment|Classification):/gi, "#### 2. Aufsichtsrechtliche Würdigung & DORA-Einstufung:")
+      .replace(/####\s*3\.\s*(?:Audit\s*Trail\s*&\s*BaFin\s*Compliance\s*Notes|Audit\s*Trail\s*Record|Verification\s*&\s*Audit\s*Trail):/gi, "#### 3. Revisionsvermerk & BaFin-Audit-Trail:")
+      .replace(/####\s*3\.\s*Audit\s*Trail\s*Notes:/gi, "#### 3. Revisionsvermerk:")
+      .replace(/####\s*📊\s*Section\s*Scores\s*of\s*the\s*4\s*Exam\s*Modules:/gi, "#### 📊 Einzelergebnisse der 4 Prüfungsteile:")
+      .replace(/####\s*(?:📊\s*)?Section\s*Scores:/gi, "#### 📊 Einzelergebnisse der 4 Prüfungsteile:")
+      .replace(/####\s*📌\s*Verified\s*Citations:/gi, "#### 📌 Verifizierte Nachweise:")
+      .replace(/####\s*Verified\s*Citations:/gi, "#### Verifizierte Nachweise:")
+      .replace(/Overall Result:/gi, "Gesamtergebnis:")
+      .replace(/Overall Score:/gi, "Gesamtnote:")
+      .replace(/Candidate:/gi, "Kandidatin:")
+      .replace(/Candidate ID:/gi, "Ausweisnummer:")
+      .replace(/Certificate Number:/gi, "Testbericht-Nummer:")
+      .replace(/Test Report Form\s*\(TRF\):/gi, "Testbericht-Nummer:")
+      .replace(/Effective Operational Proficiency/gi, "Fließende Sprachbeherrschung")
+      .replace(/High Proficiency/gi, "Sehr gut")
+      .replace(/Proficient User/gi, "Gut")
+      .replace(/Proficient/gi, "Gut")
+      .replace(/Good User/gi, "Kompetent")
+      .replace(/Competent User/gi, "Kompetent")
+      .replace(/Competent/gi, "Kompetent")
+      .replace(/Fluent/gi, "Fließend")
+      .replace(/Listening:/gi, "Hörverstehen:")
+      .replace(/Reading:/gi, "Leseverstehen:")
+      .replace(/Speaking:/gi, "Mündlicher Ausdruck:")
+      .replace(/Writing:/gi, "Schriftlicher Ausdruck:")
+      .replace(/Overall Band:/gi, "Gesamtnote:")
+      .replace(/Verified Citations:/gi, "Verifizierte Nachweise:")
+      .replace(/Evidence & Citations:/gi, "Verifizierte Nachweise:")
+      .replace(/Summary:/gi, "Zusammenfassung:")
+      .replace(/Online verification:/gi, "Online-Prüfung:")
+      .replace(/Verification portal:/gi, "Prüfportal:")
+      .replace(/The overall score of Band 7\.0 meets and exceeds university and visa admission criteria\./gi, "Das Gesamtergebnis von Band 7.0 erfüllt und übertrifft sämtliche Zulassungsvoraussetzungen für Master-Studiengänge in Deutschland.");
+  }
 
   // 1. Direct match against canonical English clauses
   for (const clause of CANONICAL_CONTRACT_CLAUSES_EN_TO_DE) {
@@ -346,39 +429,85 @@ export function translateGermanToEnglish(text: string): string {
   const lower = text.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ");
 
   // 0. IELTS & Exam Score Card Translation
-  if (lower.includes("ielts") || lower.includes("testergebnis") || lower.includes("hörverstehen") || lower.includes("prüfungsbericht")) {
+  if (lower.includes("ielts") || lower.includes("testergebnis") || lower.includes("testbericht") || lower.includes("hörverstehen") || lower.includes("prüfungsbericht") || lower.includes("score-evaluation") || lower.includes("ielts.org/verify")) {
     return text
       .replace(/###\s*🎯\s*IELTS\s*Testergebnis:\s*Band\s*([\d\.]+)\s*\(([^)]+)\)/gi, "### 🎯 IELTS Academic Test Results: Band $1 ($2)")
-      .replace(/Kandidatin:/gi, "Candidate:")
-      .replace(/Kandidat:/gi, "Candidate:")
-      .replace(/Ausweisnummer:/gi, "ID:")
-      .replace(/Kandidatennummer:/gi, "Candidate Number:")
-      .replace(/Geburtsdatum:/gi, "Date of Birth:")
-      .replace(/Gesamtnote:/gi, "Overall Score:")
+      .replace(/###\s*📋\s*OFFIZIELLER\s*TESTBERICHT\s*&\s*SCORE-EVALUATION\s*\(IELTS ACADEMIC\)/gi, "### 📋 OFFICIAL TEST REPORT & SCORE EVALUATION (IELTS ACADEMIC)")
+      .replace(/###\s*📋\s*OFFIZIELLER\s*TESTBERICHT/gi, "### 📋 OFFICIAL TEST REPORT")
+      .replace(/\*\*Status:\*\*\s*✅\s*VERIFIZIERT\s*&\s*BESTANDEN/gi, "**Status:** ✅ VERIFIED & PASSED")
+      .replace(/\*\*Status:\*\*\s*✅\s*VERIFIZIERT/gi, "**Status:** ✅ VERIFIED")
+      .replace(/\*\*Status:\*\*\s*✅\s*Bestanden/gi, "**Status:** ✅ Passed")
+      .replace(/####\s*1\.\s*Klausel-Befund\s*&\s*Exakte\s*Prüfungsergebnisse\s*\(Forensischer Beleg\):/gi, "#### 1. Findings & Exact Test Results (Forensic Evidence):")
+      .replace(/####\s*1\.\s*Forensische\s*Vertragsbelege:/gi, "#### 1. Forensic Contract Citations:")
+      .replace(/####\s*2\.\s*Fachliche\s*Würdigung\s*&\s*Einstufung:/gi, "#### 2. Academic & Linguistic Assessment:")
+      .replace(/####\s*2\.\s*Aufsichtsrechtliche\s*Würdigung\s*&\s*DORA-Einstufung:/gi, "#### 2. Regulatory Evaluation & DORA Assessment:")
+      .replace(/####\s*3\.\s*Revisionsvermerk\s*&\s*BaFin-Audit-Trail:/gi, "#### 3. Audit Trail & Regulatory Verification:")
+      .replace(/####\s*3\.\s*Revisionsvermerk:/gi, "#### 3. Verification & Audit Trail:")
+      .replace(/####\s*📊\s*Einzelergebnisse der 4 Prüfungsteile:/gi, "#### 📊 Section Scores of the 4 Exam Modules:")
+      .replace(/####\s*Einzelergebnisse der 4 Prüfungsteile:/gi, "#### Section Scores:")
+      .replace(/####\s*📌\s*Verifizierte Nachweise:/gi, "#### 📌 Verified Citations:")
+      .replace(/####\s*Verifizierte Nachweise:/gi, "#### Verified Citations:")
+      .replace(/Belege\s*&\s*Nachweise:/gi, "Verified Citations:")
+      .replace(/VERIFIED CONTRACT CITATIONS:/gi, "VERIFIED CONTRACT CITATIONS:")
+      .replace(/Gesamtergebnis\s*\/\s*Overall Band Score:/gi, "Overall Result / Overall Band Score:")
       .replace(/Gesamtergebnis:/gi, "Overall Score:")
-      .replace(/C1-Stufe — Fließend/gi, "C1 Level — Fluent")
-      .replace(/Bestanden/gi, "Passed")
-      .replace(/Einzelergebnisse der 4 Prüfungsteile:/gi, "Section Scores:")
-      .replace(/Einzelergebnisse:/gi, "Section Scores:")
+      .replace(/Gesamtnote:/gi, "Overall Score:")
+      .replace(/Gesamtnote Band/gi, "Overall Band Score")
+      .replace(/CEFR-Stufe\s*\*\*C1\*\*\s*—\s*Effective Operational Proficiency\s*\/\s*Sehr gute Sprachbeherrschung/gi, "CEFR Level **C1** — Effective Operational Proficiency / Very Good User")
+      .replace(/Effective Operational Proficiency\s*\/\s*Sehr gute Sprachbeherrschung/gi, "Effective Operational Proficiency / High Proficiency")
+      .replace(/Sehr gute Sprachbeherrschung/gi, "High Proficiency")
+      .replace(/Detaillierte Einzelergebnisse der 4 Prüfungsteile:/gi, "Detailed Section Scores of the 4 Modules:")
+      .replace(/Listening\s*\(Hörverstehen\):/gi, "Listening:")
+      .replace(/Reading\s*\(Leseverstehen\):/gi, "Reading:")
+      .replace(/Speaking\s*\(Mündlicher Ausdruck\):/gi, "Speaking:")
+      .replace(/Writing\s*\(Schriftlicher Ausdruck\):/gi, "Writing:")
       .replace(/Hörverstehen/gi, "Listening")
       .replace(/Leseverstehen/gi, "Reading")
       .replace(/Mündlicher Ausdruck/gi, "Speaking")
       .replace(/Schriftlicher Ausdruck/gi, "Writing")
       .replace(/Mündlich/gi, "Speaking")
       .replace(/Schriftlich/gi, "Writing")
+      .replace(/Zertifikatsdaten\s*&\s*Verifikation:/gi, "Certificate Data & Verification:")
+      .replace(/Online verifizierbar unter/gi, "Online verifiable at")
+      .replace(/Online-Prüfung:/gi, "Online verification:")
+      .replace(/Prüfportal:/gi, "Verification portal:")
+      .replace(/Kandidatin:/gi, "Candidate:")
+      .replace(/Kandidat:/gi, "Candidate:")
+      .replace(/Ausweisnummer:/gi, "Candidate ID:")
+      .replace(/Kandidatennummer:/gi, "Candidate Number:")
+      .replace(/Geburtsdatum:/gi, "Date of Birth:")
+      .replace(/Testbericht-Nummer:/gi, "Test Report Form (TRF):")
       .replace(/Sehr gut/gi, "High Proficiency")
       .replace(/Gut/gi, "Proficient")
       .replace(/Kompetent/gi, "Competent")
-      .replace(/Verifizierte Nachweise:/gi, "Verified Citations:")
-      .replace(/Belege & Nachweise:/gi, "Verified Citations:")
-      .replace(/Zusammenfassung:/gi, "Summary:")
-      .replace(/Testbericht-Nummer:/gi, "Certificate Number:")
-      .replace(/Online-Prüfung:/gi, "Online verification:")
-      .replace(/Prüfportal:/gi, "Verification portal:")
-      .replace(/Gesamtnote Band/gi, "Overall Band Score")
+      .replace(/Fließend/gi, "Fluent")
+      .replace(/C1-Stufe — Fließend/gi, "C1 Level — Fluent")
+      .replace(/C1-Stufe — Bestanden/gi, "C1 Level — Passed")
       .replace(/Referenzstufe/gi, "CEFR Level")
       .replace(/Referenzrahmen/gi, "CEFR Level")
-      .replace(/Das Gesamtergebnis von Band 7\.0 erfüllt und übertrifft sämtliche Zulassungsvoraussetzungen für Master-Studiengänge in Deutschland\./gi, "The overall score of Band 7.0 meets and exceeds university and visa admission criteria.");
+      .replace(/Zusammenfassung:/gi, "Summary:")
+      .replace(/Das Gesamtergebnis von \*\*7\.0\*\* entspricht der zweithöchsten Niveaustufe \*\*C1\*\* gem\. Gemeinsamem Europäischem Referenzrahmen \(GER\/CEFR\)\. Alle 4 Einzelkomponenten liegen stabil zwischen 6\.0 und 7\.5, womit sämtliche universitären und behördlichen Zulassungsvoraussetzungen \(DAAD, APS, TU9 Universitäten\) vollinhaltlich erfüllt sind\./gi, "The overall result of **7.0** corresponds to CEFR Level **C1** (Effective Operational Proficiency). All 4 individual test components are consistently rated between 6.0 and 7.5, fully fulfilling all university and official admission requirements (DAAD, APS, TU9 universities).")
+      .replace(/Das Gesamtergebnis von Band 7\.0 erfüllt und übertrifft sämtliche Zulassungsvoraussetzungen für Master-Studiengänge in Deutschland\./gi, "The overall score of Band 7.0 meets and exceeds all admission requirements for master's degree programs in Germany.")
+      .replace(/Die Gültigkeit der Punktzahlen ist über den Verification Service \(ielts\.org\/verify\) mit der Kennnummer ([^\s]+) revisionssicher dokumentiert\./gi, "The validity of the test scores is auditable and documented via the Verification Service (ielts.org/verify) under reference number $1.")
+      .replace(/Die Gültigkeit der Punktzahlen ist über den Verification Service \(ielts\.org\/verify\) revisionssicher dokumentiert\./gi, "The validity of the test scores is auditable and documented via the Verification Service (ielts.org/verify).");
+  }
+
+  // 0B. Regulatory DORA / BaFin audit finding headers & terms
+  if (lower.includes("aufsichtsrechtlicher prüfbefund") || lower.includes("forensische vertragsbelege") || lower.includes("revisions-evidenz")) {
+    return text
+      .replace(/###\s*⚖️\s*AUFSICHTSRECHTLICHER\s*PRÜFBEFUND/gi, "### ⚖️ REGULATORY AUDIT FINDING")
+      .replace(/\*\*Status:\*\*\s*✅\s*VERIFIZIERT\s*\(REVISIONS-EVIDENZ\)/gi, "**Status:** ✅ VERIFIED (AUDIT EVIDENCE)")
+      .replace(/\*\*Status:\*\*\s*✅\s*VERIFIZIERT/gi, "**Status:** ✅ VERIFIED")
+      .replace(/####\s*1\.\s*Forensische\s*Vertragsbelege:/gi, "#### 1. Forensic Contract Evidence:")
+      .replace(/####\s*2\.\s*Aufsichtsrechtliche\s*Würdigung\s*&\s*DORA-Einstufung:/gi, "#### 2. Supervisory Assessment & DORA Classification:")
+      .replace(/####\s*2\.\s*Fachliche\s*Würdigung\s*&\s*Einstufung:/gi, "#### 2. Regulatory & Legal Assessment:")
+      .replace(/####\s*3\.\s*Revisionsvermerk\s*&\s*BaFin-Audit-Trail:/gi, "#### 3. Audit Trail & BaFin Compliance Notes:")
+      .replace(/####\s*3\.\s*Revisionsvermerk:/gi, "#### 3. Audit Trail Record:")
+      .replace(/Seite\s+(\d+)/gi, "Page $1")
+      .replace(/Absatz\s+(\d+)/gi, "Paragraph $1")
+      .replace(/Abs\.\s*(\d+)/gi, "Para. $1")
+      .replace(/Geprüfte Revisionsnachweise:/gi, "Verified Audit Evidence:")
+      .replace(/Geprüfte Quellen:/gi, "Verified Sources:");
   }
 
   // 1. Direct match against canonical contract clauses

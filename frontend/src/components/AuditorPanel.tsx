@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
-import { translateGermanToEnglish } from "@/lib/translator";
+import { translateGermanToEnglish, translateEnglishToGerman, isEnglishText } from "@/lib/translator";
 
 export interface CitationItem {
   id: string;
@@ -288,15 +288,30 @@ export function AuditPanel({
 
         {/* Conversation History */}
         {messages.map((msg) => {
-          // If lang is EN, default to English unless toggled. If lang is DE, default to German.
-          const isTranslated =
-            translatedMap[msg.id] !== undefined
-              ? translatedMap[msg.id]
-              : lang === "EN";
+          const isOrigEn = isEnglishText(msg.finding_summary);
+          const isToggled = translatedMap[msg.id] === true;
 
-          const displayedSummary = isTranslated
-            ? translateGermanToEnglish(msg.finding_summary)
-            : msg.finding_summary;
+          let displayedSummary: string;
+          let buttonLabel: string;
+          let activeLangBadge: string;
+
+          if (isOrigEn) {
+            displayedSummary = isToggled ? translateEnglishToGerman(msg.finding_summary) : msg.finding_summary;
+            buttonLabel = isToggled
+              ? (lang === "DE" ? "Original Englisch 🇬🇧" : "Original English 🇬🇧")
+              : (lang === "DE" ? "Auf Deutsch übersetzen 🇩🇪" : "Translate to German 🇩🇪");
+            activeLangBadge = isToggled ? "DE Translated" : "EN Original";
+          } else {
+            const showEnglish =
+              translatedMap[msg.id] !== undefined
+                ? translatedMap[msg.id]
+                : lang === "EN";
+            displayedSummary = showEnglish ? translateGermanToEnglish(msg.finding_summary) : msg.finding_summary;
+            buttonLabel = showEnglish
+              ? (lang === "DE" ? "Original Deutsch 🇩🇪" : "German Original 🇩🇪")
+              : (lang === "DE" ? "Auf Englisch übersetzen 🇬🇧" : "Translate to English 🇬🇧");
+            activeLangBadge = showEnglish ? "EN Translated" : "DE Original";
+          }
 
           return (
             <div key={msg.id} className="space-y-2.5 animate-in fade-in duration-200">
@@ -345,7 +360,7 @@ export function AuditPanel({
                         title="Convert German legal text to English for international compliance"
                       >
                         <Languages className="w-3 h-3" />
-                        <span>{isTranslated ? "Auf Deutsch 🇩🇪" : "Translate to English 🇬🇧"}</span>
+                        <span>{buttonLabel}</span>
                       </button>
 
                       {/* Delete individual finding from history */}
@@ -371,7 +386,7 @@ export function AuditPanel({
                           {lang === "DE" ? "GEPRÜFTE BELEGE (AUDIT EVIDENCE)" : "VERIFIED AUDIT EVIDENCE"}
                         </span>
                         <span className="text-[9px] text-[var(--accent-cyan)] font-mono">
-                          {isTranslated ? "EN Translated" : "DE Original"}
+                          {activeLangBadge}
                         </span>
                       </div>
 

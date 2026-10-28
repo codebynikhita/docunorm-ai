@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
-import { translateGermanToEnglish } from "@/lib/translator";
+import { translateGermanToEnglish, translateEnglishToGerman, isEnglishText } from "@/lib/translator";
 import { renderMarkdownFormattedText } from "@/components/AuditorPanel";
 
 export interface StandaloneAuditorProps {
@@ -653,14 +653,29 @@ export function StandaloneAuditorStudio({
           ) : (
             (activeThread?.messages || []).map((msg) => {
               const isUser = msg.sender === "user";
-              // If lang is EN, default to English translation unless toggled off
-              const isTranslated =
-                translatedMap[msg.id] !== undefined
-                  ? translatedMap[msg.id]
-                  : lang === "EN";
-              const displayedText = isTranslated
-                ? translateGermanToEnglish(msg.text)
-                : msg.text;
+              const isOrigEn = isEnglishText(msg.text);
+              const isToggled = translatedMap[msg.id] === true;
+
+              let displayedText: string;
+              let buttonLabel: string;
+
+              if (isOrigEn) {
+                // Original message is English
+                displayedText = isToggled ? translateEnglishToGerman(msg.text) : msg.text;
+                buttonLabel = isToggled
+                  ? "Original English 🇬🇧"
+                  : (lang === "DE" ? "Auf Deutsch übersetzen 🇩🇪" : "Translate to German 🇩🇪");
+              } else {
+                // Original message is German
+                const showEnglish =
+                  translatedMap[msg.id] !== undefined
+                    ? translatedMap[msg.id]
+                    : lang === "EN";
+                displayedText = showEnglish ? translateGermanToEnglish(msg.text) : msg.text;
+                buttonLabel = showEnglish
+                  ? (lang === "DE" ? "Original Deutsch 🇩🇪" : "German Original 🇩🇪")
+                  : (lang === "DE" ? "Auf Englisch übersetzen 🇬🇧" : "Translate to English 🇬🇧");
+              }
 
               return (
                 <div
@@ -674,9 +689,9 @@ export function StandaloneAuditorStudio({
                   )}
 
                   <div
-                    className={`rounded-2xl p-4 space-y-3 shadow-sm ${
+                    className={`rounded-2xl p-3.5 space-y-2.5 shadow-sm ${
                       isUser
-                        ? "bg-[var(--surface-card)] border border-[var(--accent-tangerine)]/40 text-[var(--foreground)] max-w-xl"
+                        ? "bg-[var(--surface-card)] border border-[var(--accent-tangerine)]/40 text-[var(--foreground)] min-w-[140px] max-w-xl"
                         : "bg-[var(--surface-card)] border border-[var(--surface-border)] border-l-4 border-l-[var(--accent-tangerine)] flex-1"
                     }`}
                   >
@@ -704,7 +719,7 @@ export function StandaloneAuditorStudio({
                             className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[var(--accent-cyan)] font-bold hover:border-[var(--accent-cyan)] transition-all cursor-pointer"
                           >
                             <Languages className="w-3 h-3" />
-                            <span>{isTranslated ? (lang === "DE" ? "Original Deutsch 🇩🇪" : "German Original 🇩🇪") : (lang === "DE" ? "Auf Englisch übersetzen 🇬🇧" : "Translate to English 🇬🇧")}</span>
+                            <span>{buttonLabel}</span>
                           </button>
 
                           <button
@@ -764,11 +779,11 @@ export function StandaloneAuditorStudio({
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-[9.5px] font-mono opacity-40 pt-1">
+                    <div className="flex items-center justify-between gap-4 text-[9.5px] font-mono opacity-50 pt-1.5 border-t border-[var(--surface-border)]/40 mt-1">
                       {isUser ? (
                         <button
                           onClick={() => handleDeleteMessage(msg.id)}
-                          className="opacity-60 hover:opacity-100 hover:text-rose-400 flex items-center gap-1 transition-opacity cursor-pointer text-rose-400/80"
+                          className="opacity-70 hover:opacity-100 hover:text-rose-400 flex items-center gap-1 transition-colors cursor-pointer text-rose-400 shrink-0"
                           title={lang === "DE" ? "Frage löschen" : "Delete question"}
                         >
                           <Trash2 className="w-3 h-3" />
@@ -777,7 +792,7 @@ export function StandaloneAuditorStudio({
                       ) : (
                         <span />
                       )}
-                      <span>{msg.timestamp}</span>
+                      <span className="shrink-0">{msg.timestamp}</span>
                     </div>
                   </div>
 
