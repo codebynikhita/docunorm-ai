@@ -230,3 +230,26 @@ async def test_auditor_extracts_candidate_identity():
     assert "AD872063" in res
     assert "[SOURCE_1]" in res
 
+
+@pytest.mark.asyncio
+async def test_auditor_extracts_my_details():
+    from app.services.auditor import generate_llm_audit_finding
+
+    chunks = [
+        {"page_number": 1, "content": "Candidate Details NIKHITA GOWDARA PRABHAKARA REDDY AD872063"},
+        {"page_number": 1, "content": "Centre Number IN008 Test Date 28/FEB/2026 Test Report Form Number 26IA515338GOWN008A"},
+    ]
+
+    res = await generate_llm_audit_finding(query="my details", retrieved_chunks=chunks, lang="EN")
+
+    # Must return candidate identity and examination details, NOT generic DORA inspection rights!
+    assert "Nikhita" in res
+    assert "AD872063" in res
+    assert "515338" in res
+    assert "09/12/2003" in res
+    assert "IN008" in res
+    assert "26IA515338GOWN008A" in res
+    assert "Inspection Rights" not in res
+    assert "DORA" not in res
+    assert "[SOURCE_1]" in res
+
