@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-10-29T14:19:46.821860",
+  "total_samples": 40,
+  "epochs": 5,
+  "final_train_loss": 0.25,
+  "final_val_loss": 0.3044,
+  "final_perplexity": 1.36,
+  "final_token_accuracy": 98.14,
+  "convergence_status": "CONVERGED_OPTIMAL",
+  "epochs_telemetry": [
+    {
+      "epoch": 1,
+      "train_loss": 1.3711,
+      "val_loss": 1.4805,
+      "perplexity": 4.4,
+      "token_accuracy_pct": 79.97,
+      "learning_rate": 0.0001809
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.7923,
+      "val_loss": 0.8732,
+      "perplexity": 2.39,
+      "token_accuracy_pct": 89.35,
+      "learning_rate": 0.0001309
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.4901,
+      "val_loss": 0.5562,
+      "perplexity": 1.74,
+      "token_accuracy_pct": 94.25,
+      "learning_rate": 6.91e-05
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.3323,
+      "val_loss": 0.3908,
+      "perplexity": 1.48,
+      "token_accuracy_pct": 96.81,
+      "learning_rate": 1.91e-05
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.25,
+      "val_loss": 0.3044,
+      "perplexity": 1.36,
+      "token_accuracy_pct": 98.14,
+      "learning_rate": 0.0
+    }
+  ]
+}

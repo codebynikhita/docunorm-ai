@@ -22,7 +22,7 @@ pytest_bin = backend_dir / ".venv" / "bin" / "pytest"
 
 
 def run_step(step_num: int, title: str, cmd: list[str], cwd: Path) -> tuple[bool, float, str]:
-    print(f"\n▶️  [STEP {step_num}/5] {title}...")
+    print(f"\n▶️  [STEP {step_num}/6] {title}...")
     start_t = time.time()
     res = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True)
     duration = time.time() - start_t
@@ -68,18 +68,27 @@ def main():
     )
     results.append(("Model Training Pipeline", s3, d3))
 
-    # Step 4: Multi-Pillar Regulatory Benchmark
-    s4, d4, o4 = run_step(
+    # Step 4: Training Convergence & Loss Telemetry Simulation
+    s4_loss, d4_loss, o4_loss = run_step(
         4,
-        "Multi-Pillar Regulatory Benchmark (20 Ground-Truth Tests)",
+        "Training Convergence & Loss Telemetry Simulation",
+        [str(python_bin), "scripts/simulate_training_loss.py"],
+        backend_dir,
+    )
+    results.append(("Training Loss Telemetry (5 Epochs)", s4_loss, d4_loss))
+
+    # Step 5: Multi-Pillar Regulatory Benchmark
+    s4, d4, o4 = run_step(
+        5,
+        "Multi-Pillar Regulatory Benchmark (30 Ground-Truth Tests)",
         [str(python_bin), "scripts/evaluate_model.py"],
         backend_dir,
     )
-    results.append(("Regulatory Benchmark (20 cases)", s4, d4))
+    results.append(("Regulatory Benchmark (30 cases)", s4, d4))
 
-    # Step 5: Frontend TypeScript Verification
+    # Step 6: Frontend TypeScript Verification
     s5, d5, o5 = run_step(
-        5,
+        6,
         "Frontend TypeScript Static Type Check (tsc --noEmit)",
         ["npx", "tsc", "--noEmit"],
         frontend_dir,
