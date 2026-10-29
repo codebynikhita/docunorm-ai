@@ -15,34 +15,35 @@ from app.schemas.remediation import (
 
 def compute_word_diff(original: str, replacement: str) -> list[DiffToken]:
     """
-    Computes a word-by-word redline diff between original clause and compliant replacement.
+    Computes a clean, high-precision word-level redline diff between original clause and compliant replacement.
+    Splits on whitespace to prevent arbitrary whitespace alignments from shredding words into interleaved fragments.
     """
-    orig_words = re.findall(r"\S+|\s+", original)
-    repl_words = re.findall(r"\S+|\s+", replacement)
+    orig_words = original.strip().split()
+    repl_words = replacement.strip().split()
 
     matcher = difflib.SequenceMatcher(None, orig_words, repl_words)
     tokens: list[DiffToken] = []
 
     for tag, i1, i2, j1, j2 in matcher.get_opcodes():
         if tag == "equal":
-            text = "".join(orig_words[i1:i2])
+            text = " ".join(orig_words[i1:i2])
             if text:
-                tokens.append(DiffToken(type="equal", text=text))
+                tokens.append(DiffToken(type="equal", text=text + " "))
         elif tag == "delete":
-            text = "".join(orig_words[i1:i2])
+            text = " ".join(orig_words[i1:i2])
             if text:
-                tokens.append(DiffToken(type="delete", text=text))
+                tokens.append(DiffToken(type="delete", text=text + " "))
         elif tag == "insert":
-            text = "".join(repl_words[j1:j2])
+            text = " ".join(repl_words[j1:j2])
             if text:
-                tokens.append(DiffToken(type="insert", text=text))
+                tokens.append(DiffToken(type="insert", text=text + " "))
         elif tag == "replace":
-            del_text = "".join(orig_words[i1:i2])
-            ins_text = "".join(repl_words[j1:j2])
+            del_text = " ".join(orig_words[i1:i2])
+            ins_text = " ".join(repl_words[j1:j2])
             if del_text:
-                tokens.append(DiffToken(type="delete", text=del_text))
+                tokens.append(DiffToken(type="delete", text=del_text + " "))
             if ins_text:
-                tokens.append(DiffToken(type="insert", text=ins_text))
+                tokens.append(DiffToken(type="insert", text=ins_text + " "))
 
     return tokens
 

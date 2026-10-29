@@ -16,6 +16,8 @@ import {
   FileCheck2,
   AlertTriangle,
   Loader2,
+  Columns,
+  AlignLeft,
 } from "lucide-react";
 import {
   DocumentRiskHeatmap,
@@ -49,6 +51,7 @@ export function RemediationModal({
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [viewMode, setViewMode] = useState<"split" | "inline">("split");
 
   useEffect(() => {
     if (!isOpen || !documentId) return;
@@ -187,7 +190,7 @@ export function RemediationModal({
                           }`}
                         >
                           <div className="flex items-center justify-between text-[10px] mb-1">
-                            <span className="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400 font-bold border border-rose-500/30">
+                            <span className="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-500 dark:text-rose-400 font-bold border border-rose-500/30">
                               {item.severity}
                             </span>
                             <span className="opacity-60">{isDe ? `Seite ${item.page_number}` : `Page ${item.page_number}`}</span>
@@ -207,79 +210,154 @@ export function RemediationModal({
               {generating ? (
                 <div className="p-12 text-center text-xs font-mono opacity-70 space-y-2">
                   <Loader2 className="w-6 h-6 animate-spin mx-auto text-[var(--accent-tangerine)]" />
-                  <p>Synthesizing legal redline diff...</p>
+                  <p>{isDe ? "Synthetisiere rechtssicheren Redline-Diff..." : "Synthesizing legal redline diff..."}</p>
                 </div>
               ) : proposal ? (
                 <div className="space-y-4">
                   {/* Title & Statutory Basis Banner */}
                   <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/25 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
                     <div>
-                      <div className="font-bold text-blue-400">{isDe ? proposal.title_de : proposal.title_en}</div>
+                      <div className="font-bold text-blue-500 dark:text-blue-400">{isDe ? proposal.title_de : proposal.title_en}</div>
                       <div className="text-[11px] opacity-75 mt-0.5">
                         {isDe ? "Rechtsgrundlage:" : "Statutory Basis:"} {proposal.bgb_statutory_basis} • {proposal.dora_statutory_basis}
                       </div>
                     </div>
                     <button
                       onClick={handleCopy}
-                      className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/40 px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold text-[11px]"
+                      className="flex items-center gap-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-600 dark:text-blue-300 border border-blue-500/40 px-3 py-1.5 rounded-lg transition-all cursor-pointer font-bold text-[11px]"
                     >
-                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                       <span>{copied ? (isDe ? "Kopiert!" : "Copied!") : (isDe ? "Klausel kopieren" : "Copy Clause")}</span>
                     </button>
                   </div>
 
-                  {/* Word-Level Redline Diff Viewer */}
-                  <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-[var(--foreground)] opacity-70 border-b border-[var(--surface-border)] pb-2">
-                      <span className="flex items-center gap-1.5 font-bold">
-                        <GitCompare className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
-                        <span>{isDe ? "Wort-für-Wort Redline-Vergleich (Änderungsnachverfolgung):" : "Word-by-Word Redline Comparison:"}</span>
-                      </span>
-                      <div className="flex items-center gap-3 text-[10px]">
-                        <span className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded bg-rose-500/40 border border-rose-500"></span>
-                          <span>{isDe ? "Gestrichen (Rechtswidrig)" : "Removed (Deficient)"}</span>
+                  {/* Redline Diff Comparison Container */}
+                  <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] space-y-3 shadow-md">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[var(--surface-border)] pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <GitCompare className="w-4 h-4 text-[var(--accent-tangerine)]" />
+                        <span className="font-mono text-xs font-bold text-[var(--foreground)]">
+                          {isDe ? "Klausel-Nachbesserung & Redline-Diff:" : "Clause Remediation & Redline Diff:"}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded bg-emerald-500/40 border border-emerald-500"></span>
-                          <span>{isDe ? "Eingefügt (BGB/DORA Muster)" : "Added (Compliant)"}</span>
-                        </span>
+                      </div>
+
+                      {/* View Mode Switcher (Split vs Inline) & High-Contrast Legend */}
+                      <div className="flex flex-wrap items-center gap-3">
+                        {/* High-Contrast Legend */}
+                        <div className="flex items-center gap-2 text-[10px] font-mono">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-red-100 text-red-700 dark:bg-red-950/70 dark:text-red-300 border border-red-300 dark:border-red-700 font-bold">
+                            <span className="w-2 h-2 rounded-full bg-red-600 dark:bg-red-500"></span>
+                            <span>{isDe ? "Gestrichen (Defizitär)" : "Removed (Deficient)"}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-bold">
+                            <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-500"></span>
+                            <span>{isDe ? "Eingefügt (Rechtskonform)" : "Added (Compliant)"}</span>
+                          </span>
+                        </div>
+
+                        {/* View Mode Switcher */}
+                        <div className="flex items-center gap-1 bg-[var(--surface-dark)] p-0.5 rounded-lg border border-[var(--surface-border)] text-[10px] font-mono">
+                          <button
+                            onClick={() => setViewMode("split")}
+                            className={`flex items-center gap-1 px-2 py-1 rounded cursor-pointer font-bold ${
+                              viewMode === "split"
+                                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
+                                : "text-[var(--foreground)] opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            <Columns className="w-3 h-3" />
+                            <span>{isDe ? "Nebeneinander" : "Side-by-Side"}</span>
+                          </button>
+                          <button
+                            onClick={() => setViewMode("inline")}
+                            className={`flex items-center gap-1 px-2 py-1 rounded cursor-pointer font-bold ${
+                              viewMode === "inline"
+                                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
+                                : "text-[var(--foreground)] opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            <AlignLeft className="w-3 h-3" />
+                            <span>{isDe ? "Fließtext" : "Inline Diff"}</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-lg bg-[var(--surface-dark)] font-mono text-xs leading-relaxed border border-[var(--surface-border)]">
-                      {proposal.diff_tokens.map((token, idx) => {
-                        if (token.type === "delete") {
+                    {/* VIEW 1: SIDE-BY-SIDE (SPLIT VIEW) - CLEAR VIVID RED & GREEN */}
+                    {viewMode === "split" ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Red Column: Original Deficient Clause */}
+                        <div className="p-4 rounded-xl border-2 border-red-500/40 bg-red-50/60 dark:bg-red-950/30 space-y-2 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-red-600 text-white font-mono font-bold text-[10px] uppercase tracking-wider shadow-sm">
+                              <span>✕</span>
+                              <span>{isDe ? "GESTRICHEN (RECHTSWIDRIG)" : "REMOVED (DEFICIENT)"}</span>
+                            </span>
+                            <span className="text-[10px] font-mono text-red-600 dark:text-red-400 font-semibold">
+                              {isDe ? "Originaler Vertragstext" : "Original Contract Clause"}
+                            </span>
+                          </div>
+                          <div className="p-3 rounded-lg bg-white/80 dark:bg-black/30 border border-red-300 dark:border-red-800 text-xs font-mono leading-relaxed text-red-800 dark:text-red-200 line-through decoration-red-600 decoration-2">
+                            {proposal.original_text || (isDe ? "Allgemeine Vertragsklausel ohne explizite Regelung" : "Generic clause lacking explicit statutory governance")}
+                          </div>
+                        </div>
+
+                        {/* Green Column: Compliant Replacement Clause */}
+                        <div className="p-4 rounded-xl border-2 border-emerald-500/40 bg-emerald-50/60 dark:bg-emerald-950/30 space-y-2 shadow-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-600 text-white font-mono font-bold text-[10px] uppercase tracking-wider shadow-sm">
+                              <span>✓</span>
+                              <span>{isDe ? "EINGEFÜGT (RECHTSKONFORM)" : "ADDED (COMPLIANT)"}</span>
+                            </span>
+                            <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">
+                              {isDe ? "BGB § 311 / DORA Muster" : "BGB § 311 / DORA Model"}
+                            </span>
+                          </div>
+                          <div className="p-3 rounded-lg bg-white/80 dark:bg-black/30 border border-emerald-300 dark:border-emerald-800 text-xs font-mono leading-relaxed text-emerald-900 dark:text-emerald-100 font-semibold">
+                            {proposal.compliant_replacement_de}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* VIEW 2: INLINE REDLINE DIFF - HIGH CONTRAST RED & GREEN TOKENS */
+                      <div className="p-4 rounded-xl bg-[var(--surface-dark)] font-mono text-xs leading-loose border border-[var(--surface-border)]">
+                        {proposal.diff_tokens.map((token, idx) => {
+                          if (token.type === "delete") {
+                            return (
+                              <span
+                                key={idx}
+                                className="inline-block bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-200 border-2 border-red-500 dark:border-red-600 font-bold line-through decoration-red-600 decoration-2 px-1.5 py-0.5 rounded mx-1 shadow-sm"
+                              >
+                                {token.text}
+                              </span>
+                            );
+                          } else if (token.type === "insert") {
+                            return (
+                              <span
+                                key={idx}
+                                className="inline-block bg-emerald-100 text-emerald-900 dark:bg-emerald-950/80 dark:text-emerald-100 border-2 border-emerald-500 dark:border-emerald-600 font-bold underline decoration-emerald-600 decoration-2 px-1.5 py-0.5 rounded mx-1 shadow-sm"
+                              >
+                                {token.text}
+                              </span>
+                            );
+                          }
                           return (
-                            <span
-                              key={idx}
-                              className="bg-rose-500/25 text-rose-300 line-through decoration-rose-500 px-1 py-0.5 rounded mx-0.5"
-                            >
+                            <span key={idx} className="text-[var(--foreground)] opacity-90 mx-0.5">
                               {token.text}
                             </span>
                           );
-                        } else if (token.type === "insert") {
-                          return (
-                            <span
-                              key={idx}
-                              className="bg-emerald-500/25 text-emerald-300 font-bold underline decoration-emerald-500 px-1 py-0.5 rounded mx-0.5"
-                            >
-                              {token.text}
-                            </span>
-                          );
-                        }
-                        return <span key={idx}>{token.text}</span>;
-                      })}
-                    </div>
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   {/* Clean Proposed German Replacement Clause */}
-                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-2">
-                    <span className="text-[11px] font-mono font-bold text-emerald-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5" />
+                  <div className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border-2 border-emerald-500/40 space-y-2 shadow-sm">
+                    <span className="text-[11px] font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileCheck2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       <span>{isDe ? "Vollständige rechtssichere Musterklausel (Deutsch):" : "Compliant German Legal Replacement Clause:"}</span>
                     </span>
-                    <p className="text-xs font-mono text-[var(--foreground)] leading-relaxed bg-[var(--surface-dark)]/60 p-3 rounded-lg border border-emerald-500/20">
+                    <p className="text-xs font-mono text-emerald-950 dark:text-emerald-100 leading-relaxed bg-white/80 dark:bg-black/30 p-3.5 rounded-lg border border-emerald-400 dark:border-emerald-700 font-medium">
                       {proposal.compliant_replacement_de}
                     </p>
                   </div>
@@ -289,7 +367,7 @@ export function RemediationModal({
                     <span className="text-[10px] font-bold opacity-60 uppercase tracking-wider">
                       {isDe ? "Aufsichtsrechtliche Begründung & BGB-Würdigung:" : "Legal Justification & BGB Assessment:"}
                     </span>
-                    <p className="opacity-80 text-[11px] leading-relaxed">
+                    <p className="opacity-80 text-[11px] leading-relaxed text-[var(--foreground)]">
                       {isDe ? proposal.legal_justification_de : proposal.legal_justification_en}
                     </p>
                   </div>
