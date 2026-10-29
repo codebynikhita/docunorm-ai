@@ -18,6 +18,7 @@ import { LandingPage } from "@/components/LandingPage";
 import { LoginPage } from "@/components/LoginPage";
 import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
 import { RemediationModal } from "@/components/RemediationModal";
+import { TableInspectorModal } from "@/components/TableInspectorModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
 import { Bot, Award } from "lucide-react";
@@ -48,6 +49,7 @@ export default function Home() {
   const [isDoraSubcontractorModalOpen, setIsDoraSubcontractorModalOpen] = useState(false);
   const [isAuditRightsModalOpen, setIsAuditRightsModalOpen] = useState(false);
   const [isRemediationModalOpen, setIsRemediationModalOpen] = useState(false);
+  const [isTableInspectorOpen, setIsTableInspectorOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -378,6 +380,7 @@ export default function Home() {
                 onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
                 onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
                 onOpenRemediation={() => setIsRemediationModalOpen(true)}
+                onOpenTableInspector={() => setIsTableInspectorOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -427,6 +430,7 @@ export default function Home() {
                 onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
                 onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
                 onOpenRemediation={() => setIsRemediationModalOpen(true)}
+                onOpenTableInspector={() => setIsTableInspectorOpen(true)}
               />
             </main>
           )}
@@ -547,6 +551,28 @@ export default function Home() {
         lang={lang}
       />
 
+      {/* SLA-Tabellen & Pönalen-Inspektor Modal (DORA Art. 30) */}
+      <TableInspectorModal
+        isOpen={isTableInspectorOpen}
+        onClose={() => setIsTableInspectorOpen(false)}
+        lang={lang}
+        documentId={documentId}
+        documentName={documentName}
+        availableDocuments={availableDocuments}
+        onSelectDocument={handleSelectDocument}
+        onJumpToCitation={(page, bbox) => {
+          setCurrentPage(page);
+          if (bbox) {
+            setActiveHighlight({
+              page_number: page,
+              box: bbox,
+              label: lang === "DE" ? "SLA-Tabelle / Klausel-Zelle" : "SLA Table / Cell",
+            });
+          }
+          setLayoutMode("workbench");
+        }}
+      />
+
       {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
@@ -565,6 +591,7 @@ export default function Home() {
         onOpenDoraSubcontractor={() => setIsDoraSubcontractorModalOpen(true)}
         onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
         onOpenRemediation={() => setIsRemediationModalOpen(true)}
+        onOpenTableInspector={() => setIsTableInspectorOpen(true)}
         onOpenZugferd={() => setIsZugferdModalOpen(true)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}

@@ -28,6 +28,8 @@ from app.schemas.dora import DoraExitAuditReport
 from app.schemas.subcontractor import DoraSubcontractorAuditReport
 from app.schemas.audit_rights import DoraAuditRightsReport
 from app.schemas.remediation import DocumentRiskHeatmap, AmendmentProposal
+from app.schemas.table import DocumentTablesResponse, TableStructure
+from app.services.table_extractor import TableExtractorService
 from app.services.dora_exit_engine import dora_exit_engine
 from app.services.subcontractor_engine import subcontractor_engine
 from app.services.audit_rights_engine import audit_rights_engine
@@ -1228,5 +1230,111 @@ async def export_amendment_pdf(
         media_type="application/pdf",
         filename=clean_filename,
     )
+
+
+@router.get(
+    "/{document_id}/tables",
+    response_model=DocumentTablesResponse,
+    summary="Extract & Analyze Structured Tables (SLA Matrices, Academic Certificates, Invoices)",
+)
+async def get_document_tables(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> DocumentTablesResponse:
+    """
+    Extracts high-fidelity table structures, cell coordinates, Markdown representation,
+    and automatic DORA Art. 30 / BaFin SLA compliance evaluation.
+    """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
+
+    pdf_path = Path(doc.file_path)
+    return TableExtractorService.extract_tables_from_pdf(
+        document_id=doc.id,
+        pdf_path=pdf_path,
+        filename=doc.filename,
+    )
+
+
+@router.get(
+    "/{document_id}/tables/{table_id}",
+    response_model=TableStructure,
+    summary="Get Detailed Structure of a Specific Table",
+)
+async def get_document_table_by_id(
+    document_id: UUID,
+    table_id: str,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> TableStructure:
+    """
+    Returns single table geometry, bounding boxes, cell grids, and regulatory metrics.
+    """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
+
+    tables_res = TableExtractorService.extract_tables_from_pdf(
+        document_id=doc.id,
+        pdf_path=doc.file_path,
+        filename=doc.filename,
+    )
+    for tbl in tables_res.tables:
+        if tbl.table_id == table_id:
+            return tbl
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Table '{table_id}' not found in document.",
+    )
+
+
+@router.get(
+    "/{document_id}/tables/{table_id}/export.csv",
+    summary="Export Structured Table to CSV for SAP/Excel Processing",
+)
+async def export_table_csv(
+    document_id: UUID,
+    table_id: str,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> Response:
+    """
+    Exports clean UTF-8 CSV representation for corporate finance and compliance workflows.
+    """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Document not found.",
+        )
+
+    tables_res = TableExtractorService.extract_tables_from_pdf(
+        document_id=doc.id,
+        pdf_path=doc.file_path,
+        filename=doc.filename,
+    )
+    for tbl in tables_res.tables:
+        if tbl.table_id == table_id:
+            clean_name = f"{doc.filename.replace('.pdf', '')}_{tbl.table_id}.csv"
+            return Response(
+                content=tbl.csv_data,
+                media_type="text/csv",
+                headers={
+                    "Content-Disposition": f'attachment; filename="{clean_name}"',
+                    "Content-Type": "text/csv; charset=utf-8",
+                },
+            )
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Table '{table_id}' not found in document.",
+    )
+
 
 

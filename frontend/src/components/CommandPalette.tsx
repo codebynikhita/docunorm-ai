@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Sparkles,
   ExternalLink,
+  Table as TableIcon,
   X,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
@@ -40,6 +41,7 @@ interface CommandPaletteProps {
   onOpenDoraSubcontractor: () => void;
   onOpenAuditRights: () => void;
   onOpenRemediation?: () => void;
+  onOpenTableInspector?: () => void;
   onOpenZugferd: () => void;
   onOpenCertificate: () => void;
   availableDocuments?: any[];
@@ -57,6 +59,7 @@ export function CommandPalette({
   onOpenDoraSubcontractor,
   onOpenAuditRights,
   onOpenRemediation,
+  onOpenTableInspector,
   onOpenZugferd,
   onOpenCertificate,
   availableDocuments = [],
@@ -147,6 +150,18 @@ export function CommandPalette({
       shortcut: "B R",
       action: () => {
         if (onOpenRemediation) onOpenRemediation();
+        onClose();
+      },
+    },
+    {
+      id: "reg-table-inspector",
+      title_de: "SLA-Tabellen & Pönalen-Inspektor (DORA Art. 30)",
+      title_en: "SLA Table & Penalty Matrix Inspector (DORA Art. 30)",
+      category: "regulatory",
+      icon: TableIcon,
+      shortcut: "S T",
+      action: () => {
+        if (onOpenTableInspector) onOpenTableInspector();
         onClose();
       },
     },

@@ -434,4 +434,75 @@ export async function downloadAmendmentPdf(documentId: string, proposals?: Amend
   document.body.removeChild(a);
 }
 
+export interface TableCell {
+  row_idx: number;
+  col_idx: number;
+  text: string;
+  bounding_box: [number, number, number, number];
+  is_header: boolean;
+  is_numeric: boolean;
+  confidence?: number;
+}
+
+export interface TableRegulatoryAnalysis {
+  sla_classification: string;
+  compliance_status: "COMPLIANT" | "PARTIALLY_COMPLIANT" | "CRITICAL_NON_COMPLIANT" | string;
+  availability_target?: string | null;
+  penalty_scale_assessed: string[];
+  dora_statutory_basis: string;
+  deficiencies: string[];
+  recommendations: string[];
+}
+
+export interface TableStructure {
+  table_id: string;
+  document_id: string;
+  page_number: number;
+  bounding_box: [number, number, number, number];
+  row_count: number;
+  col_count: number;
+  headers: string[];
+  rows: string[][];
+  cells: TableCell[];
+  table_type: "SLA_PENALTY_MATRIX" | "ACADEMIC_SCORE_REPORT" | "FINANCIAL_INVOICE" | "GENERAL_CONTRACTUAL" | string;
+  title: string;
+  csv_data: string;
+  markdown_table: string;
+  regulatory_analysis?: TableRegulatoryAnalysis | null;
+}
+
+export interface DocumentTablesResponse {
+  document_id: string;
+  filename: string;
+  total_tables: number;
+  tables: TableStructure[];
+}
+
+export async function getDocumentTables(documentId: string): Promise<DocumentTablesResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/tables`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Failed to extract tables (status: ${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadTableCsv(documentId: string, tableId: string, title: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/tables/${tableId}/export.csv`);
+  if (!res.ok) {
+    throw new Error(`Failed to export table CSV (status: ${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const cleanTitle = title.replace(/[^a-zA-Z0-9_-]/g, "_");
+  a.download = `${cleanTitle}_${tableId}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 

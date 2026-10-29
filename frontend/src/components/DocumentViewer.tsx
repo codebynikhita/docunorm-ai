@@ -23,6 +23,7 @@ import {
   ShieldAlert,
   Sparkles,
   Network,
+  Table as TableIcon,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
@@ -62,6 +63,7 @@ interface DocumentViewerProps {
   onOpenDoraSubcontractor?: () => void;
   onOpenAuditRights?: () => void;
   onOpenRemediation?: () => void;
+  onOpenTableInspector?: () => void;
 }
 
 export function DocumentViewer({
@@ -80,6 +82,7 @@ export function DocumentViewer({
   onOpenDoraSubcontractor,
   onOpenAuditRights,
   onOpenRemediation,
+  onOpenTableInspector,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -399,7 +402,7 @@ export function DocumentViewer({
           </div>
 
           {/* REGULATORY AUDIT MODULES GROUP */}
-          {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights) && (
+          {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector) && (
             <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm shrink-0">
               {onOpenDoraExit && (
                 <button
@@ -436,6 +439,19 @@ export function DocumentViewer({
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="hidden xl:inline">
                     Prüfrechte (DIN 5008)
+                  </span>
+                </button>
+              )}
+
+              {onOpenTableInspector && (
+                <button
+                  onClick={onOpenTableInspector}
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-[var(--accent-tangerine)] hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  title={lang === "DE" ? "SLA-Tabellen & Pönalen-Inspektor (DORA Art. 30)" : "SLA Table & Penalty Matrix Inspector (DORA Art. 30)"}
+                >
+                  <TableIcon className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+                  <span className="hidden xl:inline">
+                    {lang === "DE" ? "SLA-Tabellen" : "SLA Tables"}
                   </span>
                 </button>
               )}
