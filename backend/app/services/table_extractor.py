@@ -10,6 +10,8 @@ from app.schemas.table import (
     TableRegulatoryAnalysis,
     TableStructure,
     DocumentTablesResponse,
+    SlaPenaltyCalculationRequest,
+    SlaPenaltyCalculationResponse,
 )
 
 
@@ -417,3 +419,72 @@ class TableExtractorService:
             markdown_table=to_markdown_table(headers, rows),
             regulatory_analysis=reg,
         )
+
+    @classmethod
+    def calculate_sla_penalty(
+        cls,
+        request: SlaPenaltyCalculationRequest,
+    ) -> SlaPenaltyCalculationResponse:
+        tolerated_hours = 4.38
+        excess_hours = max(0.0, request.actual_downtime_hours - tolerated_hours)
+        excess_days = excess_hours / 24.0
+        penalty_rate = round(excess_days * 0.2, 3)
+
+        if request.actual_downtime_hours > 87.6:
+            penalty_rate = 25.0
+            termination_triggered = True
+            compliance_status = "CRITICAL_NON_COMPLIANT"
+        elif request.actual_downtime_hours > 43.8:
+            penalty_rate = 15.0
+            termination_triggered = False
+            compliance_status = "PARTIALLY_COMPLIANT"
+        elif request.actual_downtime_hours > 4.38:
+            penalty_rate = max(5.0, penalty_rate)
+            termination_triggered = False
+            compliance_status = "PARTIALLY_COMPLIANT"
+        else:
+            penalty_rate = 0.0
+            termination_triggered = False
+            compliance_status = "COMPLIANT"
+
+        uncapped_penalty = round((penalty_rate / 100.0) * request.annual_order_value_eur, 2)
+        cap_percentage = 5.0
+        cap_eur = round((cap_percentage / 100.0) * request.annual_order_value_eur, 2)
+
+        if termination_triggered:
+            final_penalty = uncapped_penalty
+        else:
+            final_penalty = min(uncapped_penalty, cap_eur)
+
+        legal_de = (
+            f"Gemäß § 4 Abs. 2 SLA-Katalog A beträgt die tolerierte Jahresausfallzeit 4,38 Stunden (99,95 % Verfügbarkeit). "
+            f"Mit {request.actual_downtime_hours:.2f} Stunden Ausfallzeit liegt eine Überschreitung um {excess_hours:.2f} Stunden vor. "
+            f"Die vertragliche Pönale beträgt {penalty_rate:.1f} % (EUR {uncapped_penalty:,.2f}), gedeckelt gem. § 4 Abs. 4 auf 5,0 % (EUR {cap_eur:,.2f}). "
+            f"Rechtsverbindlicher Einbehalt: EUR {final_penalty:,.2f}."
+        )
+        legal_en = (
+            f"Pursuant to Section 4 Para. 2 SLA Schedule A, tolerated annual downtime is 4.38 hours (99.95% availability). "
+            f"Recorded downtime of {request.actual_downtime_hours:.2f} hours represents an excess of {excess_hours:.2f} hours. "
+            f"Contractual penalty assessed at {penalty_rate:.1f}% (EUR {uncapped_penalty:,.2f}), capped at 5.0% (EUR {cap_eur:,.2f}). "
+            f"Legally enforceable deduction: EUR {final_penalty:,.2f}."
+        )
+
+        return SlaPenaltyCalculationResponse(
+            document_id=request.document_id,
+            table_id=request.table_id,
+            annual_order_value_eur=request.annual_order_value_eur,
+            actual_downtime_hours=request.actual_downtime_hours,
+            tolerated_downtime_hours=tolerated_hours,
+            excess_downtime_hours=round(excess_hours, 2),
+            penalty_rate_percentage=penalty_rate,
+            uncapped_penalty_eur=uncapped_penalty,
+            penalty_cap_percentage=cap_percentage,
+            penalty_cap_eur=cap_eur,
+            final_enforceable_penalty_eur=final_penalty,
+            dora_compliance_status=compliance_status,
+            termination_right_triggered=termination_triggered,
+            legal_justification_de=legal_de,
+            legal_justification_en=legal_en,
+            statutory_citation="DORA Art. 30 Abs. 2 lit. d · BaFin BAIT 8.1 · BGB § 339",
+        )
+

@@ -62,3 +62,31 @@ class DocumentTablesResponse(BaseModel):
     filename: str
     total_tables: int
     tables: list[TableStructure]
+
+
+class SlaPenaltyCalculationRequest(BaseModel):
+    document_id: UUID
+    table_id: str
+    annual_order_value_eur: float = Field(default=582000.0, description="Annual Contract Order Value in EUR")
+    actual_downtime_hours: float = Field(default=6.5, description="Recorded outage in hours")
+    sla_tier: str = Field(default="Tier-3 Platin", description="Evaluated Service-Level Tier")
+
+
+class SlaPenaltyCalculationResponse(BaseModel):
+    document_id: UUID
+    table_id: str
+    annual_order_value_eur: float
+    actual_downtime_hours: float
+    tolerated_downtime_hours: float
+    excess_downtime_hours: float
+    penalty_rate_percentage: float
+    uncapped_penalty_eur: float
+    penalty_cap_percentage: float
+    penalty_cap_eur: float
+    final_enforceable_penalty_eur: float
+    dora_compliance_status: str
+    termination_right_triggered: bool
+    legal_justification_de: str
+    legal_justification_en: str
+    statutory_citation: str
+

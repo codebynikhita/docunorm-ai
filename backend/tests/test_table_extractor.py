@@ -145,3 +145,26 @@ async def test_get_tables_endpoint_not_found():
         app.dependency_overrides.pop(get_session, None)
 
 
+def test_calculate_sla_penalty_engine():
+    from app.schemas.table import SlaPenaltyCalculationRequest
+
+    doc_id = uuid4()
+    req = SlaPenaltyCalculationRequest(
+        document_id=doc_id,
+        table_id="tbl-p1-sla",
+        annual_order_value_eur=582000.0,
+        actual_downtime_hours=6.5,
+        sla_tier="Tier-3 Platin",
+    )
+    res = TableExtractorService.calculate_sla_penalty(req)
+    assert res.document_id == doc_id
+    assert res.tolerated_downtime_hours == 4.38
+    assert res.excess_downtime_hours > 0
+    assert res.penalty_rate_percentage > 0
+    assert res.final_enforceable_penalty_eur > 0
+    assert "DORA Art. 30" in res.statutory_citation
+    assert res.dora_compliance_status == "PARTIALLY_COMPLIANT"
+    assert res.termination_right_triggered is False
+
+
+

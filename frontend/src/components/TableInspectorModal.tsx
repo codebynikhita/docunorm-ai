@@ -15,6 +15,9 @@ import {
   Layers,
   Sparkles,
   Search,
+  Calculator,
+  FileJson,
+  TrendingDown,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
 import {
@@ -22,6 +25,8 @@ import {
   TableCell,
   getDocumentTables,
   downloadTableCsv,
+  calculateSlaPenalty,
+  SlaPenaltyCalculationResponse,
 } from "@/lib/api";
 
 interface TableInspectorModalProps {
@@ -53,7 +58,16 @@ export function TableInspectorModal({
   const [selectedTableIdx, setSelectedTableIdx] = useState<number>(0);
   const [hoveredCell, setHoveredCell] = useState<TableCell | null>(null);
   const [copiedMd, setCopiedMd] = useState(false);
-  const [activeTab, setActiveTab] = useState<"grid" | "raw_md" | "dora">("grid");
+  const [copiedJson, setCopiedJson] = useState(false);
+  const [activeTab, setActiveTab] = useState<"grid" | "calculator" | "dora" | "raw_md">("grid");
+  const [searchFilter, setSearchFilter] = useState("");
+
+  // SLA Penalty Calculator State
+  const [calcOrderValue, setCalcOrderValue] = useState<number>(582000);
+  const [calcDowntimeHours, setCalcDowntimeHours] = useState<number>(6.5);
+  const [calcTier, setCalcTier] = useState<string>("Tier-3 Platin");
+  const [calcResult, setCalcResult] = useState<SlaPenaltyCalculationResponse | null>(null);
+  const [calcLoading, setCalcLoading] = useState(false);
 
   // Fetch tables whenever documentId changes or modal opens
   useEffect(() => {
@@ -102,6 +116,21 @@ export function TableInspectorModal({
     downloadTableCsv(documentId, currentTable.table_id, currentTable.title);
   };
 
+  const handleDownloadJson = () => {
+    if (!currentTable) return;
+    const blob = new Blob([JSON.stringify(currentTable, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${currentTable.table_id}_export.json`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    setCopiedJson(true);
+    setTimeout(() => setCopiedJson(false), 2000);
+  };
+
   const handleJumpToTable = () => {
     if (!currentTable || !onJumpToCitation) return;
     onJumpToCitation(currentTable.page_number, currentTable.bounding_box);
@@ -113,6 +142,34 @@ export function TableInspectorModal({
     onJumpToCitation(currentTable.page_number, cell.bounding_box);
     onClose();
   };
+
+  const handleExecuteSlaCalculation = async () => {
+    if (!currentTable || !documentId) return;
+    setCalcLoading(true);
+    try {
+      const res = await calculateSlaPenalty(documentId, {
+        document_id: documentId,
+        table_id: currentTable.table_id,
+        annual_order_value_eur: calcOrderValue,
+        actual_downtime_hours: calcDowntimeHours,
+        sla_tier: calcTier,
+      });
+      setCalcResult(res);
+    } catch (e: any) {
+      console.error("SLA Penalty Calculation failed:", e);
+    } finally {
+      setCalcLoading(false);
+    }
+  };
+
+  // Filter rows based on search input
+  const filteredRows = currentTable
+    ? currentTable.rows.filter((row) =>
+        searchFilter.trim() === ""
+          ? true
+          : row.some((c) => c.toLowerCase().includes(searchFilter.toLowerCase()))
+      )
+    : [];
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
@@ -184,6 +241,7 @@ export function TableInspectorModal({
                     onClick={() => {
                       setSelectedTableIdx(idx);
                       setHoveredCell(null);
+                      setCalcResult(null);
                     }}
                     className={`px-3 py-1.5 text-xs font-mono rounded-t-lg transition-all flex items-center gap-2 cursor-pointer border-t border-x ${
                       isSelected
@@ -212,6 +270,17 @@ export function TableInspectorModal({
                 }`}
               >
                 {isDe ? "Rasteransicht" : "Grid View"}
+              </button>
+              <button
+                onClick={() => setActiveTab("calculator")}
+                className={`px-2 py-1 text-xs rounded font-medium transition-colors flex items-center gap-1 ${
+                  activeTab === "calculator"
+                    ? "bg-[var(--surface-border)] text-[var(--accent-tangerine)] font-bold"
+                    : "text-[var(--foreground)] opacity-60 hover:opacity-100"
+                }`}
+              >
+                <Calculator className="w-3 h-3" />
+                <span>{isDe ? "Pönalen-Rechner" : "Penalty Calc"}</span>
               </button>
               <button
                 onClick={() => setActiveTab("dora")}
@@ -353,7 +422,27 @@ export function TableInspectorModal({
 
               {/* Main Tab: Grid View */}
               {activeTab === "grid" && (
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  {/* Real-time search filter input */}
+                  <div className="flex items-center gap-2 bg-[var(--surface-dark)] border border-[var(--surface-border)] rounded-lg px-3 py-1.5 text-xs">
+                    <Search className="w-3.5 h-3.5 text-[var(--foreground)] opacity-50 shrink-0" />
+                    <input
+                      type="text"
+                      value={searchFilter}
+                      onChange={(e) => setSearchFilter(e.target.value)}
+                      placeholder={isDe ? "Tabelle durchsuchen (z. B. Verfügbarkeit, Pönale, Listening)..." : "Filter table (e.g. availability, penalty, score)..."}
+                      className="bg-transparent border-none text-xs text-[var(--foreground)] placeholder:opacity-40 focus:outline-none w-full font-mono"
+                    />
+                    {searchFilter && (
+                      <button
+                        onClick={() => setSearchFilter("")}
+                        className="text-[var(--foreground)] opacity-40 hover:opacity-100 text-xs px-1 cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+
                   <div className="border border-[var(--surface-border)] rounded-xl overflow-hidden overflow-x-auto bg-[var(--surface-dark)]/40 shadow-inner">
                     <table className="w-full text-left border-collapse text-xs">
                       <thead>
@@ -369,7 +458,7 @@ export function TableInspectorModal({
                         </tr>
                       </thead>
                       <tbody>
-                        {currentTable.rows.map((row, rIdx) => (
+                        {filteredRows.map((row, rIdx) => (
                           <tr
                             key={rIdx}
                             className="border-b border-[var(--surface-border)]/60 hover:bg-[var(--accent-tangerine)]/5 transition-colors last:border-b-0"
@@ -434,6 +523,110 @@ export function TableInspectorModal({
                 </div>
               )}
 
+              {/* Main Tab: Interactive SLA Penalty Calculator */}
+              {activeTab === "calculator" && (
+                <div className="space-y-4">
+                  <div className="bg-[var(--surface-dark)] border border-[var(--surface-border)] rounded-xl p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calculator className="w-4 h-4 text-[var(--accent-tangerine)]" />
+                        <h4 className="font-bold text-sm text-[var(--foreground)]">
+                          {isDe ? "DORA Art. 30 Pönalen- & Abzugsrechner" : "DORA Art. 30 Penalty & Deduction Calculator"}
+                        </h4>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-card)] border border-[var(--surface-border)] text-emerald-400">
+                        BGB § 339 & BaFin BAIT 8.1
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-[11px] font-mono opacity-60 block mb-1">
+                          {isDe ? "Jährliches Auftragsvolumen (EUR):" : "Annual Contract Value (EUR):"}
+                        </label>
+                        <input
+                          type="number"
+                          value={calcOrderValue}
+                          onChange={(e) => setCalcOrderValue(Number(e.target.value))}
+                          className="w-full bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-2 font-mono text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-tangerine)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-mono opacity-60 block mb-1">
+                          {isDe ? "Tatsächliche Ausfallzeit (Stunden):" : "Actual Outage Duration (Hours):"}
+                        </label>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={calcDowntimeHours}
+                          onChange={(e) => setCalcDowntimeHours(Number(e.target.value))}
+                          className="w-full bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-2 font-mono text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-tangerine)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-mono opacity-60 block mb-1">
+                          {isDe ? "SLA-Stufe:" : "SLA Tier:"}
+                        </label>
+                        <select
+                          value={calcTier}
+                          onChange={(e) => setCalcTier(e.target.value)}
+                          className="w-full bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-2 font-mono text-xs text-[var(--foreground)] focus:outline-none focus:border-[var(--accent-tangerine)]"
+                        >
+                          <option value="Tier-3 Platin">Tier-3 Platin (≥ 99,95 %)</option>
+                          <option value="Tier-2 Gold">Tier-2 Gold (99,50 % - 99,94 %)</option>
+                          <option value="Tier-1 Silber">Tier-1 Silber (99,00 % - 99,49 %)</option>
+                          <option value="Kritische Störung">Kritisch (&lt; 99,00 %)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <button
+                        onClick={handleExecuteSlaCalculation}
+                        disabled={calcLoading}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] font-mono text-xs font-bold hover:opacity-90 transition-all cursor-pointer shadow-md"
+                      >
+                        <TrendingDown className="w-3.5 h-3.5" />
+                        <span>{calcLoading ? "Berechne..." : isDe ? "Pönale Berechnen" : "Calculate Penalty"}</span>
+                      </button>
+                    </div>
+
+                    {/* Live Calculation Output Card */}
+                    {calcResult && (
+                      <div className="mt-3 p-3.5 rounded-xl bg-black/40 border border-[var(--surface-border)] space-y-3 animate-in fade-in-50">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+                          <div className="p-2 rounded bg-[var(--surface-card)]">
+                            <span className="opacity-50 block text-[10px]">{isDe ? "Tolerierte Downtime:" : "Tolerated Downtime:"}</span>
+                            <span className="font-bold text-emerald-400">{calcResult.tolerated_downtime_hours} Std</span>
+                          </div>
+                          <div className="p-2 rounded bg-[var(--surface-card)]">
+                            <span className="opacity-50 block text-[10px]">{isDe ? "Überschreitung:" : "Excess Outage:"}</span>
+                            <span className="font-bold text-rose-400">+{calcResult.excess_downtime_hours} Std</span>
+                          </div>
+                          <div className="p-2 rounded bg-[var(--surface-card)]">
+                            <span className="opacity-50 block text-[10px]">{isDe ? "Pönalensatz:" : "Penalty Rate:"}</span>
+                            <span className="font-bold text-[var(--accent-tangerine)]">{calcResult.penalty_rate_percentage} %</span>
+                          </div>
+                          <div className="p-2 rounded bg-[var(--surface-card)]">
+                            <span className="opacity-50 block text-[10px]">{isDe ? "Rechtsverbindlich:" : "Final Deduction:"}</span>
+                            <span className="font-bold text-emerald-300">EUR {calcResult.final_enforceable_penalty_eur.toLocaleString()}</span>
+                          </div>
+                        </div>
+
+                        <div className="text-xs p-2.5 rounded bg-[var(--surface-card)]/80 text-[var(--foreground)] opacity-90 font-mono">
+                          <span className="font-bold text-[var(--accent-tangerine)] block mb-1">
+                            {isDe ? "Aufsichtsrechtliche Begründung (DORA & BGB):" : "Legal Justification (DORA & BGB):"}
+                          </span>
+                          <p>{isDe ? calcResult.legal_justification_de : calcResult.legal_justification_en}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Main Tab: SLA Audit Deep-Dive */}
               {activeTab === "dora" && currentTable.regulatory_analysis && (
                 <div className="space-y-4">
@@ -489,6 +682,15 @@ export function TableInspectorModal({
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadJson}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-card)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono font-medium text-[var(--foreground)] transition-colors cursor-pointer"
+                title="Export structured JSON for SAP S/4HANA"
+              >
+                {copiedJson ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <FileJson className="w-3.5 h-3.5" />}
+                <span>JSON</span>
+              </button>
+
               <button
                 onClick={handleCopyMarkdown}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-card)] hover:bg-[var(--surface-border)] border border-[var(--surface-border)] text-xs font-mono font-medium text-[var(--foreground)] transition-colors cursor-pointer"
