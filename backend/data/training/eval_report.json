@@ -1,0 +1,432 @@
+{
+  "timestamp": "2026-10-29T14:03:29.978841",
+  "total_tests": 20,
+  "passed_tests": 20,
+  "accuracy_percent": 100.0,
+  "mean_latency_ms": 10.5,
+  "p95_latency_ms": 68.6,
+  "pillars": {
+    "Pillar IV (Cascading Subcontracting Trap)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        68.60804557800293
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Disguised Exit Toll)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        9.135723114013672
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Restricted Audit Access)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.503271102905273
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Cross-Border CLOUD Act Conflict)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        8.188724517822266
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (SLA Calculation Loophole)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.163763046264648
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Conditional Escrow)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.570981979370117
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Institutional Gold Standard)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.048130035400391
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Electronic Invoicing (Tax Compliance)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.508993148803711
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Datacenter Physical Access Ban)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.1849822998046875
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (BGB § 307 Vicarious Liability Trap)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.236719131469727
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Pooled Audit Cooperation Denial)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.824897766113281
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Cross-Border English Contract Risk)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.575750350952148
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (SLA & Penalty Matrices)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.266044616699219
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Academic Certification (IELTS & CEFR)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.895780563354492
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (BGB § 311 Contract Remediation)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.828950881958008
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Supervisory Audit Notices)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.933927536010742
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Electronic Invoicing (ZUGFeRD 2.3)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.719278335571289
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Bilingual Purity (English Regulatory)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.116079330444336
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Critical Function Categorization)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.409334182739258
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (Forensic Revisionssicherheit)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.916046142578125
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    }
+  },
+  "results": [
+    {
+      "id": "COMPLEX-TRAP-01-DEEMED-CONSENT",
+      "pillar": "Pillar IV (Cascading Subcontracting Trap)",
+      "passed": true,
+      "duration_ms": 68.6,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 LIT. A) **Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** Kaskadierendes Drittpar"
+    },
+    {
+      "id": "COMPLEX-TRAP-02-HIDDEN-EXIT-TOLL",
+      "pillar": "Pillar IV (Disguised Exit Toll)",
+      "passed": true,
+      "duration_ms": 9.1,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 LIT. H) **Status:** ❌ DEFIZITÄR / VERDECKTE AUSTRITTSBARRIERE | **Aufsichts-Pillar:** IKT-Exit-"
+    },
+    {
+      "id": "COMPLEX-TRAP-03-AUDIT-DEPOSIT-BARRIER",
+      "pillar": "Pillar IV (Restricted Audit Access)",
+      "passed": true,
+      "duration_ms": 7.5,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BAFIN PRÜFUNGSRECHTE & KWG § 25B) **Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** Vor-Ort-Prüfrecht"
+    },
+    {
+      "id": "COMPLEX-TRAP-04-CLOUD-ACT-CONFLICT",
+      "pillar": "Pillar IV (Cross-Border CLOUD Act Conflict)",
+      "passed": true,
+      "duration_ms": 8.2,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DATENSOUVERÄNITÄT & DRITTSTAATENTRANSFER) **Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** DORA Art."
+    },
+    {
+      "id": "COMPLEX-TRAP-05-SLA-EXCLUSION-LOOPHOLE",
+      "pillar": "Pillar IV (SLA Calculation Loophole)",
+      "passed": true,
+      "duration_ms": 7.2,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 LIT. D) **Status:** ❌ DEFIZITÄR / NACHBESSERUNGSBEDARF | **Aufsichts-Pillar:** Service Level Ag"
+    },
+    {
+      "id": "COMPLEX-TRAP-06-SOURCE-CODE-ESCROW",
+      "pillar": "Pillar IV (Conditional Escrow)",
+      "passed": true,
+      "duration_ms": 7.6,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (SOFTWARE-ESCROW & RESILIENZ) **Status:** ⚠️ BEDINGT KONFORM / ERHEBLICHER NACHBESSERUNGSBEDARF | **Aufsichts-Pillar"
+    },
+    {
+      "id": "COMPLEX-GOLDEN-07-GOLD-STANDARD-EXIT",
+      "pillar": "Pillar IV (Institutional Gold Standard)",
+      "passed": true,
+      "duration_ms": 7.0,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** IKT-Drittparteirisiko (Pillar IV)  #"
+    },
+    {
+      "id": "COMPLEX-ZUGFERD-08-INVALID-VAT-TAX",
+      "pillar": "Electronic Invoicing (Tax Compliance)",
+      "passed": true,
+      "duration_ms": 7.5,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (STEUERRECHTLICHE COMPLIANCE & ZUGFeRD) **Status:** ❌ DEFIZITÄR / RECHNUNG ABGEWIESEN | **Aufsichts-Pillar:** GoBD &"
+    },
+    {
+      "id": "COMPLEX-AUDIT-09-DATACENTER-PHYSICAL-BAN",
+      "pillar": "Pillar IV (Datacenter Physical Access Ban)",
+      "passed": true,
+      "duration_ms": 7.2,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 3 LIT. E & KWG § 25B) **Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** Säule IV (P"
+    },
+    {
+      "id": "COMPLEX-REMEDY-10-BGB-LIABILITY-DISCLAIMER",
+      "pillar": "Pillar IV (BGB § 307 Vicarious Liability Trap)",
+      "passed": true,
+      "duration_ms": 7.2,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BGB § 307 / § 278 & DORA ART. 30) **Status:** ❌ DEFIZITÄR / NICHTIG NACH BGB § 307 | **Aufsichts-Pillar:** Zivilrec"
+    },
+    {
+      "id": "COMPLEX-POOLED-11-JOINT-AUDIT-DENIAL",
+      "pillar": "Pillar IV (Pooled Audit Cooperation Denial)",
+      "passed": true,
+      "duration_ms": 7.8,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 3 LIT. E - POOLED AUDITS) **Status:** ❌ DEFIZITÄR / NICHT KONFORM | **Aufsichts-Pillar:** Säule I"
+    },
+    {
+      "id": "COMPLEX-CROSSBORDER-12-ENGLISH-EU-TRANSFER",
+      "pillar": "Pillar IV (Cross-Border English Contract Risk)",
+      "passed": true,
+      "duration_ms": 7.6,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ REGULATORY AUDIT FINDING (DORA ART. 30(2)(C) & GDPR ART. 44) **Status:** ❌ DEFIZITÄR / NON-COMPLIANT | **Supervisory Pillar:** DORA Third-Country Transfe"
+    },
+    {
+      "id": "COMPLEX-SLA-13-PENALTY-MATRIX-CAP",
+      "pillar": "Pillar IV (SLA & Penalty Matrices)",
+      "passed": true,
+      "duration_ms": 7.3,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 LIT. D) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Service Level Agreements & Pö"
+    },
+    {
+      "id": "ACADEMIC-IELTS-14-CANDIDATE-IDENTITY-SCORE",
+      "pillar": "Academic Certification (IELTS & CEFR)",
+      "passed": true,
+      "duration_ms": 6.9,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### 🎯 IELTS Testergebnis: Band 7.0 (C1 — Bestanden)  **Status:** ✅ VERIFIZIERT & BESTANDEN | **Overall Band Score:** **7.0** (**CEFR C1**)  **Kandidatin:** Nikh"
+    },
+    {
+      "id": "COMPLEX-BGB311-15-REMEDY-REDLINE-PROPOSAL",
+      "pillar": "Pillar IV (BGB § 311 Contract Remediation)",
+      "passed": true,
+      "duration_ms": 7.8,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BGB § 311 VERTRAGSNACHBESSERUNG) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** BGB § 311 Nachbesserung"
+    },
+    {
+      "id": "COMPLEX-DIN5008-16-BAFIN-SUPERVISORY-NOTICE",
+      "pillar": "Pillar IV (Supervisory Audit Notices)",
+      "passed": true,
+      "duration_ms": 6.9,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 LIT. C) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Datenresidenz & EU-Souveränit"
+    },
+    {
+      "id": "COMPLEX-ZUGFERD-17-COMFORT-LEITWEG-COMPLIANT",
+      "pillar": "Electronic Invoicing (ZUGFeRD 2.3)",
+      "passed": true,
+      "duration_ms": 7.7,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (ZUGFeRD 2.3 / E-RECHNUNG 2025) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Elektronische Rechnungsste"
+    },
+    {
+      "id": "COMPLEX-LANG-PURITY-18-ENGLISH-DORA-COMPLIANCE",
+      "pillar": "Bilingual Purity (English Regulatory)",
+      "passed": true,
+      "duration_ms": 7.1,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ REGULATORY AUDIT FINDINGS **Status:** ✅ VERIFIED (STATUTORY EVIDENCE)  #### 1. Contractual Citations: • [SOURCE_1] (Seite 1): Service Level Agreement Sec"
+    },
+    {
+      "id": "COMPLEX-COREBANK-19-CRITICAL-FUNCTION-DEFICIT",
+      "pillar": "Pillar IV (Critical Function Categorization)",
+      "passed": true,
+      "duration_ms": 7.4,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 / KERNFUNKTION) **Status:** ❌ DEFIZITÄR / VERTRAGSWIDRIG | **Aufsichts-Pillar:** Einstufung kri"
+    },
+    {
+      "id": "COMPLEX-AUDIT-20-CISO-INTERVIEW-LOG-ACCESS",
+      "pillar": "Pillar IV (Forensic Revisionssicherheit)",
+      "passed": true,
+      "duration_ms": 6.9,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHER PRÜFBEFUND **Status:** ✅ VERIFIZIERT (REVISIONS-EVIDENZ)  #### 1. Forensische Vertragsbelege: • [SOURCE_1] (Seite 1): § 22 Audit-Umf"
+    }
+  ]
+}

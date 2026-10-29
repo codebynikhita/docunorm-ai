@@ -106,5 +106,77 @@
     "must_include_citation": "[SOURCE_1]",
     "must_mention": ["dora", "transfer"],
     "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-SLA-13-PENALTY-MATRIX-CAP",
+    "pillar": "Pillar IV (SLA & Penalty Matrices)",
+    "context": "Anlage 4 SLA-Katalog A: Verfügbarkeit 99,95 % Mindestanforderung im Jahresmittel. Pönale: 0,2 % Verzugsstrafe pro Werktag, maximaler Pönalendeckel von 5 % des jährlichen Auftragswerts gem. DORA Art. 30 Abs. 2 lit. d.",
+    "query": "Sind die Pönalen und Verfügbarkeitsstaffeln nach DORA Art. 30 Abs. 2 lit. d und BaFin BAIT 8.1 ausreichend?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["verfügbarkeit", "dora"],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "ACADEMIC-IELTS-14-CANDIDATE-IDENTITY-SCORE",
+    "pillar": "Academic Certification (IELTS & CEFR)",
+    "context": "Test Report Form: 26IA515338GOWN008A. Candidate Details: NIKHITA GOWDARA PRABHAKARA REDDY. Candidate Number: AD872063. Listening: 7.5, Reading: 7.0, Writing: 6.0, Speaking: 6.5. Overall Band Score: 7.0 (CEFR Level C1). Validated at ielts.org/verify.",
+    "query": "Welches Gesamtergebnis und welche Einzelergebnisse wurden im Testbericht erzielt?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["7.0", "listening"],
+    "expected_status": "VERIFIZIERT"
+  },
+  {
+    "id": "COMPLEX-BGB311-15-REMEDY-REDLINE-PROPOSAL",
+    "pillar": "Pillar IV (BGB § 311 Contract Remediation)",
+    "context": "Alt-Klausel § 18: 'Der Dienstleister haftet nicht für den Verlust von Daten im Rahmen von Ausstiegsmaßnahmen.' Nachtrag gem. § 311 BGB: 'Der Dienstleister haftet vollumfänglich für die geordnete Datenmigration und Integrität der Primärdatenbanken gem. DORA Art. 30.'",
+    "query": "Ist die redaktionelle Nachbesserung gem. BGB § 311 zur DORA-Konformität geeignet?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["nachbesserung", "dora"],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-DIN5008-16-BAFIN-SUPERVISORY-NOTICE",
+    "pillar": "Pillar IV (Supervisory Audit Notices)",
+    "context": "Aufsichtliches Anschreiben DIN 5008 gem. KWG § 25b Abs. 1 an CloudScale GmbH: 'Anforderung zur Duldung einer unangekündigten Vor-Ort-Sonderprüfung am Standort Frankfurt am Main am 15.11.2026 durch BaFin-Prüfteam.'",
+    "query": "Welche aufsichtsrechtlichen Pflichten begründet diese Mitteilung für den Auslagerungsdienstleister nach KWG § 25b?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["bafin", "kwg"],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-ZUGFERD-17-COMFORT-LEITWEG-COMPLIANT",
+    "pillar": "Electronic Invoicing (ZUGFeRD 2.3)",
+    "context": "ZUGFeRD 2.3 XML / Factur-X: Profil EN 16931 (COMFORT). Leitweg-ID: 04011000-12345-67. Nettobetrag: 48.500,00 EUR. 19% USt: 9.215,00 EUR. Bruttobetrag: 57.715,00 EUR.",
+    "query": "Erfüllt dieser Rechnungsdatensatz die ab 2025 geltenden Vorgaben für elektronische Rechnungen nach EN 16931 in Deutschland?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["rechnung", "16931"],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-LANG-PURITY-18-ENGLISH-DORA-COMPLIANCE",
+    "pillar": "Bilingual Purity (English Regulatory)",
+    "context": "Service Level Agreement Section 14: Tier-3 Cloud infrastructure availability guaranteed at 99.95% annual minimum under DORA Art. 30. Unscheduled downtime penalties are calculated at 0.2% per day of invoice fee.",
+    "query": "Does this SLA availability commitment meet regulatory cloud standards under EU DORA Art. 30?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["availability", "dora"],
+    "expected_status": "COMPLIANT"
+  },
+  {
+    "id": "COMPLEX-COREBANK-19-CRITICAL-FUNCTION-DEFICIT",
+    "pillar": "Pillar IV (Critical Function Categorization)",
+    "context": "Vertrag Ziffer 3.1: 'Die Auslagerung des Kernbank-Zahlungsverkehrs wird als unkritische Nebenleistung eingestuft. Auf ein förmliches Ausstiegs- und Notfallkonzept nach DORA wird einvernehmlich verzichtet.'",
+    "query": "Ist der Verzicht auf ein Notfallkonzept bei Kernbank-Zahlungssystemen nach DORA Art. 30 zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["kernbank", "dora"],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-AUDIT-20-CISO-INTERVIEW-LOG-ACCESS",
+    "pillar": "Pillar IV (Forensic Revisionssicherheit)",
+    "context": "§ 22 Audit-Umfang: 'Das Prüfungsrecht des Instituts umfasst uneingeschränkte CISO- und Entwickler-Interviews sowie die Auswertung unveränderlicher Roh-Audit-Logs und Konfigurationsdateien gem. DORA Art. 30.'",
+    "query": "Entspricht dieser Prüfumfang den aufsichtlichen Mindeststandards gem. KWG § 25b und DORA Art. 30 Abs. 3 lit. e?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": ["prüf", "dora"],
+    "expected_status": "KONFORM"
   }
 ]

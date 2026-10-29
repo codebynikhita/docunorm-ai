@@ -1,0 +1,24 @@
+{
+  "model_id": "docunorm-sovereign-dora-1793262809",
+  "base_model": "models/gemini-1.5-flash-001",
+  "created_at": "2026-10-29T14:03:29.098246",
+  "training_dataset": "dora_bafin_train.jsonl",
+  "training_samples": 30,
+  "mean_tokens": 277.1,
+  "hyperparameters": {
+    "epochs": 5,
+    "batch_size": 4,
+    "learning_rate": 0.001,
+    "lora_rank": 16,
+    "lora_alpha": 32
+  },
+  "target_regulations": [
+    "EU DORA Art. 30",
+    "BaFin BAIT 8.1",
+    "KWG \u00a7 25b",
+    "ZUGFeRD 2.3",
+    "BGB \u00a7 311",
+    "CEFR Level C1"
+  ],
+  "training_status": "COMPILED_LOCAL_TRAINING"
+}
