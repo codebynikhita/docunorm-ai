@@ -48,7 +48,7 @@ def main():
         [str(pytest_bin), "-q"],
         backend_dir,
     )
-    results.append(("Pytest Suite (56 tests)", s1, d1))
+    results.append(("Pytest Suite (58 tests)", s1, d1))
 
     # Step 2: Dataset Quality Audit
     s2, d2, o2 = run_step(
