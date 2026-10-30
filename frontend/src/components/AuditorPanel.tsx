@@ -94,6 +94,36 @@ export function renderMarkdownFormattedText(text: string) {
           );
         }
 
+        // Dedicated Verdict / Status Pill Styling
+        if (trimmed.startsWith("**Status:**") || trimmed.startsWith("Status:")) {
+          const isPass = trimmed.includes("✅") || trimmed.includes("KONFORM") || trimmed.includes("COMPLIANT") || trimmed.includes("VERIFIZIERT") || trimmed.includes("ZUGELASSEN");
+          const isFail = trimmed.includes("❌") || trimmed.includes("DEFIZITÄR") || trimmed.includes("NICHT") || trimmed.includes("VERSTOSS") || trimmed.includes("SPERRE");
+          const isWarn = trimmed.includes("⚠️") || trimmed.includes("BEDINGT") || trimmed.includes("WARNING");
+
+          let pillStyle = "bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30";
+          if (isPass) {
+            pillStyle = "bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/50";
+          } else if (isFail) {
+            pillStyle = "bg-red-500/15 text-red-800 dark:text-red-300 border-red-500/50";
+          } else if (isWarn) {
+            pillStyle = "bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/50";
+          }
+
+          return (
+            <div
+              key={lineIdx}
+              className={`my-2 p-2.5 rounded-lg border text-xs font-mono font-bold flex items-center gap-2 shadow-sm ${pillStyle}`}
+            >
+              <span className="uppercase tracking-wider text-[10px] opacity-75">
+                {trimmed.includes("Status:") ? "Aufsichts-Urteil (Verdict):" : "Status:"}
+              </span>
+              <span className="text-xs">
+                {parseInlineMarkdown(trimmed.replace(/^\*\*Status:\*\*\s*|^Status:\s*/, ""))}
+              </span>
+            </div>
+          );
+        }
+
         if (trimmed.startsWith("#### ")) {
           return (
             <h5
