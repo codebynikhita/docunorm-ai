@@ -5,7 +5,10 @@
     "context": "Ziffer 14.3 (Unterauftragsvergabe): Der IKT-Dienstleister teilt die beabsichtigte Beauftragung weiterer Unterauftragnehmer elektronisch mit. Widerspricht das Finanzinstitut nicht innerhalb einer Frist von 5 Werktagen ab Zugang der Mitteilung schriftlich unter Darlegung schwerwiegender Gründe, gilt die Zustimmung als unwiderruflich erteilt (Zustimmungsfiktion).",
     "query": "Ist diese Zustimmungsfiktion mit 5-tägiger Widerspruchsfrist nach DORA Art. 30 Abs. 2 lit. a und BaFin BAIT zulässig?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["zustimmungsfiktion", "dora"],
+    "must_mention": [
+      "zustimmungsfiktion",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -14,7 +17,10 @@
     "context": "§ 21 Abs. 4 (Datenrückgabe bei Vertragsende): Der IKT-Auftragnehmer unterstützt die Datenmigration für 90 Tage. Für den Personal- und Infrastrukturaufwand der Bereitstellung der relationalen Primärdatenbanken wird eine pauschale Bereitstellungsgebühr in Höhe von 120.000 € zzgl. MwSt. erhoben, zahlbar vor Beginn jeglicher Datenextraktion.",
     "query": "Verstößt diese Bereitstellungsgebühr von 120.000 € gegen das Verbot von Austrittsbarrieren nach DORA Art. 30 Abs. 2 lit. h?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["gebühr", "exit"],
+    "must_mention": [
+      "gebühr",
+      "exit"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -23,7 +29,10 @@
     "context": "§ 16 Vor-Ort-Audits: Vor-Ort-Prüfungen durch das Finanzinstitut oder die Aufsichtsbehörde (BaFin/EZB) sind gestattet, bedingen jedoch die vorherige Hinterlegung einer nicht erstattungsfähigen Prüfkaution von 50.000 € zur Deckung interner Begleitkosten und dürfen maximal einmal im Kalenderjahr stattfinden.",
     "query": "Entspricht diese Kautionspflicht für Vor-Ort-Prüfungen den aufsichtsrechtlichen Prüfrechten nach KWG § 25b und DORA Art. 30 Abs. 3 lit. e?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["prüf", "kaution"],
+    "must_mention": [
+      "prüf",
+      "kaution"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -32,7 +41,10 @@
     "context": "§ 8 Datenhaltung & Verschlüsselung: Die Kundendaten ruhen ausschließlich in Rechenzentren im Großraum Frankfurt am Main. Die kryptographischen Hauptschlüssel (Master Encryption Keys) werden jedoch aus Redundanzgründen beim US-Mutterkonzern in Virginia (USA) verwaltet und unterliegen US-Herausgabeverlangen gem. US CLOUD Act.",
     "query": "Ist diese Auslagerung trotz Serverstandort Frankfurt mit DORA Art. 30 Abs. 2 lit. c und DSGVO vereinbar?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["schlüssel", "cloud act"],
+    "must_mention": [
+      "schlüssel",
+      "cloud act"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -41,7 +53,10 @@
     "context": "Anlage 2 SLA: Die Verfügbarkeit beträgt 99,9 % im Jahresmittel. Ausdrücklich von der Ausfallzeit ausgenommen sind alle 'dringenden oder unvorhergesehenen Notfallwartungen', unabhängig von deren Dauer, sowie sämtliche Störungen bei Vorleistungslieferanten des Anbieters.",
     "query": "Ist diese Berechnungsformel für Verfügbarkeitsausfälle nach DORA Art. 30 Abs. 2 lit. d aufsichtsrechtlich haltbar?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["verfügbarkeit", "sla"],
+    "must_mention": [
+      "verfügbarkeit",
+      "sla"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -50,7 +65,10 @@
     "context": "§ 12 Software-Hinterlegung (Escrow): Der Quellcode der Bankensoftware wird bei einem deutschen Treuhänder hinterlegt. Eine Herausgabe an das Institut erfolgt ausschließlich im Falle der rechtskräftigen Eröffnung des Insolvenzverfahrens ohne Vorhandensein eines Rechtsnachfolgers.",
     "query": "Reicht diese eng gefasste Escrow-Herausgabeklausel für kritische Bankfunktionen zur Absicherung der Geschäftskontinuität aus?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["escrow", "insolvenz"],
+    "must_mention": [
+      "escrow",
+      "insolvenz"
+    ],
     "expected_status": "BEDINGT KONFORM"
   },
   {
@@ -59,7 +77,10 @@
     "context": "§ 28 Disengagement & Migration: 1. Kündigungsfrist von 90 Tagen zum Monatsende. 2. Garantierte unentgeltliche Migrationsunterstützung für bis zu 180 Tage nach Vertragsbeendigung. 3. Vollständige Datenherausgabe in strukturierten offenen Formaten (Parquet/JSON). 4. Vor-Ort-Begleitung des Übergangs auf den Nachfolge-Dienstleister ohne gesonderte Vergütung.",
     "query": "Erfüllt dieser Übergangsplan den institutionellen Goldstandard für DORA Art. 30 Abs. 2 lit. h?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["migration", "dora"],
+    "must_mention": [
+      "migration",
+      "dora"
+    ],
     "expected_status": "KONFORM"
   },
   {
@@ -68,7 +89,10 @@
     "context": "ZUGFeRD 2.3 XML: Profil EXTENDED. Rechnungsbetrag: 450.000,00 EUR. USt-IdNr des Leistenden: Keine Angabe ('in Gründung'). Steuersatz: 0% ohne Nennung eines gesetzlichen Steuerbefreiungsgrundes gem. UStG.",
     "query": "Ist diese elektronische Rechnung nach deutschem Steuerrecht und EN 16931 buchungsfähig?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["ust", "rechnung"],
+    "must_mention": [
+      "ust",
+      "rechnung"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -77,7 +101,10 @@
     "context": "§ 17.4 Rechenzentrums-Sicherheit: 'Der physische Zutritt zu Rechenzentrumsflächen durch Vertreter des Instituts oder der Aufsichtsbehörden ist aus betrieblichen Sicherheitsgründen kategorisch ausgeschlossen. Revisionsprüfungen sind ausschließlich als Remote-Loganalysen gestattet.'",
     "query": "Ist der kategorische Ausschluss physischer Vor-Ort-Zutritte zu Rechenzentren mit KWG § 25b und DORA Art. 30 Abs. 3 lit. e vereinbar?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["rechenzentrum", "kwg § 25b"],
+    "must_mention": [
+      "rechenzentrum",
+      "kwg § 25b"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -86,7 +113,10 @@
     "context": "AGB-Klausel § 12.3: 'Eine Haftung für Subunternehmer ist vollumfänglich ausgeschlossen. Der Auftragnehmer haftet keinesfalls für Pflichtverletzungen von Erfüllungsgehilfen.'",
     "query": "Ist dieser Haftungsausschluss für Subunternehmer nach BGB § 307 und DORA Art. 30 wirksam?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["bgb", "erfüllungsgehilfen"],
+    "must_mention": [
+      "bgb",
+      "erfüllungsgehilfen"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -95,7 +125,10 @@
     "context": "Zusatzvereinbarung Revision § 6: 'Gemeinschaftsprüfungen (Pooled Audits) mit anderen beauftragenden Finanzinstituten sind ausgeschlossen. Jede Prüfung muss bilateral und separat beauftragt werden.'",
     "query": "Ist der vertragliche Ausschluss von Gemeinschaftsprüfungen nach DORA Art. 30 Abs. 3 lit. e zulässig?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["dora", "gemeinschaftsprüfung"],
+    "must_mention": [
+      "dora",
+      "gemeinschaftsprüfung"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -104,7 +137,10 @@
     "context": "Cloud Addendum Section 9.2: 'Customer transaction metadata is automatically transferred to US parent company and is subject to FISA Section 702 government disclosure requests without prior written notice to customer.'",
     "query": "Does this automated data transfer to the US conform with EU DORA Art. 30(2)(c) and German BaFin guidelines?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["dora", "transfer"],
+    "must_mention": [
+      "dora",
+      "transfer"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -113,7 +149,10 @@
     "context": "Anlage 4 SLA-Katalog A: Verfügbarkeit 99,95 % Mindestanforderung im Jahresmittel. Pönale: 0,2 % Verzugsstrafe pro Werktag, maximaler Pönalendeckel von 5 % des jährlichen Auftragswerts gem. DORA Art. 30 Abs. 2 lit. d.",
     "query": "Sind die Pönalen und Verfügbarkeitsstaffeln nach DORA Art. 30 Abs. 2 lit. d und BaFin BAIT 8.1 ausreichend?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["verfügbarkeit", "dora"],
+    "must_mention": [
+      "verfügbarkeit",
+      "dora"
+    ],
     "expected_status": "KONFORM"
   },
   {
@@ -122,7 +161,10 @@
     "context": "Test Report Form: 26IA515338GOWN008A. Candidate Details: NIKHITA GOWDARA PRABHAKARA REDDY. Candidate Number: AD872063. Listening: 7.5, Reading: 7.0, Writing: 6.0, Speaking: 6.5. Overall Band Score: 7.0 (CEFR Level C1). Validated at ielts.org/verify.",
     "query": "Welches Gesamtergebnis und welche Einzelergebnisse wurden im Testbericht erzielt?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["7.0", "listening"],
+    "must_mention": [
+      "7.0",
+      "listening"
+    ],
     "expected_status": "VERIFIZIERT"
   },
   {
@@ -131,7 +173,10 @@
     "context": "Alt-Klausel § 18: 'Der Dienstleister haftet nicht für den Verlust von Daten im Rahmen von Ausstiegsmaßnahmen.' Nachtrag gem. § 311 BGB: 'Der Dienstleister haftet vollumfänglich für die geordnete Datenmigration und Integrität der Primärdatenbanken gem. DORA Art. 30.'",
     "query": "Ist die redaktionelle Nachbesserung gem. BGB § 311 zur DORA-Konformität geeignet?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["nachbesserung", "dora"],
+    "must_mention": [
+      "nachbesserung",
+      "dora"
+    ],
     "expected_status": "KONFORM"
   },
   {
@@ -140,7 +185,10 @@
     "context": "Aufsichtliches Anschreiben DIN 5008 gem. KWG § 25b Abs. 1 an CloudScale GmbH: 'Anforderung zur Duldung einer unangekündigten Vor-Ort-Sonderprüfung am Standort Frankfurt am Main am 15.11.2026 durch BaFin-Prüfteam.'",
     "query": "Welche aufsichtsrechtlichen Pflichten begründet diese Mitteilung für den Auslagerungsdienstleister nach KWG § 25b?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["bafin", "kwg"],
+    "must_mention": [
+      "bafin",
+      "kwg"
+    ],
     "expected_status": "KONFORM"
   },
   {
@@ -149,7 +197,10 @@
     "context": "ZUGFeRD 2.3 XML / Factur-X: Profil EN 16931 (COMFORT). Leitweg-ID: 04011000-12345-67. Nettobetrag: 48.500,00 EUR. 19% USt: 9.215,00 EUR. Bruttobetrag: 57.715,00 EUR.",
     "query": "Erfüllt dieser Rechnungsdatensatz die ab 2025 geltenden Vorgaben für elektronische Rechnungen nach EN 16931 in Deutschland?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["rechnung", "16931"],
+    "must_mention": [
+      "rechnung",
+      "16931"
+    ],
     "expected_status": "KONFORM"
   },
   {
@@ -158,7 +209,10 @@
     "context": "Service Level Agreement Section 14: Tier-3 Cloud infrastructure availability guaranteed at 99.95% annual minimum under DORA Art. 30. Unscheduled downtime penalties are calculated at 0.2% per day of invoice fee.",
     "query": "Does this SLA availability commitment meet regulatory cloud standards under EU DORA Art. 30?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["availability", "dora"],
+    "must_mention": [
+      "availability",
+      "dora"
+    ],
     "expected_status": "COMPLIANT"
   },
   {
@@ -167,7 +221,10 @@
     "context": "Vertrag Ziffer 3.1: 'Die Auslagerung des Kernbank-Zahlungsverkehrs wird als unkritische Nebenleistung eingestuft. Auf ein förmliches Ausstiegs- und Notfallkonzept nach DORA wird einvernehmlich verzichtet.'",
     "query": "Ist der Verzicht auf ein Notfallkonzept bei Kernbank-Zahlungssystemen nach DORA Art. 30 zulässig?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["kernbank", "dora"],
+    "must_mention": [
+      "kernbank",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -176,7 +233,10 @@
     "context": "§ 22 Audit-Umfang: 'Das Prüfungsrecht des Instituts umfasst uneingeschränkte CISO- und Entwickler-Interviews sowie die Auswertung unveränderlicher Roh-Audit-Logs und Konfigurationsdateien gem. DORA Art. 30.'",
     "query": "Entspricht dieser Prüfumfang den aufsichtlichen Mindeststandards gem. KWG § 25b und DORA Art. 30 Abs. 3 lit. e?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["prüf", "dora"],
+    "must_mention": [
+      "prüf",
+      "dora"
+    ],
     "expected_status": "KONFORM"
   },
   {
@@ -185,7 +245,10 @@
     "context": "Lieferantenvereinbarung § 4: 'Die Risikoanalyse nach § 5 LkSG bezüglich umweltbezogener und menschenrechtlicher Sorgfaltspflichten entfällt für mittelbare Zulieferer in Drittstaaten dauerhaft.'",
     "query": "Ist der pauschale Ausschluss der lückenlosen LkSG-Risikoanalyse nach deutschem Recht zulässig?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["lksg", "sorgfaltspflicht"],
+    "must_mention": [
+      "lksg",
+      "sorgfaltspflicht"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -194,7 +257,10 @@
     "context": "Cloud Terms Section 12.1: 'Customer bears exclusive and sole responsibility for high-availability failover architectures and continuous operational resilience under DORA Art. 30.'",
     "query": "Does this clause shifting all operational resilience solely to customer comply with EU DORA Art. 30(2)?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["dora", "resilience"],
+    "must_mention": [
+      "dora",
+      "resilience"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -203,7 +269,10 @@
     "context": "Vertrag § 15.2: 'Konzerngesellschaften und verbundene Tochterunternehmen des Providers gelten ausdrücklich nicht als Subunternehmer und dürfen ohne vorherige Anzeige mit Datenverarbeitungsaufgaben betraut werden.'",
     "query": "Ist diese Ausnahmeklausel für Konzerngesellschaften mit DORA Art. 30 Abs. 2 lit. a vereinbar?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["subunternehmer", "dora"],
+    "must_mention": [
+      "subunternehmer",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -212,7 +281,10 @@
     "context": "AGB § 8 Haftung: 'Jegliche Haftung für grobe Fahrlässigkeit von Erfüllungsgehilfen sowie für IKT-Sicherheitsausfälle wird auf maximal 50 % der monatlichen Vergütung begrenzt.'",
     "query": "Ist diese Haftungsbeschränkung bei grober Fahrlässigkeit nach BGB § 309 Nr. 7 und DORA wirksam?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["bgb", "fahrlässigkeit"],
+    "must_mention": [
+      "bgb",
+      "fahrlässigkeit"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -221,7 +293,10 @@
     "context": "Escrow-Vertrag § 9: 'Die Quellcode-Herausgabe im Insolvenzfall setzt die vollständige Übernahme aller gerichtlichen und anwaltlichen Kosten des Insolvenzverwalters durch das Institut im Voraus voraus.'",
     "query": "Stellt diese Kostenübernahmeklausel eine unzulässige Austrittsbarriere nach DORA Art. 30 dar?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["escrow", "dora"],
+    "must_mention": [
+      "escrow",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -230,7 +305,10 @@
     "context": "SLA Anlage 3: 'Der Dienstleister bemüht sich nach besten wirtschaftlichen Kräften ('best effort') um eine zügige Behebung von Serverstörungen, ohne feste Wiederherstellungsfristen (RTO/RPO) einzugehen.'",
     "query": "Genügt eine reine 'Best Effort'-Klausel den BaFin BAIT und DORA Anforderungen an quantifizierbare SLAs?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["sla", "dora"],
+    "must_mention": [
+      "sla",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -239,7 +317,10 @@
     "context": "ZUGFeRD XML Position 1: 10.000 €; Position 2: 15.000 €. Nettosumme im Dokumentenkopf: 40.000 € (rechnerische Diskrepanz von 15.000 € ohne Nachweis).",
     "query": "Ist diese elektronische Rechnung trotz Summenabweichung nach GoBD und EN 16931 buchungsfähig?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["rechnung", "gobd"],
+    "must_mention": [
+      "rechnung",
+      "gobd"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -248,7 +329,10 @@
     "context": "Official IELTS Score Report: NIKHITA GOWDARA PRABHAKARA REDDY, Overall Band Score 7.0, CEFR C1, TRF 26IA515338GOWN008A. Minimum university admission threshold: Band 6.5 (B2/C1).",
     "query": "Erfüllt das Testergebnis von Band 7.0 die formalen universitären Sprachvoraussetzungen für deutsche Master-Studiengänge?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["7.0", "zulassung"],
+    "must_mention": [
+      "7.0",
+      "zulassung"
+    ],
     "expected_status": "VERIFIZIERT"
   },
   {
@@ -257,7 +341,10 @@
     "context": "Vertrag § 26: 'Kundendaten werden ausschließlich in proprietären Binärformaten gespeichert. Eine Konvertierung in interoperable Standardformate (JSON, Parquet, CSV) bei Vertragsende wird ausgeschlossen.'",
     "query": "Widerspricht der Ausschluss interoperabler Datenformate beim Exit der DORA-Portabilitätsanforderung?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["portabilität", "dora"],
+    "must_mention": [
+      "portabilität",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
   },
   {
@@ -266,7 +353,70 @@
     "context": "Ziffer 11.3: 'Meldung von IKT-Sicherheitsvorfällen: Der Dienstleister informiert den Kunden über schwerwiegende Sicherheitsvorfälle innerhalb von 72 Stunden nach endgültiger interner Bestätigung.'",
     "query": "Ist eine 72-stündige Meldefrist für schwerwiegende IKT-Vorfälle mit DORA Art. 19 und RTS konform?",
     "must_include_citation": "[SOURCE_1]",
-    "must_mention": ["meldefrist", "dora"],
+    "must_mention": [
+      "meldefrist",
+      "dora"
+    ],
     "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-BAFIN-31-OUTSOURCING-REGISTER-DEFICIT",
+    "pillar": "Pillar IV (BaFin Outsourcing Register Art. 28)",
+    "context": "Vertrag § 4: 'Der IKT-Dienstleister verweigert die Bereitstellung von standardisierten Stammdaten zur Befüllung des aufsichtsrechtlichen Auslagerungsregisters gem. BaFin-Meldeportal (DORA Art. 28 Abs. 3).'",
+    "query": "Ist die Verweigerung von Stammdaten zur Auslagerungsmeldung nach DORA Art. 28 zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "auslagerung",
+      "register"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-NIS2-32-SUPPLY-CHAIN-CYBERSECURITY",
+    "pillar": "Pillar IV (NIS-2 Supply Chain Security BSIG)",
+    "context": "Ziffer 14: 'Der IKT-Lieferant garantiert die Einhaltung der NIS-2 Cybersicherheitsmaßnahmen nach § 30 BSIG und verfügt über ein gültiges ISO/IEC 27001 Zertifikat mit jährlichem Audit.'",
+    "query": "Erfüllt die vertragliche Verpflichtung auf § 30 BSIG die Cybersicherheitsvorgaben nach der NIS-2 Richtlinie?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "nis-2",
+      "konform"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-ESCROW-33-QUARTERLY-DEPOSIT-AUDIT",
+    "pillar": "Pillar IV (Continuous Active Source Code Escrow)",
+    "context": "§ 19 Quellcode-Hinterlegung: 'Der Softwareanbieter hinterlegt den vollständigen Quellcode quartalsweise bei einem zertifizierten Notar in Frankfurt inklusive automatisierter Build-Verifikation.'",
+    "query": "Entspricht die quartalsweise Notarhinterlegung mit Build-Prüfung den Kontinuitätsanforderungen der BaFin?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "escrow",
+      "kontinuität"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-AI-ACT-34-HIGH-RISK-TRANSPARENCY",
+    "pillar": "EU AI Act (High-Risk AI Governance)",
+    "context": "Vertrag Ziffer 8.2: 'Der Anbieter von KI-gestützten Kreditentscheidungssystemen stellt keine Dokumentation über Trainingsdaten, Modellgewichtung oder Validierungstests zur Verfügung.'",
+    "query": "Verletzt das Fehlen von Trainingsdaten-Dokumentationen für Hochrisiko-KI die Vorgaben des EU AI Act Art. 11?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "ai act",
+      "defizitär"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-LKSG-35-ANNUAL-BAFA-REPORTING",
+    "pillar": "LkSG German Supply Chain Due Diligence",
+    "context": "Lieferantenvereinbarung § 9: 'Der Tier-1 Lieferant übermittelt jährlich bis zum 31. März seinen geprüften BAFA-Menschenrechtsbericht und garantiert ein funktionsfähiges Beschwerdeverfahren nach § 8 LkSG.'",
+    "query": "Erfüllt die jährliche Berichtsübermittlung und das Beschwerdeverfahren die Anforderungen von § 8 und § 10 LkSG?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "lksg",
+      "bafa"
+    ],
+    "expected_status": "KONFORM"
   }
 ]
