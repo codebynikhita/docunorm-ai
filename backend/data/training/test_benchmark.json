@@ -418,5 +418,65 @@
       "bafa"
     ],
     "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-EBA-36-INTRAGROUP-SUB-OUTSOURCING",
+    "pillar": "Pillar IV (EBA Intragroup Outsourcing Guidelines)",
+    "context": "Vertrag Ziffer 6.4: 'Konzerninterne Auslagerungen an ausländische Schwestergesellschaften in Singapur bedürfen keiner gesonderten Risikoanalyse oder aufsichtlichen Vorankündigung.'",
+    "query": "Erfordert die konzerninterne Auslagerung an Drittstaaten-Töchter nach EBA Guidelines und DORA Art. 30 eine vollumfängliche Risikoanalyse?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "intragroup",
+      "auslagerung"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-BSI-37-TR02102-CRYPTOGRAPHY-DEPRECATION",
+    "pillar": "BSI TR-02102 Cryptographic Key Length Mandates",
+    "context": "Anlage IT-Sicherheit: 'Die Verschlüsselung von Kundendaten erfolgt mittels RSA-1024 und SHA-1 zur Gewährleistung maximaler Prozessorleistung.'",
+    "query": "Entspricht die Verwendung von RSA-1024 und SHA-1 den aktuellen kryptographischen Mindeststandards des BSI?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "kryptographie",
+      "bsi"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-DORA-38-CONCENTRATION-RISK-MULTI-REGION",
+    "pillar": "Pillar IV (DORA Art. 29 ICT Concentration Risk)",
+    "context": "§ 22 Multi-Region Redundanz: 'Der Cloud-Anbieter garantiert georedundante Aktiv-Aktiv-Replikation über getrennte deutsche Verfügbarkeitszonen (Frankfurt und Berlin) mit automatischem Failover unter 60 Sekunden.'",
+    "query": "Erfüllt die Aktiv-Aktiv-Georedundanz mit 60-Sekunden-Failover die DORA-Anforderungen zur Reduzierung von IKT-Konzentrationsrisiken?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "konzentrationsrisiko",
+      "resilienz"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-CSRD-39-GREEN-DATACENTER-PUE",
+    "pillar": "EU CSRD & Green ICT Energy Efficiency (PUE < 1.3)",
+    "context": "Anlage Nachhaltigkeit § 5: 'Die betriebenen Rechenzentren garantieren einen nachgewiesenen Energieeffizienzwert (PUE) von unter 1,25 und werden zu 100 % mit verifizierter erneuerbarer Energie betrieben.'",
+    "query": "Erfüllt der PUE-Wert von 1,25 und der 100% Ökostrombezug die europäischen CSRD-Nachhaltigkeitskriterien für IKT-Rechenzentren?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "csrd",
+      "energieeffizienz"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-GDPR-40-SCHREMS-II-TIA-WARRANTY",
+    "pillar": "DSGVO Art. 46 / EuGH Schrems II Transfer Impact Assessment",
+    "context": "Datenschutzvereinbarung § 11: 'Der Auftragnehmer sichert zu, dass keine Datenübermittlung in Drittstaaten ohne vorheriges, schriftlich dokumentiertes Transfer Impact Assessment (TIA) und zusätzliche Verschlüsselungsmaßnahmen erfolgt.'",
+    "query": "Entspricht die zwingende Koppelung von Drittstaatentransfers an ein TIA den EuGH Schrems II und DSGVO-Vorgaben?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "schrems ii",
+      "tia"
+    ],
+    "expected_status": "KONFORM"
   }
 ]
