@@ -36,6 +36,7 @@ interface ExecutiveDashboardProps {
   onSelectDocument?: (doc: any) => void;
   onAuditQuery: (query: string) => void;
   onSwitchToWorkbench: () => void;
+  onOpenDinReport?: () => void;
 }
 
 export function ExecutiveDashboard({
@@ -46,6 +47,7 @@ export function ExecutiveDashboard({
   onSelectDocument,
   onAuditQuery,
   onSwitchToWorkbench,
+  onOpenDinReport,
 }: ExecutiveDashboardProps) {
   const isDe = lang === "DE";
 
@@ -274,6 +276,17 @@ export function ExecutiveDashboard({
                 </option>
               ))}
             </select>
+          )}
+
+          {onOpenDinReport && documentId && (
+            <button
+              onClick={onOpenDinReport}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] border border-[var(--surface-border)] text-xs font-mono font-bold text-[var(--foreground)] transition-all shadow-sm cursor-pointer flex-shrink-0"
+              title="Download Certified DIN 5008 Regulatory Audit Report PDF"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-500" />
+              <span>{isDe ? "DIN-Bericht PDF" : "DIN Report PDF"}</span>
+            </button>
           )}
 
           <button

@@ -569,6 +569,26 @@ export async function triggerBenchmarkRun(): Promise<any> {
   return res.json();
 }
 
+export async function downloadDinAuditReportPdf(documentId: string, signatoryName?: string): Promise<void> {
+  const query = signatoryName ? `?signatory_name=${encodeURIComponent(signatoryName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-din-audit-report${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export DIN Audit Report PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `DIN_AUDIT_REPORT_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 
 
 

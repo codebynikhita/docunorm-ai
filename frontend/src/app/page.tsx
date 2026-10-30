@@ -19,6 +19,7 @@ import { LoginPage } from "@/components/LoginPage";
 import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
 import { RemediationModal } from "@/components/RemediationModal";
 import { TableInspectorModal } from "@/components/TableInspectorModal";
+import { AuditReportExporterModal } from "@/components/AuditReportExporterModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
 import { Bot, Award } from "lucide-react";
@@ -50,6 +51,7 @@ export default function Home() {
   const [isAuditRightsModalOpen, setIsAuditRightsModalOpen] = useState(false);
   const [isRemediationModalOpen, setIsRemediationModalOpen] = useState(false);
   const [isTableInspectorOpen, setIsTableInspectorOpen] = useState(false);
+  const [isDinReportModalOpen, setIsDinReportModalOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -359,6 +361,7 @@ export default function Home() {
                 onSelectDocument={handleSelectDocument}
                 onAuditQuery={() => setLayoutMode("auditor")}
                 onSwitchToWorkbench={() => setLayoutMode("workbench")}
+                onOpenDinReport={() => setIsDinReportModalOpen(true)}
               />
             </main>
           ) : layoutMode === "focus" ? (
@@ -572,6 +575,16 @@ export default function Home() {
           setLayoutMode("workbench");
         }}
       />
+
+      {/* DIN 5008 / ISO 19011 Regulatory Audit Report PDF Exporter Modal */}
+      <AuditReportExporterModal
+        isOpen={isDinReportModalOpen}
+        onClose={() => setIsDinReportModalOpen(false)}
+        documentId={documentId}
+        documentName={documentName}
+        lang={lang}
+      />
+
 
       {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
       <CommandPalette
