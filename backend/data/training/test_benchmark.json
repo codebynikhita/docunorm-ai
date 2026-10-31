@@ -478,5 +478,125 @@
       "tia"
     ],
     "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-BAFIN-41-UNIFIED-AUDIT-TRAIL",
+    "pillar": "BaFin GoBD & KWG § 25a Revision-Proof WORM Audit Trail",
+    "context": "Anlage IT-Revision § 4: 'Alle systemischen Audit-Logs und Transaktionsprotokolle werden unveränderbar (WORM-Speicher) über eine Mindestaufbewahrungsdauer von zehn (10) Jahren revisionssicher archiviert.'",
+    "query": "Erfüllt die 10-jährige WORM-Speicherung von Audit-Logs die GoBD- und KWG § 25a-Anforderungen der BaFin?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "audit-trail",
+      "worm"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-DORA-42-CYBER-THREAT-SHARING",
+    "pillar": "Pillar IV (DORA Art. 45 Cyber Threat Intelligence Sharing)",
+    "context": "§ 18 Informationsaustausch: 'Der Dienstleister untersagt dem Finanzinstitut jegliche Weitergabe von Cyber-Bedrohungsdaten oder Indicator of Compromise (IoC) an nationale Warnkreise (CSIRT/CERT-Bund).'",
+    "query": "Ist ein vertragliches Verbot des Austauschs von Cyber-Bedrohungsdaten nach DORA Art. 45 zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "dora",
+      "bedrohung"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-BGB-43-PAYMENT-DEFAULT-INTEREST",
+    "pillar": "BGB § 288 Abs. 2 Statutory B2B Default Interest Mandate",
+    "context": "Zahlungsbedingungen Ziffer 4.3: 'Bei Zahlungsverzug des Auftraggebers werden Verzugszinsen in Höhe von 1 % pro Kalenderjahr berechnet. Ein weitergehender Verzugsschaden ist ausgeschlossen.'",
+    "query": "Entspricht ein Verzugszins von 1 % p.a. den zwingenden gesetzlichen Vorgaben für B2B-Verträge nach BGB § 288 Abs. 2?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "verzugszins",
+      "bgb"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-NIS2-44-MANAGEMENT-LIABILITY",
+    "pillar": "NIS-2 Directive & § 38 BSIG Executive Liability",
+    "context": "§ 12 Haftungsfreistellung für Geschäftsleiter: 'Die Geschäftsleitung des Dienstleisters und der Organe ist von jeglicher persönlicher Haftung und Aufsichtspflicht für Cybersicherheitsrisiken vollumfänglich freigestellt.'",
+    "query": "Ist der Ausschluss der Leitungsverantwortung für Cybersicherheitsmaßnahmen nach der NIS-2-Richtlinie und § 38 BSIG wirksam?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "nis-2",
+      "vorstand"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-DORA-45-CHANGE-MANAGEMENT-ROLLBACK",
+    "pillar": "Pillar IV (DORA Art. 9 Major Change Management & Rollback)",
+    "context": "§ 15 Änderungsmanagement: 'Wesentliche Software- und Infrastrukturänderungen dürfen nur nach erfolgreichem Regressionstest und mit dokumentiertem automatisierten Rollback-Verfahren in Produktion überführt werden.'",
+    "query": "Erfüllt das strukturierte Änderungsmanagement mit automatisiertem Rollback die DORA Art. 9 Abs. 4-Anforderungen?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "change-management",
+      "rollback"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-ZUGFERD-46-HYBRID-PDF-INTEGRITY",
+    "pillar": "Electronic Invoicing (ZUGFeRD 2.3 / Factur-X PDF/A-3 Integrity)",
+    "context": "E-Rechnungsprüfbericht: PDF/A-3 Konformitätsprüfung fehlgeschlagen. Die eingebettete factur-x.xml weicht in der Gesamtsumme um 500,00 EUR vom visuellen Rechnungsbetrag ab.",
+    "query": "Ist eine hybride E-Rechnung mit Summenabweichung zwischen visueller PDF-Ebene und eingebettetem XML-Datensatz buchungsfähig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "zugferd",
+      "abweichung"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-LKSG-47-CODE-OF-CONDUCT-MANDATE",
+    "pillar": "LkSG German Supply Chain Due Diligence (Code of Conduct § 6)",
+    "context": "Lieferantenvertrag Ziffer 7.1: 'Der unmittelbare Zulieferer verpflichtet sich zur strikten Einhaltung des Menschenrechts-Verhaltenskodex (Code of Conduct) und gestattet jährliche risikobasierte Vor-Ort-Audits.'",
+    "query": "Genügt die vertragliche Verpflichtung auf den Code of Conduct und das Auditrecht den Präventionspflichten nach § 6 LkSG?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "lksg",
+      "verhaltenskodex"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-DORA-48-TLPT-PENETRATION-TESTING",
+    "pillar": "Pillar IV (DORA Art. 26 Threat-Led Penetration Testing TLPT)",
+    "context": "§ 16 TLPT-Prüfungen: 'Der IKT-Dienstleister nimmt alle 3 Jahre an bedrohungsorientierten Penetrationstests (TLPT/TIBER-DE) teil und gewährt akkreditierten TIBER-Prüfern uneingeschränkten Testzugang.'",
+    "query": "Erfüllt das 3-jährige TLPT-Intervall mit akkreditierten TIBER-Prüfern die Vorgaben von DORA Art. 26?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "tlpt",
+      "tiber"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-BAFIN-49-SUBCONTRACTOR-CHAIN-AUDIT",
+    "pillar": "Pillar IV (BaFin BAIT 8.3 Subcontractor Chain Inspection Pass-Through)",
+    "context": "Auslagerungsvertrag § 13.4: 'Der Prüfungs- und Kontrollzugang der BaFin erstreckt sich nur auf den Hauptdienstleister; Vor-Ort-Prüfungen bei nachgelagerten Subunternehmern (4th Parties) sind ausgeschlossen.'",
+    "query": "Ist der Ausschluss von Aufsichtskontrollen bei nachgelagerten Subunternehmern nach BaFin BAIT 8.3 und KWG § 25b zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "subunternehmer",
+      "bait"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-DORA-50-STATUTORY-TERMINATION-RIGHTS",
+    "pillar": "Pillar IV (DORA Art. 28 Abs. 7 Statutory Extraordinary Termination)",
+    "context": "§ 28 Kündigungsrechte: 'Das Finanzinstitut besitzt ein außerordentliches fristloses Kündigungsrecht bei schwerwiegenden IKT-Sicherheitsverstößen, behördlicher Kündigungsanordnung oder gescheiterten Notfalltests.'",
+    "query": "Entspricht dieses Sonderkündigungsrecht den zwingenden Vorgaben von DORA Art. 28 Abs. 7?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "kündigung",
+      "dora"
+    ],
+    "expected_status": "KONFORM"
   }
 ]

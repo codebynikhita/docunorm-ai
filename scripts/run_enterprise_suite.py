@@ -80,11 +80,11 @@ def main():
     # Step 5: Multi-Pillar Regulatory Benchmark
     s4, d4, o4 = run_step(
         5,
-        "Multi-Pillar Regulatory Benchmark (40 Ground-Truth Tests)",
+        "Multi-Pillar Regulatory Benchmark (50 Ground-Truth Tests)",
         [str(python_bin), "scripts/evaluate_model.py"],
         backend_dir,
     )
-    results.append(("Regulatory Benchmark (40 cases)", s4, d4))
+    results.append(("Regulatory Benchmark (50 cases)", s4, d4))
 
     # Step 6: Frontend TypeScript Verification
     s5, d5, o5 = run_step(

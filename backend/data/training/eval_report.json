@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-10-31T09:10:37.408041",
-  "total_tests": 40,
-  "passed_tests": 40,
+  "timestamp": "2026-10-31T10:16:38.817950",
+  "total_tests": 50,
+  "passed_tests": 50,
   "accuracy_percent": 100.0,
-  "mean_latency_ms": 9.3,
-  "p95_latency_ms": 12.8,
+  "mean_latency_ms": 8.0,
+  "p95_latency_ms": 7.8,
   "pillars": {
     "Pillar IV (Cascading Subcontracting Trap)": {
       "passed": 1,
       "total": 1,
       "latencies": [
-        54.18205261230469
+        58.65287780761719
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -19,7 +19,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        8.205890655517578
+        8.121967315673828
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -28,7 +28,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        9.501934051513672
+        7.801055908203125
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -37,7 +37,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        9.726762771606445
+        7.282018661499023
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -46,7 +46,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        8.623838424682617
+        7.127046585083008
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -55,7 +55,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        9.545087814331055
+        7.080793380737305
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -64,7 +64,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        8.287906646728516
+        7.110834121704102
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -73,7 +73,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        9.272098541259766
+        7.037878036499023
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -82,7 +82,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        9.671211242675781
+        7.169008255004883
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -91,7 +91,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        12.300729751586914
+        6.989002227783203
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -100,7 +100,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        12.574911117553711
+        6.9561004638671875
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -109,7 +109,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        12.827157974243164
+        6.964921951293945
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -118,7 +118,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        12.51077651977539
+        7.119178771972656
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -127,7 +127,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        11.59811019897461
+        6.865739822387695
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -136,7 +136,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        9.748220443725586
+        6.88934326171875
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -145,7 +145,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        8.105278015136719
+        6.817102432250977
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -154,7 +154,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.5969696044921875
+        6.994962692260742
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -163,7 +163,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.944894790649414
+        6.925821304321289
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -172,7 +172,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.974220275878906
+        6.8607330322265625
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -181,7 +181,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.943941116333008
+        7.055759429931641
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -190,8 +190,8 @@
       "passed": 2,
       "total": 2,
       "latencies": [
-        6.780862808227539,
-        6.754159927368164
+        6.937980651855469,
+        6.800174713134766
       ],
       "citations_ok": 2,
       "purity_ok": 2
@@ -200,7 +200,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.070064544677734
+        7.081031799316406
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -209,7 +209,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.806135177612305
+        6.860017776489258
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -218,7 +218,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.938695907592773
+        6.90007209777832
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -227,7 +227,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.824970245361328
+        6.808996200561523
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -236,7 +236,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.837129592895508
+        6.831884384155273
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -245,7 +245,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.236003875732422
+        6.901025772094727
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -254,7 +254,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.705999374389648
+        6.805181503295898
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -263,7 +263,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.98089599609375
+        6.807088851928711
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -272,7 +272,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.769895553588867
+        6.9599151611328125
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -281,7 +281,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.036924362182617
+        6.779193878173828
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -290,7 +290,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.858110427856445
+        6.777763366699219
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -299,7 +299,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.793975830078125
+        6.7958831787109375
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -308,7 +308,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.850242614746094
+        6.89697265625
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -317,7 +317,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.084131240844727
+        6.866216659545898
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -326,7 +326,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.74891471862793
+        6.836175918579102
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -335,7 +335,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.833076477050781
+        6.824970245361328
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -344,7 +344,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.841897964477539
+        7.182836532592773
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -353,7 +353,97 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.714820861816406
+        6.945133209228516
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "BaFin GoBD & KWG § 25a Revision-Proof WORM Audit Trail": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.091999053955078
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (DORA Art. 45 Cyber Threat Intelligence Sharing)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.287025451660156
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "BGB § 288 Abs. 2 Statutory B2B Default Interest Mandate": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.800174713134766
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "NIS-2 Directive & § 38 BSIG Executive Liability": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.180690765380859
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (DORA Art. 9 Major Change Management & Rollback)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.871223449707031
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Electronic Invoicing (ZUGFeRD 2.3 / Factur-X PDF/A-3 Integrity)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.117748260498047
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "LkSG German Supply Chain Due Diligence (Code of Conduct § 6)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.822824478149414
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (DORA Art. 26 Threat-Led Penetration Testing TLPT)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.796121597290039
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (BaFin BAIT 8.3 Subcontractor Chain Inspection Pass-Through)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        7.230043411254883
+      ],
+      "citations_ok": 1,
+      "purity_ok": 1
+    },
+    "Pillar IV (DORA Art. 28 Abs. 7 Statutory Extraordinary Termination)": {
+      "passed": 1,
+      "total": 1,
+      "latencies": [
+        6.8149566650390625
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -364,7 +454,7 @@
       "id": "COMPLEX-TRAP-01-DEEMED-CONSENT",
       "pillar": "Pillar IV (Cascading Subcontracting Trap)",
       "passed": true,
-      "duration_ms": 54.2,
+      "duration_ms": 58.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -376,7 +466,7 @@
       "id": "COMPLEX-TRAP-02-HIDDEN-EXIT-TOLL",
       "pillar": "Pillar IV (Disguised Exit Toll)",
       "passed": true,
-      "duration_ms": 8.2,
+      "duration_ms": 8.1,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -388,7 +478,7 @@
       "id": "COMPLEX-TRAP-03-AUDIT-DEPOSIT-BARRIER",
       "pillar": "Pillar IV (Restricted Audit Access)",
       "passed": true,
-      "duration_ms": 9.5,
+      "duration_ms": 7.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -400,7 +490,7 @@
       "id": "COMPLEX-TRAP-04-CLOUD-ACT-CONFLICT",
       "pillar": "Pillar IV (Cross-Border CLOUD Act Conflict)",
       "passed": true,
-      "duration_ms": 9.7,
+      "duration_ms": 7.3,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -412,7 +502,7 @@
       "id": "COMPLEX-TRAP-05-SLA-EXCLUSION-LOOPHOLE",
       "pillar": "Pillar IV (SLA Calculation Loophole)",
       "passed": true,
-      "duration_ms": 8.6,
+      "duration_ms": 7.1,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -424,7 +514,7 @@
       "id": "COMPLEX-TRAP-06-SOURCE-CODE-ESCROW",
       "pillar": "Pillar IV (Conditional Escrow)",
       "passed": true,
-      "duration_ms": 9.5,
+      "duration_ms": 7.1,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -436,7 +526,7 @@
       "id": "COMPLEX-GOLDEN-07-GOLD-STANDARD-EXIT",
       "pillar": "Pillar IV (Institutional Gold Standard)",
       "passed": true,
-      "duration_ms": 8.3,
+      "duration_ms": 7.1,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -448,7 +538,7 @@
       "id": "COMPLEX-ZUGFERD-08-INVALID-VAT-TAX",
       "pillar": "Electronic Invoicing (Tax Compliance)",
       "passed": true,
-      "duration_ms": 9.3,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -460,7 +550,7 @@
       "id": "COMPLEX-AUDIT-09-DATACENTER-PHYSICAL-BAN",
       "pillar": "Pillar IV (Datacenter Physical Access Ban)",
       "passed": true,
-      "duration_ms": 9.7,
+      "duration_ms": 7.2,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -472,7 +562,7 @@
       "id": "COMPLEX-REMEDY-10-BGB-LIABILITY-DISCLAIMER",
       "pillar": "Pillar IV (BGB § 307 Vicarious Liability Trap)",
       "passed": true,
-      "duration_ms": 12.3,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -484,7 +574,7 @@
       "id": "COMPLEX-POOLED-11-JOINT-AUDIT-DENIAL",
       "pillar": "Pillar IV (Pooled Audit Cooperation Denial)",
       "passed": true,
-      "duration_ms": 12.6,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -496,7 +586,7 @@
       "id": "COMPLEX-CROSSBORDER-12-ENGLISH-EU-TRANSFER",
       "pillar": "Pillar IV (Cross-Border English Contract Risk)",
       "passed": true,
-      "duration_ms": 12.8,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -508,7 +598,7 @@
       "id": "COMPLEX-SLA-13-PENALTY-MATRIX-CAP",
       "pillar": "Pillar IV (SLA & Penalty Matrices)",
       "passed": true,
-      "duration_ms": 12.5,
+      "duration_ms": 7.1,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -520,7 +610,7 @@
       "id": "ACADEMIC-IELTS-14-CANDIDATE-IDENTITY-SCORE",
       "pillar": "Academic Certification (IELTS & CEFR)",
       "passed": true,
-      "duration_ms": 11.6,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -532,7 +622,7 @@
       "id": "COMPLEX-BGB311-15-REMEDY-REDLINE-PROPOSAL",
       "pillar": "Pillar IV (BGB § 311 Contract Remediation)",
       "passed": true,
-      "duration_ms": 9.7,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -544,7 +634,7 @@
       "id": "COMPLEX-DIN5008-16-BAFIN-SUPERVISORY-NOTICE",
       "pillar": "Pillar IV (Supervisory Audit Notices)",
       "passed": true,
-      "duration_ms": 8.1,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -556,7 +646,7 @@
       "id": "COMPLEX-ZUGFERD-17-COMFORT-LEITWEG-COMPLIANT",
       "pillar": "Electronic Invoicing (ZUGFeRD 2.3)",
       "passed": true,
-      "duration_ms": 7.6,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -580,7 +670,7 @@
       "id": "COMPLEX-COREBANK-19-CRITICAL-FUNCTION-DEFICIT",
       "pillar": "Pillar IV (Critical Function Categorization)",
       "passed": true,
-      "duration_ms": 7.0,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -592,7 +682,7 @@
       "id": "COMPLEX-AUDIT-20-CISO-INTERVIEW-LOG-ACCESS",
       "pillar": "Pillar IV (Forensic Revisionssicherheit)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 7.1,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -604,7 +694,7 @@
       "id": "COMPLEX-LKSG-21-SUPPLY-CHAIN-HUMAN-RIGHTS",
       "pillar": "LkSG German Supply Chain Due Diligence",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -628,7 +718,7 @@
       "id": "COMPLEX-AFFILIATE-23-SECRET-SUBCONTRACTING",
       "pillar": "Pillar IV (Secret Affiliate Sub-Outsourcing)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -676,7 +766,7 @@
       "id": "COMPLEX-ZUGFERD-27-CALCULATION-SUM-MISMATCH",
       "pillar": "Electronic Invoicing (Calculation Integrity)",
       "passed": true,
-      "duration_ms": 7.2,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -688,7 +778,7 @@
       "id": "ACADEMIC-TU9-28-MASTER-ADMISSION-VALIDITY",
       "pillar": "Academic Certification (German University Admission)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -700,7 +790,7 @@
       "id": "COMPLEX-MULTICLOUD-29-PORTABILITY-LOCKIN",
       "pillar": "Pillar IV (Vendor Lock-in & Portability)",
       "passed": true,
-      "duration_ms": 7.0,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -712,7 +802,7 @@
       "id": "COMPLEX-INCIDENT-30-EXTENDED-72H-BREACH",
       "pillar": "Pillar IV (DORA Incident Reporting Breach)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -724,7 +814,7 @@
       "id": "COMPLEX-BAFIN-31-OUTSOURCING-REGISTER-DEFICIT",
       "pillar": "Pillar IV (BaFin Outsourcing Register Art. 28)",
       "passed": true,
-      "duration_ms": 7.0,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -736,7 +826,7 @@
       "id": "COMPLEX-NIS2-32-SUPPLY-CHAIN-CYBERSECURITY",
       "pillar": "Pillar IV (NIS-2 Supply Chain Security BSIG)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -784,7 +874,7 @@
       "id": "COMPLEX-EBA-36-INTRAGROUP-SUB-OUTSOURCING",
       "pillar": "Pillar IV (EBA Intragroup Outsourcing Guidelines)",
       "passed": true,
-      "duration_ms": 7.1,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -796,7 +886,7 @@
       "id": "COMPLEX-BSI-37-TR02102-CRYPTOGRAPHY-DEPRECATION",
       "pillar": "BSI TR-02102 Cryptographic Key Length Mandates",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -820,7 +910,7 @@
       "id": "COMPLEX-CSRD-39-GREEN-DATACENTER-PUE",
       "pillar": "EU CSRD & Green ICT Energy Efficiency (PUE < 1.3)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 7.2,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -832,13 +922,133 @@
       "id": "COMPLEX-GDPR-40-SCHREMS-II-TIA-WARRANTY",
       "pillar": "DSGVO Art. 46 / EuGH Schrems II Transfer Impact Assessment",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
       "purity_ok": true,
       "purity_reason": "Pure",
       "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DSGVO ART. 46 & EUGH SCHREMS II) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Drittstaatentransfer & T"
+    },
+    {
+      "id": "COMPLEX-BAFIN-41-UNIFIED-AUDIT-TRAIL",
+      "pillar": "BaFin GoBD & KWG § 25a Revision-Proof WORM Audit Trail",
+      "passed": true,
+      "duration_ms": 7.1,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BAFIN GOBD & KWG § 25A) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Revisionssicherer Audit-Trail & W"
+    },
+    {
+      "id": "COMPLEX-DORA-42-CYBER-THREAT-SHARING",
+      "pillar": "Pillar IV (DORA Art. 45 Cyber Threat Intelligence Sharing)",
+      "passed": true,
+      "duration_ms": 7.3,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 45 BEDROHUNGSAUSTAUSCH) **Status:** ❌ DEFIZITÄR / VERSTOSS GEGEN DORA ART. 45 | **Aufsichts-Pillar:** Inf"
+    },
+    {
+      "id": "COMPLEX-BGB-43-PAYMENT-DEFAULT-INTEREST",
+      "pillar": "BGB § 288 Abs. 2 Statutory B2B Default Interest Mandate",
+      "passed": true,
+      "duration_ms": 6.8,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BGB § 288 ABS. 2) **Status:** ❌ DEFIZITÄR / GESETZESVERSTOSS | **Aufsichts-Pillar:** Gesetzlicher B2B-Verzugszins &"
+    },
+    {
+      "id": "COMPLEX-NIS2-44-MANAGEMENT-LIABILITY",
+      "pillar": "NIS-2 Directive & § 38 BSIG Executive Liability",
+      "passed": true,
+      "duration_ms": 7.2,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (NIS-2 & § 38 BSIG VORSTANDSHAFTUNG) **Status:** ❌ DEFIZITÄR / UNWIRKSAMER HAFTUNGSAUSSCHLUSS | **Aufsichts-Pillar:*"
+    },
+    {
+      "id": "COMPLEX-DORA-45-CHANGE-MANAGEMENT-ROLLBACK",
+      "pillar": "Pillar IV (DORA Art. 9 Major Change Management & Rollback)",
+      "passed": true,
+      "duration_ms": 6.9,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 9 ABS. 4 LIT. E) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** IKT-Änderungsmanagement & Notf"
+    },
+    {
+      "id": "COMPLEX-ZUGFERD-46-HYBRID-PDF-INTEGRITY",
+      "pillar": "Electronic Invoicing (ZUGFeRD 2.3 / Factur-X PDF/A-3 Integrity)",
+      "passed": true,
+      "duration_ms": 7.1,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ ELEKTRONISCHE RECHNUNGSPRÜFUNG (ZUGFeRD 2.3 / EN 16931) **Status:** ❌ DEFIZITÄR / SYNCHRONISATIONSFEHLER | **Aufsichts-Pillar:** ZUGFeRD 2.3 Hybride Date"
+    },
+    {
+      "id": "COMPLEX-LKSG-47-CODE-OF-CONDUCT-MANDATE",
+      "pillar": "LkSG German Supply Chain Due Diligence (Code of Conduct § 6)",
+      "passed": true,
+      "duration_ms": 6.8,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (LKSG § 6 PRÄVENTION) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Lieferketten-Verhaltenskodex & Präve"
+    },
+    {
+      "id": "COMPLEX-DORA-48-TLPT-PENETRATION-TESTING",
+      "pillar": "Pillar IV (DORA Art. 26 Threat-Led Penetration Testing TLPT)",
+      "passed": true,
+      "duration_ms": 6.8,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 26 TLPT) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Bedrohungsorientierte Penetrationstest"
+    },
+    {
+      "id": "COMPLEX-BAFIN-49-SUBCONTRACTOR-CHAIN-AUDIT",
+      "pillar": "Pillar IV (BaFin BAIT 8.3 Subcontractor Chain Inspection Pass-Through)",
+      "passed": true,
+      "duration_ms": 7.2,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (BAFIN BAIT 8.3 & KWG § 25B) **Status:** ❌ DEFIZITÄR / KONTROLLHINDERNIS | **Aufsichts-Pillar:** Kaskadierende Prüfr"
+    },
+    {
+      "id": "COMPLEX-DORA-50-STATUTORY-TERMINATION-RIGHTS",
+      "pillar": "Pillar IV (DORA Art. 28 Abs. 7 Statutory Extraordinary Termination)",
+      "passed": true,
+      "duration_ms": 6.8,
+      "citation_ok": true,
+      "facts_ok": true,
+      "status_ok": true,
+      "purity_ok": true,
+      "purity_reason": "Pure",
+      "response_preview": "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 28 ABS. 7) **Status:** ✅ VOLLSTÄNDIG KONFORM | **Aufsichts-Pillar:** Gesetzliche Sonderkündigungsrechte"
     }
   ]
 }
