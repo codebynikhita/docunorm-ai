@@ -588,6 +588,58 @@ export async function downloadDinAuditReportPdf(documentId: string, signatoryNam
   document.body.removeChild(a);
 }
 
+export interface LkSGRiskItem {
+  category: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "COMPLIANT";
+  title_de: string;
+  title_en: string;
+  statutory_reference: string;
+  bafa_guideline_ref: string;
+  finding_de: string;
+  finding_en: string;
+  evidence_snippet: string;
+  page_number: number;
+  remediation_action_de: string;
+  remediation_action_en: string;
+}
+
+export interface LkSGSupplierAssessment {
+  supplier_name: string;
+  supplier_tier: "TIER_1_DIRECT" | "TIER_N_INDIRECT";
+  overall_compliance_score: number;
+  compliance_rating: "AAA" | "AA" | "A" | "BBB" | "BB" | "B" | "CCC";
+  human_rights_score: number;
+  environmental_score: number;
+  governance_score: number;
+  complaints_procedure_present: boolean;
+  bafa_report_compliant: boolean;
+  code_of_conduct_mandated: boolean;
+  audit_rights_granted: boolean;
+  identified_risks: LkSGRiskItem[];
+  critical_risk_count: number;
+  high_risk_count: number;
+  executive_summary_de: string;
+  executive_summary_en: string;
+}
+
+export interface LkSGAuditResponse {
+  document_id: string;
+  filename: string;
+  assessment: LkSGSupplierAssessment;
+  audit_timestamp: string;
+}
+
+export async function getLkSGAudit(documentId: string): Promise<LkSGAuditResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/lksg-audit`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to perform LkSG Supply Chain Audit (${res.status})`);
+  }
+  return res.json();
+}
+
+
 
 
 

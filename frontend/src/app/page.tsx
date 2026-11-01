@@ -20,6 +20,7 @@ import { StandaloneAuditorStudio } from "@/components/StandaloneAuditorStudio";
 import { RemediationModal } from "@/components/RemediationModal";
 import { TableInspectorModal } from "@/components/TableInspectorModal";
 import { AuditReportExporterModal } from "@/components/AuditReportExporterModal";
+import { LkSGAuditPanel } from "@/components/LkSGAuditPanel";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
 import { Bot, Award } from "lucide-react";
@@ -52,6 +53,7 @@ export default function Home() {
   const [isRemediationModalOpen, setIsRemediationModalOpen] = useState(false);
   const [isTableInspectorOpen, setIsTableInspectorOpen] = useState(false);
   const [isDinReportModalOpen, setIsDinReportModalOpen] = useState(false);
+  const [isLkSGAuditOpen, setIsLkSGAuditOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -384,6 +386,7 @@ export default function Home() {
                 onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
                 onOpenRemediation={() => setIsRemediationModalOpen(true)}
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
+                onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -434,6 +437,7 @@ export default function Home() {
                 onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
                 onOpenRemediation={() => setIsRemediationModalOpen(true)}
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
+                onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
               />
             </main>
           )}
@@ -585,6 +589,19 @@ export default function Home() {
         lang={lang}
       />
 
+      {/* LkSG German Supply Chain Due Diligence & BAFA Audit Modal */}
+      <LkSGAuditPanel
+        isOpen={isLkSGAuditOpen}
+        onClose={() => setIsLkSGAuditOpen(false)}
+        lang={lang}
+        documentId={documentId}
+        documentName={documentName}
+        onJumpToCitation={(page) => {
+          setCurrentPage(page);
+          setIsLkSGAuditOpen(false);
+          setLayoutMode("workbench");
+        }}
+      />
 
       {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
       <CommandPalette
@@ -605,6 +622,7 @@ export default function Home() {
         onOpenAuditRights={() => setIsAuditRightsModalOpen(true)}
         onOpenRemediation={() => setIsRemediationModalOpen(true)}
         onOpenTableInspector={() => setIsTableInspectorOpen(true)}
+        onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
         onOpenZugferd={() => setIsZugferdModalOpen(true)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}

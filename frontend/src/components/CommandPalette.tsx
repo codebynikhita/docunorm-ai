@@ -16,6 +16,7 @@ import {
   Sparkles,
   ExternalLink,
   Table as TableIcon,
+  Scale,
   X,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
@@ -42,6 +43,7 @@ interface CommandPaletteProps {
   onOpenAuditRights: () => void;
   onOpenRemediation?: () => void;
   onOpenTableInspector?: () => void;
+  onOpenLkSGAudit?: () => void;
   onOpenZugferd: () => void;
   onOpenCertificate: () => void;
   availableDocuments?: any[];
@@ -60,6 +62,7 @@ export function CommandPalette({
   onOpenAuditRights,
   onOpenRemediation,
   onOpenTableInspector,
+  onOpenLkSGAudit,
   onOpenZugferd,
   onOpenCertificate,
   availableDocuments = [],
@@ -162,6 +165,18 @@ export function CommandPalette({
       shortcut: "S T",
       action: () => {
         if (onOpenTableInspector) onOpenTableInspector();
+        onClose();
+      },
+    },
+    {
+      id: "reg-lksg-audit",
+      title_de: "LkSG Lieferketten-Sorgfaltspflichten & BAFA-Prüfung",
+      title_en: "LkSG Supply Chain Due Diligence & BAFA Audit",
+      category: "regulatory",
+      icon: Scale,
+      shortcut: "L S",
+      action: () => {
+        if (onOpenLkSGAudit) onOpenLkSGAudit();
         onClose();
       },
     },

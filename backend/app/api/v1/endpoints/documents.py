@@ -30,6 +30,8 @@ from app.schemas.dora import DoraExitAuditReport
 from app.schemas.subcontractor import DoraSubcontractorAuditReport
 from app.schemas.audit_rights import DoraAuditRightsReport
 from app.schemas.remediation import DocumentRiskHeatmap, AmendmentProposal
+from app.schemas.lksg import LkSGAuditResponse
+from app.services.lksg_analyzer import LkSGAnalyzerService
 from app.schemas.table import (
     DocumentTablesResponse,
     TableStructure,
@@ -1477,6 +1479,73 @@ async def export_din_audit_report(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
     )
+
+
+@router.post(
+    "/{document_id}/lksg-audit",
+    response_model=LkSGAuditResponse,
+    summary="Execute German Supply Chain Due Diligence (LkSG §§ 2-10) Statutory Audit",
+)
+async def perform_lksg_audit(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> LkSGAuditResponse:
+    """
+    Performs forensic LkSG supply chain audit across Human Rights (§ 2 Abs. 2),
+    Environmental conventions (§ 2 Abs. 3), and Governance/BAFA mandates (§§ 6-10).
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "content": c.content,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+        }
+        for c in chunks
+    ]
+
+    # If document has no chunks in DB yet, fallback to parsing directly from file
+    if not chunk_dicts and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            chunk_dicts = [
+                {
+                    "id": f"p{b.page_number}_b{b.block_index}",
+                    "content": b.text,
+                    "page_number": b.page_number,
+                    "bounding_box": b.bounding_box,
+                }
+                for b in parse_res.blocks
+            ]
+
+    return LkSGAnalyzerService.analyze_document(
+        document_id=document.id,
+        filename=document.filename,
+        chunks=chunk_dicts,
+    )
+
 
 
 

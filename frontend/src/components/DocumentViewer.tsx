@@ -24,6 +24,7 @@ import {
   Sparkles,
   Network,
   Table as TableIcon,
+  Scale,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
@@ -64,6 +65,7 @@ interface DocumentViewerProps {
   onOpenAuditRights?: () => void;
   onOpenRemediation?: () => void;
   onOpenTableInspector?: () => void;
+  onOpenLkSGAudit?: () => void;
 }
 
 export function DocumentViewer({
@@ -83,6 +85,7 @@ export function DocumentViewer({
   onOpenAuditRights,
   onOpenRemediation,
   onOpenTableInspector,
+  onOpenLkSGAudit,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -452,6 +455,19 @@ export function DocumentViewer({
                   <TableIcon className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
                   <span className="hidden xl:inline">
                     {lang === "DE" ? "SLA-Tabellen" : "SLA Tables"}
+                  </span>
+                </button>
+              )}
+
+              {onOpenLkSGAudit && (
+                <button
+                  onClick={onOpenLkSGAudit}
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  title={lang === "DE" ? "LkSG Lieferketten-Sorgfaltspflichten & BAFA-Prüfung" : "LkSG Supply Chain Due Diligence & BAFA Audit"}
+                >
+                  <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="hidden xl:inline">
+                    {lang === "DE" ? "LkSG-Audit" : "LkSG Audit"}
                   </span>
                 </button>
               )}
