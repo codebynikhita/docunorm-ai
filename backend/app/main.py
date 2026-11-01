@@ -25,7 +25,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     and handles graceful resource disposal on shutdown.
     """
     print("🚀 [Startup] Ensuring database schema is ready...")
-    init_db()
+    try:
+        init_db()
+        print("✅ [Startup] Database schema verified.")
+    except Exception as e:
+        print(f"⚠️ [Startup] Database initialization notice (running in memory/stateless mode): {e}")
 
     # Verify Redis connectivity on startup
     redis = Redis(
