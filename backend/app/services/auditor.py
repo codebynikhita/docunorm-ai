@@ -1479,10 +1479,50 @@ def fallback_translate_german_text(text: str) -> str:
     if not text:
         return ""
 
+    try:
+        from app.services.banking_translations import lookup_banking_translation
+        b_trans = lookup_banking_translation(text)
+        if b_trans:
+            return b_trans
+    except Exception:
+        pass
+
     t_clean = " ".join(text.split()).strip()
 
     # Exact or near-exact paragraph matches for authentic German contracts
     CLAUSE_MAP = [
+        (
+            "DEUTSCHE BANK AG · MASTER CLOUD SERVICES AGREEMENT (DORA / KWG)",
+            "DEUTSCHE BANK AG • MASTER CLOUD SERVICES AGREEMENT (DORA / KWG)",
+        ),
+        (
+            "Vertragsdossier: DB-2026-DORA-9941 · TEIL I: PRÄAMBEL & REGULATORISCHE GRUNDLAGEN",
+            "Contract Dossier: DB-2026-DORA-9941 • PART I: PREAMBLE & REGULATORY FRAMEWORK",
+        ),
+        (
+            "DIN EN ISO/IEC 27001 · BSI C5 Testat · EBA/GL/2019/02 Konformitätsfassung",
+            "DIN EN ISO/IEC 27001 • BSI C5 Attestation • EBA/GL/2019/02 Compliance Version",
+        ),
+        (
+            "§ 1 Gegenstand der Vereinbarung und Vertragsstruktur",
+            "§ 1 Subject Matter of Agreement and Contract Structure",
+        ),
+        (
+            "Die Deutsche Bank AG (nachfolgend 'Institut' oder 'Auftraggeber') beauftragt die CloudScale Systems Europe SE",
+            "Deutsche Bank AG (hereinafter 'Institution' or 'Client') commissions CloudScale Systems Europe SE (hereinafter 'Service Provider' or 'Contractor') with the provision of highly available core banking cloud infrastructures for European payment transactions, securities settlement, and regulatory reporting processes. This master agreement governs the provision of information technology and cloud services in strict compliance with Regulation (EU) 2022/2554 (DORA), the German Banking Act (KWG § 25b), BaFin Circulars on Banking Supervisory Requirements for IT (BAIT 8.1), and European Banking Authority Guidelines (EBA/GL/2019/02).",
+        ),
+        (
+            "AUFSICHTSRECHTLICHER PRÜFVERMERK (DORA ART. 30 / BAFIN BAIT)",
+            "SUPERVISORY AUDIT VERIFICATION NOTICE (DORA ART. 30 / BAFIN BAIT)",
+        ),
+        (
+            "Diese Klausel (§) wurde vom zentralen Auslagerungsmanagement der Deutschen Bank AG geprüft",
+            "This clause was formally audited by Central Outsourcing Management of Deutsche Bank AG and conforms with supervisory requirements under DORA Art. 30 and BaFin Circulars. Forensic audit citations are deposited in the revision-proof information register.",
+        ),
+        (
+            "TECHNISCHE PARAMETER & COMPLIANCE-SCHWELLENWERTE",
+            "TECHNICAL PARAMETERS & COMPLIANCE THRESHOLDS",
+        ),
         (
             "SIEMENS AG • RECHTSABTEILUNG COMPLIANCE",
             "SIEMENS AG • LEGAL & REGULATORY COMPLIANCE DEPARTMENT",

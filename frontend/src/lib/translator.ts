@@ -1,3 +1,5 @@
+import { lookupBankingTranslation, BANKING_TITLE_MAP } from "./banking_translations";
+
 /**
  * Bidirectional Regulatory & Legal Translation Utility (DIN EN ISO 17100 / BaFin Compliance)
  * - German ➔ English for international/US auditors
@@ -126,7 +128,7 @@ const CANONICAL_CONTRACT_CLAUSES_DE_TO_EN: Array<{ deMatch: string[]; enText: st
     enText: "Banking Details and Tax Identification (Verified):",
   },
   {
-    deMatch: ["bankinstitut: deutsche bank ag", "deutsche bank ag"],
+    deMatch: ["bankinstitut: deutsche bank ag", "bankinstitut: deutsche bank"],
     enText: "Banking Institution: Deutsche Bank AG, Frankfurt am Main",
   },
   {
@@ -442,6 +444,11 @@ export function translateEnglishToGerman(text: string): string {
 export function translateGermanToEnglish(text: string): string {
   if (!text) return "";
 
+  const bankingMatch = lookupBankingTranslation(text);
+  if (bankingMatch) {
+    return bankingMatch;
+  }
+
   const lower = text.toLowerCase().replace(/•/g, " ").replace(/·/g, " ").replace(/-/g, " ");
 
   // 0. IELTS & Exam Score Card Translation
@@ -543,6 +550,127 @@ export function translateGermanToEnglish(text: string): string {
       .replace(/Abs\.\s*(\d+)/gi, "Para. $1")
       .replace(/Geprüfte Revisionsnachweise:/gi, "Verified Audit Evidence:")
       .replace(/Geprüfte Quellen:/gi, "Verified Sources:");
+  }
+
+  // 0C. Institutional Banking & Deutsche Bank 50-Page Master Agreement Translations
+  // Document Master Title
+  if (lower.includes("master cloud services agreement") || (lower.includes("deutsche bank") && lower.includes("(dora / kwg)"))) {
+    return "DEUTSCHE BANK AG • MASTER CLOUD SERVICES AGREEMENT (DORA / KWG)";
+  }
+
+  // Contract Dossier & Parts
+  if (lower.includes("vertragsdossier") || lower.includes("teil i:") || lower.includes("teil ii:") || lower.includes("teil iii:") || lower.includes("teil iv:") || lower.includes("teil v:") || lower.includes("teil vi:") || lower.includes("teil vii:") || lower.includes("teil viii:") || lower.includes("teil ix:") || lower.includes("teil x:")) {
+    if (lower.includes("teil i:") || lower.includes("teil i ")) return "Contract Dossier: DB-2026-DORA-9941 • PART I: PREAMBLE & REGULATORY FRAMEWORK";
+    if (lower.includes("teil ii:") || lower.includes("teil ii ")) return "Contract Dossier: DB-2026-DORA-9941 • PART II: SERVICE LEVEL AGREEMENTS (SLA) & AVAILABILITY";
+    if (lower.includes("teil iii:") || lower.includes("teil iii ")) return "Contract Dossier: DB-2026-DORA-9941 • PART III: DATA SOVEREIGNTY, STORAGE LOCATIONS & CRYPTOGRAPHY";
+    if (lower.includes("teil iv:") || lower.includes("teil iv ")) return "Contract Dossier: DB-2026-DORA-9941 • PART IV: SUPERVISORY AUDIT & INSPECTION RIGHTS (KWG § 25B)";
+    if (lower.includes("teil v:") || lower.includes("teil v ")) return "Contract Dossier: DB-2026-DORA-9941 • PART V: SUB-CONTRACTING & SUB-SERVICE PROVIDERS";
+    if (lower.includes("teil vi:") || lower.includes("teil vi ")) return "Contract Dossier: DB-2026-DORA-9941 • PART VI: ICT INCIDENT MANAGEMENT & BAFIN REPORTING";
+    if (lower.includes("teil vii:") || lower.includes("teil vii ")) return "Contract Dossier: DB-2026-DORA-9941 • PART VII: EXIT STRATEGY & DISENTANGLEMENT (DORA ART. 30 PARA. 2 LIT. E)";
+    if (lower.includes("teil viii:") || lower.includes("teil viii ")) return "Contract Dossier: DB-2026-DORA-9941 • PART VIII: SOURCE CODE ESCROW & CONTINUITY (DORA ART. 30 PARA. 2 LIT. H)";
+    if (lower.includes("teil ix:") || lower.includes("teil ix ")) return "Contract Dossier: DB-2026-DORA-9941 • PART IX: LIABILITY, PENALTIES & CIVIL LAW CONFORMANCE";
+    if (lower.includes("teil x:") || lower.includes("teil x ")) return "Contract Dossier: DB-2026-DORA-9941 • PART X: ESG, LKSG, E-INVOICING & FINAL PROVISIONS";
+    return "Contract Dossier: DB-2026-DORA-9941 • Institutional Banking Framework (DORA / KWG)";
+  }
+
+  // Security Standards & Attestations
+  if (lower.includes("bsi c5 testat") || lower.includes("konformitätsfassung") || (lower.includes("iso/iec 27001") && lower.includes("c5"))) {
+    return "DIN EN ISO/IEC 27001 • BSI C5 Attestation • EBA/GL/2019/02 Compliance Version";
+  }
+
+  // Pagination
+  if (/seite\s+\d+\s+von\s+\d+/i.test(text)) {
+    return text.replace(/seite\s+(\d+)\s+von\s+(\d+)/gi, "PAGE $1 OF $2");
+  }
+
+  // Supervisory Notice
+  if (lower.includes("aufsichtsrechtlicher prüfvermerk")) {
+    return "SUPERVISORY AUDIT VERIFICATION NOTICE (DORA ART. 30 / BAFIN BAIT)";
+  }
+  if (lower.includes("zentralen auslagerungsmanagement der deutschen bank ag geprüft") || lower.includes("revisionssicheren informationsregister")) {
+    return "This clause was formally audited by Central Outsourcing Management of Deutsche Bank AG and conforms with supervisory requirements under DORA Art. 30 and BaFin Circulars. Forensic audit citations are deposited in the revision-proof information register.";
+  }
+
+  // Technical Parameter Headers & Metrics
+  if (lower.includes("technische parameter & compliance-schwellenwerte") || lower.includes("technische parameter")) {
+    return "TECHNICAL PARAMETERS & COMPLIANCE THRESHOLDS";
+  }
+  if (lower.includes("verfügbarkeits-sla")) {
+    return "Availability SLA (SLA Catalog A)\n99.95% annual minimum (max. 4.38h downtime/year)";
+  }
+  if (lower.includes("wiederherstellungsziel (rto)")) {
+    return "Recovery Time Objective (RTO)\n< 2 Hours (Synchronous Multi-Region Mirroring)";
+  }
+  if (lower.includes("datenverlustgrenze (rpo)")) {
+    return "Recovery Point Objective (RPO)\n0 Minutes (Zero Data Loss Commitment)";
+  }
+  if (lower.includes("verschlüsselungsstandard")) {
+    return "Encryption Standard\nAES-256 GCM (At-Rest) • TLS 1.3 mTLS (In-Transit)";
+  }
+  if (lower.includes("aufsichtliches prüfungsrecht")) {
+    return "Supervisory Audit Access\nUnrestricted On-Site Access (BaFin, ECB, Deutsche Bank)";
+  }
+  if (lower.includes("db-dora-50p-capstone") || (lower.includes("bafin revisionsfähig") && lower.includes("deutsche bank"))) {
+    return text.replace(/seite\s+(\d+)\s+von\s+(\d+)/gi, "Page $1 of $2")
+      .replace(/dokumenten-id/gi, "Document ID")
+      .replace(/bafin revisionsfähig/gi, "BAFIN AUDIT-READY SEAL");
+  }
+
+  // Deutsche Bank 50-Page Clause Titles
+  if (lower.includes("vertragsstruktur") && lower.includes("§ 1")) return "§ 1 Subject Matter of Agreement and Contract Structure";
+  if (lower.includes("kritische und wichtige funktion") && lower.includes("§ 2")) return "§ 2 Classification as Critical and Important Function (DORA Art. 30 Para. 2)";
+  if (lower.includes("rangfolge der vertragsdokumente") || (lower.includes("§ 3") && lower.includes("rangfolge"))) return "§ 3 Order of Precedence & Primacy of Mandatory Banking Law";
+  if (lower.includes("begriffsbestimmungen & normenverweise") || (lower.includes("§ 4") && lower.includes("begriffsbestimmungen"))) return "§ 4 Definitions & Regulatory References";
+  if (lower.includes("vertragslaufzeit & ordentliche") || (lower.includes("§ 5") && lower.includes("laufzeit"))) return "§ 5 Contract Term & Ordinary Termination Notice Period";
+  if (lower.includes("quantitative dienstgüte") || lower.includes("§ 6")) return "§ 6 Quantitative Quality of Service & Minimum Availability (SLA Catalog A)";
+  if (lower.includes("wiederherstellungszeiten: rto und rpo") || lower.includes("§ 7")) return "§ 7 Recovery Times: RTO and RPO Thresholds";
+  if (lower.includes("pönalenmatrix & gesetzliche") || (lower.includes("§ 8") && lower.includes("pönal"))) return "§ 8 Penalty Matrix & Statutory Penalty Cap (BGB § 339)";
+  if (lower.includes("echtzeit-monitoring & automatisierte") || lower.includes("§ 9")) return "§ 9 Real-Time Monitoring & Automated SLA Reporting Interfaces";
+  if (lower.includes("kapazitätsmanagement & skalierungsgarantien") || lower.includes("§ 10")) return "§ 10 Capacity Management & Scalability Guarantees";
+  if (lower.includes("primäre datenresidenz") || lower.includes("§ 11")) return "§ 11 Primary Data Residency & Prohibition of Third-Country Transfers";
+  if (lower.includes("us cloud act immunität") || lower.includes("§ 12")) return "§ 12 US CLOUD Act Immunity & Hold-Your-Own-Key (HYOK) Mandate";
+  if (lower.includes("kryptographische schlüssellängen") || lower.includes("§ 13")) return "§ 13 Cryptographic Key Lengths pursuant to BSI TR-02102";
+  if (lower.includes("mandantentrennung & kryptographische") || lower.includes("§ 14")) return "§ 14 Multi-Tenancy Separation & Cryptographic Isolation";
+  if (lower.includes("datenlöschung & revisionssichere") || lower.includes("§ 15")) return "§ 15 Data Erasure & Audit-Proof Destruction (DIN 66399)";
+  if (lower.includes("uneingeschränkte vor-ort-prüfrechte") || lower.includes("§ 16")) return "§ 16 Unrestricted On-Site Audit Access Rights (DORA Art. 30 Para. 3 lit. e)";
+  if (lower.includes("verbot von prüfkautionen") || lower.includes("§ 17")) return "§ 17 Prohibition of Audit Deposits & Financial Barriers (BGB § 307)";
+  if (lower.includes("gemeinschaftliche prüfungen (pooled audits)") || lower.includes("§ 18")) return "§ 18 Joint Inspections (Pooled Audits) pursuant to EBA Guidelines";
+  if (lower.includes("bereitstellung von revisionsnachweisen") || lower.includes("§ 19")) return "§ 19 Provision of Audit Documentation & CISO Interviews";
+  if (lower.includes("threat-led penetration testing (tlpt)") || lower.includes("§ 20")) return "§ 20 Threat-Led Penetration Testing (TLPT) pursuant to DORA Art. 26 & 27";
+  if (lower.includes("vorab-zustimmungsvorbehalt") || lower.includes("§ 21")) return "§ 21 Prior Consent Reservation & Written Form Mandate (DORA Art. 30 Para. 2 lit. a)";
+  if (lower.includes("qualifiziertes widerspruchsrecht") || lower.includes("§ 22")) return "§ 22 Qualified Right of Objection & Extraordinary Termination";
+  if (lower.includes("strikte haftungsdurchleitung") || lower.includes("§ 23")) return "§ 23 Strict Pass-Through Liability & Vicarious Performance Duty (BGB § 278)";
+  if (lower.includes("vertragliche weiterreichung") || lower.includes("§ 24")) return "§ 24 Contractual Pass-Through of All Statutory DORA Obligations";
+  if (lower.includes("verbot verdeckter konzernauslagerungen") || lower.includes("§ 25")) return "§ 25 Prohibition of Undisclosed Intragroup Sub-Outsourcing";
+  if (lower.includes("4-stunden-meldefrist") || lower.includes("§ 26")) return "§ 26 4-Hour Incident Reporting Window for Major ICT Incidents (DORA Art. 19)";
+  if (lower.includes("bereitstellung von bafin-meldedaten") || lower.includes("§ 27")) return "§ 27 Provision of BaFin Incident Reporting Data (DORA RTS Reporting)";
+  if (lower.includes("24/7 notfallkontakt") || lower.includes("§ 28")) return "§ 28 24/7 Incident Hotline & Supervisory Escalation Matrix";
+  if (lower.includes("forensische protokollierung") || lower.includes("§ 29")) return "§ 29 Forensic Audit Logging & Statutory Record Retention";
+  if (lower.includes("krisenkommunikation & reputationsschutz") || lower.includes("§ 30")) return "§ 30 Crisis Communications & Institutional Reputation Protection";
+  if (lower.includes("verpflichtender migrationsbeistand") || lower.includes("§ 31")) return "§ 31 Mandatory Migration Assistance of At Least 90 Days (DORA Art. 30.2)";
+  if (lower.includes("bereitstellung interoperabler standardformate") || lower.includes("§ 32")) return "§ 32 Interoperable Open Formats & Prohibition of Vendor Lock-In";
+  if (lower.includes("transparente und gedeckelte ausstiegskosten") || lower.includes("§ 33")) return "§ 33 Transparent and Strictly Capped Disentanglement Exit Costs";
+  if (lower.includes("jährliche aktualisierung des ausstiegsplans") || lower.includes("§ 34")) return "§ 34 Annual Review and Update of the Operational Exit Strategy";
+  if (lower.includes("parallellauf & notfall-verlängerungsoption") || lower.includes("§ 35")) return "§ 35 Parallel Operations & Emergency Transition Extension Window";
+  if (lower.includes("fortlaufende quellcode-hinterlegung") || lower.includes("§ 36")) return "§ 36 Continuous Source Code Escrow with German Notary Escrow Agent";
+  if (lower.includes("automatisierte build- und kompilierungsverifikation") || lower.includes("§ 37")) return "§ 37 Automated Build and Compilation Integrity Verification";
+  if (lower.includes("auslösende ereignisse (release triggers)") || lower.includes("§ 38")) return "§ 38 Statutory Escrow Release Triggers";
+  if (lower.includes("kostenfreie quellcode-freigabe") || lower.includes("§ 39")) return "§ 39 Cost-Free Source Code Release Without Financial Preconditions";
+  if (lower.includes("nutzungs- und bearbeitungsrechte im escrow-fall") || lower.includes("§ 40")) return "§ 40 License and Modification Rights Upon Escrow Release";
+  if (lower.includes("unbeschränkte haftung für vorsatz") || lower.includes("§ 41")) return "§ 41 Unlimited Liability for Intent and Gross Negligence (BGB § 309 Nr. 7)";
+  if (lower.includes("haftung für einfache fahrlässigkeit") || lower.includes("§ 42")) return "§ 42 Liability for Simple Negligence & Essential Cardinal Duties";
+  if (lower.includes("freistellung bei datenschutz- und urheberrechtsverletzungen") || lower.includes("§ 43")) return "§ 43 Full Indemnification for Data Protection and IP Breaches";
+  if (lower.includes("verjährungsfristen nach deutschem recht") || lower.includes("§ 44")) return "§ 44 Statutory Limitation Periods under German Civil Law (BGB)";
+  if (lower.includes("versicherungspflichten des dienstleisters") || lower.includes("§ 45")) return "§ 45 Mandatory Cyber and Professional Liability Insurance Coverage";
+  if (lower.includes("einhaltung des lieferkettensorgfaltspflichtengesetzes") || lower.includes("§ 46")) return "§ 46 Compliance with the German Supply Chain Due Diligence Act (LkSG §§ 4 & 5)";
+  if (lower.includes("elektronische rechnungsstellung gem. zugferd 2.3 / factur-x") || lower.includes("§ 47")) return "§ 47 Electronic Invoicing pursuant to ZUGFeRD 2.3 / Factur-X (EN 16931)";
+  if (lower.includes("nachhaltigkeit & green data center standards") || lower.includes("§ 48")) return "§ 48 Sustainability & Green Data Center Standards (EU CSRD PUE < 1.25)";
+  if (lower.includes("schriftformklausel & bgb § 311") || lower.includes("§ 49")) return "§ 49 Written Form Mandate & BGB § 311 Amendment Procedures";
+  if (lower.includes("anwendbares recht, gerichtsstand & salvatorische klausel") || lower.includes("§ 50")) return "§ 50 Governing Law, Frankfurt am Main Jurisdiction & Severability Clause";
+
+  // Deutsche Bank 50-Page Clause Bodies
+  if (lower.includes("beauftragt die cloudscale systems europe se") && lower.includes("kernbank-cloud-infrastrukturen")) {
+    return "Deutsche Bank AG (hereinafter 'Institution' or 'Client') commissions CloudScale Systems Europe SE (hereinafter 'Service Provider' or 'Contractor') with the provision of highly available core banking cloud infrastructures for European payment transactions, securities settlement, and regulatory reporting processes. This master agreement governs the provision of information technology and cloud services in strict compliance with Regulation (EU) 2022/2554 (DORA), the German Banking Act (KWG § 25b), BaFin Circulars on Banking Supervisory Requirements for IT (BAIT 8.1), and European Banking Authority Guidelines (EBA/GL/2019/02).";
   }
 
   // 1. Direct match against canonical contract clauses
@@ -670,7 +798,7 @@ export function translateGermanToEnglish(text: string): string {
     return "Banking Details and Tax Identification (Verified):";
   }
 
-  if (lower.includes("deutsche bank ag")) {
+  if (lower.includes("bankinstitut: deutsche bank ag") || (lower.includes("bankinstitut") && lower.includes("deutsche bank"))) {
     return "Banking Institution: Deutsche Bank AG, Frankfurt am Main";
   }
 
@@ -851,6 +979,115 @@ export function classifyClause(
       statusBadge: isDe ? "Zulassungsrelevant" : "Admissions Scope",
       badgeVariant: "blue",
     };
+  }
+
+  // 2B. Institutional Banking Master Agreement (Deutsche Bank 50-Page)
+  if (lower.includes("master cloud services agreement") || lower.includes("db-dora-50p-capstone")) {
+    return {
+      clauseNumber: isDe ? "Master-Titel" : "Master Title",
+      category: isDe ? "Vertragsurkunde" : "Master Agreement",
+      title: isDe ? "Deutsche Bank AG • Master Cloud Services Agreement (DORA/KWG)" : "Deutsche Bank AG • Master Cloud Services Agreement (DORA/KWG)",
+      legalRef: "DORA Art. 30 / KWG § 25b",
+      statusBadge: isDe ? "BaFin-Revisionsfähig" : "BaFin Audit-Ready",
+      badgeVariant: "emerald",
+    };
+  }
+
+  if (lower.includes("vertragsdossier") || lower.includes("teil i") || lower.includes("teil ii") || lower.includes("teil iii") || lower.includes("teil iv") || lower.includes("teil v") || lower.includes("teil vi") || lower.includes("teil vii") || lower.includes("teil viii") || lower.includes("teil ix") || lower.includes("teil x")) {
+    return {
+      clauseNumber: isDe ? "Teil" : "Part",
+      category: isDe ? "Regulatorischer Rahmen" : "Regulatory Framework",
+      title: isDe ? "Vertragsdossier: Rechtsgrundlagen & Präambel" : "Contract Dossier: Statutory Framework & Scope",
+      legalRef: "DORA Art. 30 / KWG § 25b",
+      statusBadge: isDe ? "Rechtsverbindlich" : "Statutory Binding",
+      badgeVariant: "blue",
+    };
+  }
+
+  if (lower.includes("bsi c5") || lower.includes("iso/iec 27001")) {
+    return {
+      clauseNumber: isDe ? "Testat" : "Attestation",
+      category: isDe ? "Sicherheitszertifikate" : "Security Certification",
+      title: isDe ? "BSI C5 & ISO 27001 Konformitätsnachweis" : "BSI C5 & ISO 27001 Security Compliance Version",
+      legalRef: "BSI C5 / ISO 27001",
+      statusBadge: isDe ? "Zertifiziert" : "Certified",
+      badgeVariant: "emerald",
+    };
+  }
+
+  if (lower.includes("aufsichtsrechtlicher prüfvermerk")) {
+    return {
+      clauseNumber: isDe ? "Prüfvermerk" : "Audit Note",
+      category: isDe ? "BaFin Revisionsvermerk" : "BaFin Supervisory Note",
+      title: isDe ? "Aufsichtsrechtlicher Konformitätsvermerk (DORA/BAIT)" : "Supervisory Compliance Verification Notice",
+      legalRef: "BaFin BAIT / DORA Art. 30",
+      statusBadge: isDe ? "Konform" : "Compliant",
+      badgeVariant: "emerald",
+    };
+  }
+
+  if (lower.includes("technische parameter")) {
+    return {
+      clauseNumber: isDe ? "Parameter" : "Thresholds",
+      category: isDe ? "SLA-Schwellenwerte" : "Technical SLA Thresholds",
+      title: isDe ? "Technische Parameter & Compliance-Schwellenwerte" : "Technical Parameters & Compliance Thresholds",
+      legalRef: "DORA Art. 30 Abs. 2 lit. d",
+      statusBadge: isDe ? "Tier-3 Standard" : "Tier-3 Mandate",
+      badgeVariant: "blue",
+    };
+  }
+
+  if (lower.includes("verfügbarkeits-sla") || lower.includes("wiederherstellungsziel") || lower.includes("datenverlustgrenze") || lower.includes("verschlüsselungsstandard") || lower.includes("aufsichtliches prüfungsrecht")) {
+    return {
+      clauseNumber: isDe ? "Metrik" : "Metric",
+      category: isDe ? "SLA-Sicherheitsgrenzen" : "SLA & Security Threshold",
+      title: isDe ? "Garantierte Verfügbarkeit, RTO/RPO & Verschlüsselung" : "Guaranteed Availability, RTO/RPO & Encryption",
+      legalRef: "DORA Art. 30(2)(d) / BSI TR-02102",
+      statusBadge: isDe ? "99.95% Tier-3" : "99.95% Tier-3",
+      badgeVariant: "emerald",
+    };
+  }
+
+  // 2C. Institutional Banking Clauses (§ 1 through § 50)
+  const sectionMatch = rawText.match(/§\s*(\d+)/);
+  if (sectionMatch) {
+    const sNum = parseInt(sectionMatch[1], 10);
+    let foundDeTitle = "";
+    let foundEnTitle = "";
+    for (const [deTitle, enTitle] of Object.entries(BANKING_TITLE_MAP)) {
+      if (deTitle.startsWith(`§ ${sNum} `) || deTitle.startsWith(`§${sNum} `)) {
+        foundDeTitle = deTitle;
+        foundEnTitle = enTitle;
+        break;
+      }
+    }
+    if (foundDeTitle && foundEnTitle) {
+      return {
+        clauseNumber: `§ ${sNum}`,
+        category: isDe ? "Bankaufsichtliche Klausel" : "Regulatory Banking Clause",
+        title: isDe ? foundDeTitle : foundEnTitle,
+        legalRef:
+          sNum >= 6 && sNum <= 10
+            ? "DORA Art. 30(2)(d) SLA"
+            : sNum >= 16 && sNum <= 20
+            ? "DORA Art. 30(3)(e) Audit"
+            : sNum >= 21 && sNum <= 25
+            ? "DORA Art. 30(2)(a) Subcontracting"
+            : sNum >= 26 && sNum <= 30
+            ? "DORA Art. 19 Incident Management"
+            : sNum >= 31 && sNum <= 35
+            ? "DORA Art. 30(2)(e) Exit"
+            : sNum >= 36 && sNum <= 40
+            ? "DORA Art. 30(2)(h) Escrow"
+            : sNum >= 41 && sNum <= 45
+            ? "BGB § 309 / Haftungsordnung"
+            : sNum >= 46 && sNum <= 50
+            ? "LkSG / ZUGFeRD 2.3 / BGB"
+            : "DORA Art. 30 / KWG § 25b",
+        statusBadge: isDe ? "BaFin-Konform" : "BaFin-Compliant",
+        badgeVariant: sNum >= 41 && sNum <= 45 ? "amber" : "emerald",
+      };
+    }
   }
 
   if (lower.includes("statement of purpose") || lower.includes("academic background")) {

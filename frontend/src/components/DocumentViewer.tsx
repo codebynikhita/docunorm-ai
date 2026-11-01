@@ -903,7 +903,7 @@ export function DocumentViewer({
                     const trans = (
                       detectedDocLang === "EN"
                         ? translateEnglishToGerman(chunk.content)
-                        : chunk.translated_content || translateGermanToEnglish(chunk.content)
+                        : (translateGermanToEnglish(chunk.content) || chunk.translated_content || chunk.content)
                     ).toLowerCase();
                     const orig = chunk.content.toLowerCase();
                     return trans.includes(q) || orig.includes(q);
@@ -912,7 +912,7 @@ export function DocumentViewer({
                     const translatedText =
                       detectedDocLang === "EN"
                         ? translateEnglishToGerman(chunk.content)
-                        : chunk.translated_content || translateGermanToEnglish(chunk.content);
+                        : (translateGermanToEnglish(chunk.content) || chunk.translated_content || chunk.content);
                     const isSelected = selectedChunkId === chunk.id;
 
                     let primaryText = "";
