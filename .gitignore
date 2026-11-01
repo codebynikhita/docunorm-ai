@@ -68,6 +68,7 @@ pnpm-debug.log*
 # Docker & Local Data Persistence
 docker-data/
 *.log
+*.db
 storage/
 backend/storage/
 backend/*.pdf
