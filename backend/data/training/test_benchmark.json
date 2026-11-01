@@ -598,5 +598,65 @@
       "dora"
     ],
     "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-LKSG-51-MINAMATA-MERCURY-DISPOSAL",
+    "pillar": "Pillar V (LkSG § 2 Abs. 3 Nr. 1 Minamata Convention Mercury Violations)",
+    "context": "§ 14 Umweltstandards: 'Der Lieferant behandelt quecksilberhaltige Produktionsrückstände nach lokalen Deponie-Standards; die Verpflichtung zum Einsatz katalytischer Abluftfilter und nachweisbarer Entsorgungszertifikate nach dem Minamata-Übereinkommen wird ausdrücklich abbedungen.'",
+    "query": "Ist die Abbedingung von Filter- und Zertifizierungsanforderungen für Quecksilberrückstände nach § 2 Abs. 3 Nr. 1 LkSG (Minamata-Übereinkommen) zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "minamata",
+      "quecksilber"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-LKSG-52-CHILD-LABOUR-PROHIBITION",
+    "pillar": "Pillar V (LkSG § 2 Abs. 2 Nr. 1 ILO 138/182 Child Labour Prohibition)",
+    "context": "§ 8 Arbeitsbedingungen: 'Zur Deckung von Erntespitzen ist der Einsatz von Hilfskräften ab dem vollendeten 13. Lebensjahr gestattet, sofern eine elterliche Zustimmung vorliegt und die Schulpflicht nicht formal verletzt wird.'",
+    "query": "Ist die Beschäftigung von Kindern unter 15 Jahren nach § 2 Abs. 2 Nr. 1 LkSG und dem IAO-Übereinkommen Nr. 138 zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "iao",
+      "kinderarbeit"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-LKSG-53-FORCED-LABOUR-PASSPORT-RETENTION",
+    "pillar": "Pillar V (LkSG § 2 Abs. 2 Nr. 2 & 4 ILO 29 Forced Labour & Freedom of Movement)",
+    "context": "§ 11 Personalsicherheit: 'Ausländische Wanderarbeiter hinterlegen ihre Reisepässe und Identifikationsdokumente bei Dienstantritt bis zur vollständigen Begleichung der Vermittlungsgebühren in der Werkssicherheit.'",
+    "query": "Verstößt das Einbehalten von Ausweisdokumenten und Vermittlungsgebühren gegen § 2 Abs. 2 Nr. 2 und Nr. 4 LkSG (Verbot der Zwangsarbeit)?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "zwangsarbeit",
+      "ausweisdokumente"
+    ],
+    "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-LKSG-54-WHISTLEBLOWER-PROCEDURE-INTEGRITY",
+    "pillar": "Pillar V (LkSG § 8 Statutory Complaints Procedure & Anonymity)",
+    "context": "§ 19 Beschwerdeverfahren: 'Der Zulieferer unterhält ein firmenweites Hinweisgebersystem mit mehrsprachigem Webportal, garantiert Vertraulichkeit und Schutz vor Repressalien (§ 8 LkSG) und legt quartalsweise Transparenzberichte vor.'",
+    "query": "Erfüllt dieses institutionalisierte Hinweisgebersystem die gesetzlichen Mindestanforderungen nach § 8 LkSG?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "beschwerdeverfahren",
+      "hinweisgeber"
+    ],
+    "expected_status": "KONFORM"
+  },
+  {
+    "id": "COMPLEX-LKSG-55-BASEL-HAZARDOUS-WASTE-EXPORT",
+    "pillar": "Pillar V (LkSG § 2 Abs. 3 Nr. 3 Basel Convention Transboundary Waste Export)",
+    "context": "§ 22 Abfallwirtschaft: 'Elektronikschrott und quecksilberhaltige Serverkomponenten werden zwecks kostengünstiger Aufbereitung in Staaten außerhalb der OECD verbracht, ohne dass eine vorherige Notifizierung nach dem Basler Übereinkommen vorliegt.'",
+    "query": "Ist der unnotifizierte Export gefährlicher Elektronikabfälle in Nicht-OECD-Staaten nach § 2 Abs. 3 Nr. 3 LkSG (Basler Übereinkommen) zulässig?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "basel",
+      "abfall"
+    ],
+    "expected_status": "DEFIZITÄR"
   }
 ]

@@ -70,6 +70,8 @@ docker-data/
 *.log
 storage/
 backend/storage/
+backend/*.pdf
+backend/reports/
 
 # IDE & Editors
 .vscode/

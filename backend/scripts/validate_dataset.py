@@ -85,6 +85,8 @@ def validate_training_file(path: Path) -> dict:
                 p = "Academic / Certification"
             elif "BGB § 311" in assistant_text or "Musterklausel" in assistant_text:
                 p = "BGB § 311 Remediation"
+            elif "LkSG" in assistant_text or "Lieferkette" in assistant_text or "Menschenrecht" in assistant_text or "Minamata" in assistant_text or "Basel" in assistant_text:
+                p = "LkSG Due Diligence (§ 2 / § 8)"
             else:
                 p = "General Supervisory Mandate"
 
