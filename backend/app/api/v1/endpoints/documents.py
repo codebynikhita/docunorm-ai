@@ -438,14 +438,36 @@ async def get_document_file(
     result = await db.execute(stmt)
     document = result.scalar_one_or_none()
 
-    if not document or not document.file_path or not Path(document.file_path).exists():
+    if not document or not document.file_path:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Document file not found for ID '{document_id}'.",
         )
 
+    file_p = Path(document.file_path)
+    if not file_p.exists():
+        resolved_self = Path(__file__).resolve()
+        backend_dir = resolved_self.parents[4]
+        root_dir = resolved_self.parents[5]
+        candidates = [
+            root_dir / document.file_path,
+            backend_dir / document.file_path,
+            root_dir / "storage" / "documents" / str(tenant.id) / file_p.name,
+            backend_dir / "storage" / "documents" / str(tenant.id) / file_p.name,
+        ]
+        for c in candidates:
+            if c.exists():
+                file_p = c
+                break
+
+    if not file_p.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document file not found for ID '{document_id}' on disk.",
+        )
+
     return FileResponse(
-        path=document.file_path,
+        path=str(file_p),
         media_type=document.mime_type or "application/pdf",
         filename=document.filename,
     )
