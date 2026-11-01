@@ -93,6 +93,7 @@ export function DocumentViewer({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isTranslationHudDismissed, setIsTranslationHudDismissed] = useState(false);
   const [docViewMode, setDocViewMode] = useState<"canvas" | "dual" | "english">("dual");
+  const [dossierPrimaryView, setDossierPrimaryView] = useState<"translated" | "original">("translated");
   const [allChunks, setAllChunks] = useState<any[]>([]);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
   const [localHighlight, setLocalHighlight] = useState<BoundingBoxHighlight | null>(null);
@@ -860,6 +861,36 @@ export function DocumentViewer({
                   </button>
                 )}
               </div>
+
+              {/* Language Orientation Toggle */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1 border-b border-[var(--surface-border)] text-[10px] font-mono">
+                <span className="text-[10.5px] opacity-60 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <Languages className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+                  {detectedDocLang === "EN" ? "Dual-Language Dossier" : "Beglaubigtes Revisionsdossier"}
+                </span>
+                <div className="flex items-center gap-1 bg-[var(--surface-dark)] p-0.5 rounded-md border border-[var(--surface-border)]">
+                  <button
+                    onClick={() => setDossierPrimaryView("translated")}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all ${
+                      dossierPrimaryView === "translated"
+                        ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
+                        : "opacity-60 hover:opacity-100 text-[var(--foreground)]"
+                    }`}
+                  >
+                    {detectedDocLang === "EN" ? "🇩🇪 German Translation (Primary)" : "🇬🇧 English Translation (Primary)"}
+                  </button>
+                  <button
+                    onClick={() => setDossierPrimaryView("original")}
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all ${
+                      dossierPrimaryView === "original"
+                        ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
+                        : "opacity-60 hover:opacity-100 text-[var(--foreground)]"
+                    }`}
+                  >
+                    {detectedDocLang === "EN" ? "🇺🇸 English Original" : "🇩🇪 Deutscher Originaltext"}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Paragraph-by-Paragraph Translated Clauses (Bidirectional) */}
@@ -882,36 +913,33 @@ export function DocumentViewer({
                       detectedDocLang === "EN"
                         ? translateEnglishToGerman(chunk.content)
                         : chunk.translated_content || translateGermanToEnglish(chunk.content);
-                    const meta = classifyClause(chunk.content, chunk.chunk_index, chunk.page_number, lang);
                     const isSelected = selectedChunkId === chunk.id;
 
-                    // If original document is English: German translation is primary for German audit/readers
-                    // If original document is German: English translation is primary for international audit/readers
                     let primaryText = "";
                     let alternateText = "";
                     let alternateLabel = "";
 
-                    if (detectedDocLang === "EN") {
-                      if (lang === "DE") {
-                        primaryText = translatedText;
-                        alternateText = chunk.content;
-                        alternateLabel = "Originale englische Quelle (EN 🇺🇸 / 🇬🇧)";
-                      } else {
-                        primaryText = chunk.content;
-                        alternateText = translatedText;
-                        alternateLabel = "Beglaubigte deutsche Übersetzung (DE 🇩🇪)";
-                      }
+                    if (dossierPrimaryView === "translated") {
+                      primaryText = translatedText;
+                      alternateText = chunk.content;
+                      alternateLabel =
+                        detectedDocLang === "EN"
+                          ? "Originale englische Quelle (EN 🇺🇸)"
+                          : "Deutscher Original-Vertragstext (DE 🇩🇪)";
                     } else {
-                      if (lang === "EN") {
-                        primaryText = translatedText;
-                        alternateText = chunk.content;
-                        alternateLabel = "German Statutory Source (DE 🇩🇪)";
-                      } else {
-                        primaryText = chunk.content;
-                        alternateText = translatedText;
-                        alternateLabel = "Beglaubigte englische Übersetzung (EN 🇬🇧)";
-                      }
+                      primaryText = chunk.content;
+                      alternateText = translatedText;
+                      alternateLabel =
+                        detectedDocLang === "EN"
+                          ? "Beglaubigte deutsche Übersetzung (DE 🇩🇪)"
+                          : "Certified English Translation (EN 🇬🇧)";
                     }
+
+                    const targetLang =
+                      dossierPrimaryView === "translated"
+                        ? (detectedDocLang === "EN" ? "DE" : "EN")
+                        : (detectedDocLang === "EN" ? "EN" : "DE");
+                    const meta = classifyClause(chunk.content, chunk.chunk_index, chunk.page_number, targetLang);
 
                     const handleSelectClause = () => {
                       setSelectedChunkId(chunk.id);
