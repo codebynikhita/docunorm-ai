@@ -658,5 +658,17 @@
       "abfall"
     ],
     "expected_status": "DEFIZITÄR"
+  },
+  {
+    "id": "COMPLEX-BAFA-56-STATUTORY-RISK-QUESTIONNAIRE",
+    "pillar": "Pillar V (BAFA § 5 LkSG Handreichung Risikoanalyse)",
+    "context": "§ 46 LkSG Due Diligence: 'Der Dienstleister verpflichtet sich zur jährlichen Risikoanalyse nach der offiziellen BAFA-Handreichung und beantwortet den 12-Punkte-Fragenkatalog zu Kinderarbeit, Zwangsarbeit, Umweltübereinkommen (Minamata, Stockholm, Basel) sowie wirksamen Beschwerdeverfahren gem. § 8 LkSG.'",
+    "query": "Ist die Durchführung der Risikoanalyse nach BAFA Handreichung gem. § 5 LkSG vertraglich geregelt?",
+    "must_include_citation": "[SOURCE_1]",
+    "must_mention": [
+      "bafa",
+      "risikoanalyse"
+    ],
+    "expected_status": "KONFORM"
   }
 ]

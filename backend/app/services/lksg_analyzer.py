@@ -312,7 +312,16 @@ class LkSGAnalyzerService:
             text = c.get("content", "")
             lower = text.lower()
             if any(k in lower for k in ["quecksilber", "mercury", "minamata"]):
-                if any(k in lower for k in ["unbehandelt", "ungereinigt", "deponierung ohne filter"]):
+                if any(k in lower for k in [
+                    "unbehandelt",
+                    "ungereinigt",
+                    "deponierung ohne filter",
+                    "quecksilberhaltig",
+                    "setzt quecksilber",
+                    "einsatz von quecksilber",
+                    "verwendung von quecksilber",
+                    "mercury-added",
+                ]):
                     return LkSGRiskItem(
                         category=LkSGRiskCategory.ENVIRONMENT_MINAMATA,
                         severity=LkSGSeverity.HIGH,
@@ -357,8 +366,13 @@ class LkSGAnalyzerService:
         for c in chunks:
             text = c.get("content", "")
             lower = text.lower()
-            if any(k in lower for k in ["basel", "basler übereinkommen", "gefährliche abfälle", "hazardous waste export"]):
-                if any(k in lower for k in ["export in nicht-oecd", "grenzüberschreitende verbringung ohne notifizierung"]):
+            if any(k in lower for k in ["basel", "basler übereinkommen", "gefährliche abfälle", "hazardous waste", "elektroschrott", "industrieabfälle"]):
+                if any(k in lower for k in [
+                    "export in nicht-oecd",
+                    "in nicht-oecd",
+                    "grenzüberschreitende verbringung ohne notifizierung",
+                    "ohne behördliche genehmigung exportiert",
+                ]):
                     return LkSGRiskItem(
                         category=LkSGRiskCategory.ENVIRONMENT_HAZARDOUS_WASTE,
                         severity=LkSGSeverity.HIGH,

@@ -89,3 +89,57 @@ class LkSGAuditResponse(BaseModel):
     filename: str
     assessment: LkSGSupplierAssessment
     audit_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class BafaComplianceStatus(str, Enum):
+    COMPLIANT = "COMPLIANT"              # Vollständig konform / Vorgaben erfüllt
+    PARTIALLY_COMPLIANT = "PARTIALLY_COMPLIANT"  # Teilweise konform / Nachbesserung erforderlich
+    NON_COMPLIANT = "NON_COMPLIANT"      # Nicht konform / Erhebliches BAFA-Bußgeldrisiko
+
+
+class BafaQuestionnaireItem(BaseModel):
+    """
+    Specific question item from the official BAFA Due Diligence Audit catalog.
+    """
+    item_id: str
+    section_number: int
+    question_de: str
+    question_en: str
+    statutory_basis: str
+    status: BafaComplianceStatus
+    answer_de: str
+    answer_en: str
+    evidence_quote: str | None = None
+    page_number: int | None = None
+    bafa_recommendation_de: str
+    bafa_recommendation_en: str
+
+
+class BafaQuestionnaireSection(BaseModel):
+    """
+    Thematic section of the BAFA Handreichung (e.g. Minamata, Kinderarbeit, Beschwerdemechanismus).
+    """
+    section_number: int
+    title_de: str
+    title_en: str
+    statutory_article: str
+    compliance_status: BafaComplianceStatus
+    items: list[BafaQuestionnaireItem] = Field(default_factory=list)
+
+
+class BafaQuestionnaireResponse(BaseModel):
+    """
+    Full official BAFA Statutory Questionnaire response for corporate reporting (§§ 5, 10 LkSG).
+    """
+    document_id: UUID
+    filename: str
+    supplier_name: str
+    overall_score: float = Field(..., ge=0.0, le=100.0)
+    compliance_rating: Literal["AAA", "AA", "A", "BBB", "BB", "B", "CCC"]
+    total_questions: int = 12
+    compliant_count: int = 0
+    partially_compliant_count: int = 0
+    non_compliant_count: int = 0
+    sections: list[BafaQuestionnaireSection] = Field(default_factory=list)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+

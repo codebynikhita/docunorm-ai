@@ -639,6 +639,74 @@ export async function getLkSGAudit(documentId: string): Promise<LkSGAuditRespons
   return res.json();
 }
 
+export interface BafaQuestionnaireItem {
+  item_id: string;
+  section_number: number;
+  question_de: string;
+  question_en: string;
+  statutory_basis: string;
+  status: "COMPLIANT" | "PARTIALLY_COMPLIANT" | "NON_COMPLIANT";
+  answer_de: string;
+  answer_en: string;
+  evidence_quote?: string | null;
+  page_number?: number | null;
+  bafa_recommendation_de: string;
+  bafa_recommendation_en: string;
+}
+
+export interface BafaQuestionnaireSection {
+  section_number: number;
+  title_de: string;
+  title_en: string;
+  statutory_article: string;
+  compliance_status: "COMPLIANT" | "PARTIALLY_COMPLIANT" | "NON_COMPLIANT";
+  items: BafaQuestionnaireItem[];
+}
+
+export interface BafaQuestionnaireResponse {
+  document_id: string;
+  filename: string;
+  supplier_name: string;
+  overall_score: number;
+  compliance_rating: "AAA" | "AA" | "A" | "BBB" | "BB" | "B" | "CCC";
+  total_questions: number;
+  compliant_count: number;
+  partially_compliant_count: number;
+  non_compliant_count: number;
+  sections: BafaQuestionnaireSection[];
+  generated_at: string;
+}
+
+export async function getBafaQuestionnaire(documentId: string): Promise<BafaQuestionnaireResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/lksg-bafa-questionnaire`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to generate BAFA Questionnaire (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadBafaReportPdf(documentId: string, signatoryName?: string): Promise<void> {
+  const query = signatoryName ? `?signatory_name=${encodeURIComponent(signatoryName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-bafa-report-pdf${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export BAFA Supply Chain Audit Report PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `BAFA_LKSG_AUDIT_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 
 
 
