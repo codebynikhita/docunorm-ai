@@ -1,4 +1,3 @@
-import re
 from datetime import datetime, timezone
 from uuid import UUID
 from app.schemas.dora import DoraExitAuditReport, DoraExitCheckResult
@@ -99,7 +98,7 @@ class DoraExitStrategyEngine:
 
     def _check_termination_notice(self, chunks: list[dict], full_text: str) -> DoraExitCheckResult:
         keywords = ["kündigungsfrist", "notice period", "ausstiegsfrist", "beendigung", "60 tage", "90 tage", "monate"]
-        target_chunk = self._find_best_chunk(chunks, ["kündigungsfrist", "notice period", "ausstieg"])
+        target_chunk = self._find_best_chunk(chunks, keywords)
 
         has_notice = any(k in full_text for k in ["kündigungsfrist", "notice period", "ordentliche kündigung"])
         has_min_period = any(k in full_text for k in ["60 tage", "60 tagen", "60-tage", "90 tage", "3 monate", "zwei monate"])

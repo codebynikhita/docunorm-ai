@@ -1,5 +1,4 @@
 import difflib
-import re
 from uuid import UUID
 from pathlib import Path
 from datetime import datetime, timezone
@@ -344,7 +343,7 @@ class RemediationEngine:
         # Title Header
         page.draw_rect(fitz.Rect(45, 40, 550, 95), color=(0.1, 0.2, 0.35), fill=(0.95, 0.97, 1.0))
         page.insert_text(fitz.Point(55, 60), "NACHTRAGSVEREINBARUNG ZUM IKT-DIENSTLEISTUNGSVERTRAG", fontsize=11, fontname="hebo", color=(0.08, 0.12, 0.2))
-        page.insert_text(fitz.Point(55, 75), f"Rechtsverbindliche Anpassung gem. § 311 Abs. 1 BGB zur Erfüllung von EU-DORA", fontsize=9, fontname="hebo", color=(0.15, 0.25, 0.4))
+        page.insert_text(fitz.Point(55, 75), "Rechtsverbindliche Anpassung gem. § 311 Abs. 1 BGB zur Erfüllung von EU-DORA", fontsize=9, fontname="hebo", color=(0.15, 0.25, 0.4))
         page.insert_text(fitz.Point(55, 88), f"Bezugsdokument: {document_filename} • DIN EN ISO 9001 / BaFin Konform", fontsize=7.5, fontname="helv", color=(0.4, 0.45, 0.5))
 
         y = 120

@@ -46,7 +46,6 @@ from app.services.subcontractor_engine import subcontractor_engine
 from app.services.audit_rights_engine import audit_rights_engine
 from app.services.remediation_engine import RemediationEngine
 from app.services.auditor import (
-    build_audit_prompt,
     generate_llm_audit_finding,
     parse_citations_from_response,
     translate_chunks_to_english,
@@ -1510,7 +1509,7 @@ async def run_benchmark_suite() -> dict:
     """
     script_path = Path(__file__).resolve().parent.parent.parent.parent / "scripts" / "evaluate_model.py"
     if script_path.exists():
-        proc = await asyncio.to_thread(
+        await asyncio.to_thread(
             subprocess.run,
             [sys.executable, str(script_path)],
             capture_output=True,

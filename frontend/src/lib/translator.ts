@@ -964,7 +964,6 @@ export function classifyClause(
 ): ClauseMetadata {
   const isDe = lang === "DE";
   const lower = (rawText || "").toLowerCase();
-  const sourceLang = detectDocumentLanguage(rawText);
 
   // 1. IELTS Scorecard & Language Testing
   if (lower.includes("test report form") || lower.includes("ielts")) {

@@ -144,8 +144,8 @@ def build_fallback_synthesis(
         if past_user_messages:
             history_context = past_user_messages[-1].lower()
 
-    q_lower = query.lower()
-    combined_ctx = f"{history_context} {q_lower}".strip()
+    curr_q_lower = query.lower()
+    q_lower = f"{history_context} {curr_q_lower}".strip() if history_context else curr_q_lower
 
     # Forensically evaluate retrieved chunks if provided
     chunks_text = " ".join(c.get("content", "") for c in retrieved_chunks).lower()
@@ -154,8 +154,8 @@ def build_fallback_synthesis(
     english_query_words = ["give", "what", "score", "scores", "how", "who", "when", "tell", "show", "they", "result", "grade", "band", "is", "are", "can", "please", "scored", "does", "which"]
     german_query_words = ["ist", "sind", "wie", "welche", "welcher", "wer", "wo", "wann", "warum", "klausel", "vertrag", "prüfung", "frist", "strafe", "kündigung", "punkte", "ergebnis", "note", "kandidat"]
 
-    has_german_markers = any(w in q_lower.split() for w in german_query_words)
-    has_english_markers = any(w in q_lower.split() for w in english_query_words)
+    has_german_markers = any(w in curr_q_lower.split() for w in german_query_words)
+    has_english_markers = any(w in curr_q_lower.split() for w in english_query_words)
 
     if has_english_markers and not has_german_markers:
         use_english = True

@@ -4,17 +4,19 @@ import React, { useState } from "react";
 import {
   FileSpreadsheet,
   CheckCircle2,
-  AlertTriangle,
-  FileCode,
-  Eye,
   Check,
   ShieldCheck,
   X,
-  ExternalLink,
   FileText,
   AlertCircle,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
+
+export interface ZugferdDocumentItem {
+  id: string;
+  filename: string;
+  [key: string]: unknown;
+}
 
 interface ZugferdInspectorModalProps {
   isOpen: boolean;
@@ -22,8 +24,8 @@ interface ZugferdInspectorModalProps {
   lang: Language;
   documentId?: string;
   documentName?: string;
-  availableDocuments?: any[];
-  onSelectDocument?: (doc: any) => void;
+  availableDocuments?: ZugferdDocumentItem[];
+  onSelectDocument?: (doc: ZugferdDocumentItem | null) => void;
 }
 
 export function ZugferdInspectorModal({
@@ -87,10 +89,6 @@ export function ZugferdInspectorModal({
     </ram:ApplicableHeaderTradeSettlement>
   </rsm:SupplyChainTradeTransaction>
 </rsm:CrossIndustryInvoice>`;
-
-  const isNetMatch = invoiceData.netAmountPdf === invoiceData.netAmountXml;
-  const isTaxMatch = invoiceData.taxAmountPdf === invoiceData.taxAmountXml;
-  const isTotalMatch = invoiceData.grandTotalPdf === invoiceData.grandTotalXml;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">

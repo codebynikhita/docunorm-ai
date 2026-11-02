@@ -74,7 +74,6 @@ export function TableInspectorModal({
     if (!isOpen) return;
 
     if (!documentId) {
-      setTables([]);
       return;
     }
 
@@ -155,7 +154,7 @@ export function TableInspectorModal({
         sla_tier: calcTier,
       });
       setCalcResult(res);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("SLA Penalty Calculation failed:", e);
     } finally {
       setCalcLoading(false);

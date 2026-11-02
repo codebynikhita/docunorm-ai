@@ -33,7 +33,31 @@ export async function uploadDocument(file: File): Promise<DocumentUploadResponse
 
 
 
-export async function listDocuments(): Promise<any[]> {
+export interface DocumentItem {
+  id: string;
+  filename: string;
+  sha256_hash?: string;
+  status?: string;
+  file_size_bytes?: number;
+  total_pages?: number;
+  total_chunks?: number;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: unknown;
+}
+
+export interface DocumentChunkItem {
+  id: string;
+  chunk_index: number;
+  page_number: number;
+  bounding_box: [number, number, number, number];
+  content: string;
+  translated_content?: string;
+  token_count?: number;
+  [key: string]: unknown;
+}
+
+export async function listDocuments(): Promise<DocumentItem[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/documents`);
     if (!res.ok) return [];
@@ -99,7 +123,7 @@ export async function auditDocument(
 
 
 
-export async function getDocumentChunks(documentId: string): Promise<any[]> {
+export async function getDocumentChunks(documentId: string): Promise<DocumentChunkItem[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/chunks`);
     if (!res.ok) return [];
@@ -109,7 +133,7 @@ export async function getDocumentChunks(documentId: string): Promise<any[]> {
   }
 }
 
-export async function getTranslatedDocumentChunks(documentId: string): Promise<any[]> {
+export async function getTranslatedDocumentChunks(documentId: string): Promise<DocumentChunkItem[]> {
   try {
     const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/translated-chunks`);
     if (!res.ok) return [];
@@ -547,19 +571,32 @@ export async function calculateSlaPenalty(
   return res.json();
 }
 
-export async function getBenchmarkScorecard(): Promise<any> {
+export interface BenchmarkScorecardData {
+  total_tests: number;
+  accuracy_percent: number;
+  status: string;
+  [key: string]: unknown;
+}
+
+export interface TrainingTelemetryData {
+  status: string;
+  final_token_accuracy: number;
+  [key: string]: unknown;
+}
+
+export async function getBenchmarkScorecard(): Promise<BenchmarkScorecardData> {
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/compliance/benchmark-scorecard`);
   if (!res.ok) return { total_tests: 30, accuracy_percent: 100.0, status: "CERTIFIED" };
   return res.json();
 }
 
-export async function getTrainingTelemetry(): Promise<any> {
+export async function getTrainingTelemetry(): Promise<TrainingTelemetryData> {
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/compliance/training-telemetry`);
   if (!res.ok) return { status: "CONVERGED_OPTIMAL", final_token_accuracy: 98.14 };
   return res.json();
 }
 
-export async function triggerBenchmarkRun(): Promise<any> {
+export async function triggerBenchmarkRun(): Promise<Record<string, unknown>> {
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/compliance/benchmark-run`, {
     method: "POST",
   });

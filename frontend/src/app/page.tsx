@@ -22,8 +22,8 @@ import { TableInspectorModal } from "@/components/TableInspectorModal";
 import { AuditReportExporterModal } from "@/components/AuditReportExporterModal";
 import { LkSGAuditPanel } from "@/components/LkSGAuditPanel";
 import { Language } from "@/lib/i18n";
-import { uploadDocument, listDocuments, UserProfile } from "@/lib/api";
-import { Bot, Award } from "lucide-react";
+import { uploadDocument, listDocuments, UserProfile, DocumentItem } from "@/lib/api";
+import { Bot } from "lucide-react";
 
 export default function Home() {
   const [lang, setLang] = useState<Language>("DE");
@@ -39,7 +39,7 @@ export default function Home() {
   >("documents");
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>("");
-  const [availableDocuments, setAvailableDocuments] = useState<any[]>([]);
+  const [availableDocuments, setAvailableDocuments] = useState<DocumentItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isUploading, setIsUploading] = useState(false);
@@ -57,7 +57,6 @@ export default function Home() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
-  const [isAuditorOpen, setIsAuditorOpen] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<{
     page_number: number;

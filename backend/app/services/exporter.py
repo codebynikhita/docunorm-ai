@@ -1,4 +1,3 @@
-import hashlib
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -359,7 +358,7 @@ def generate_english_dossier_markdown(
         f"> **Cryptographic SHA-256 Fingerprint:** `{document.sha256_hash}`  ",
         f"> **Generated Date:** `{current_date_str}`  ",
         direction_note,
-        f"> **Compliance Standards:** EU DORA (VO 2022/2554) Art. 30, BDSG § 26, DIN 66399 Schutzklasse 3  ",
+        "> **Compliance Standards:** EU DORA (VO 2022/2554) Art. 30, BDSG § 26, DIN 66399 Schutzklasse 3  ",
         "\n---\n",
     ]
 
@@ -374,12 +373,12 @@ def generate_english_dossier_markdown(
         lines.append(f"*Coordinates: `[x0: {int(bbox[0])}, y0: {int(bbox[1])}, x1: {int(bbox[2])}, y1: {int(bbox[3])}]`*\n")
         
         if is_english_source:
-            lines.append(f"**Beglaubigte deutsche Übersetzung:**\n")
+            lines.append("**Beglaubigte deutsche Übersetzung:**\n")
             lines.append(f"{trans}\n")
             if orig != trans:
                 lines.append(f"<details><summary>Original English Source (EN 🇺🇸 / 🇬🇧)</summary>\n\n> {orig}\n\n</details>\n")
         else:
-            lines.append(f"**English Translated Legal Clause:**\n")
+            lines.append("**English Translated Legal Clause:**\n")
             lines.append(f"{trans}\n")
             if orig != trans:
                 lines.append(f"<details><summary>Original German Statutory Source (DE 🇩🇪)</summary>\n\n> {orig}\n\n</details>\n")
