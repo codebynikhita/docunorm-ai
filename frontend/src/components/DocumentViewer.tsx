@@ -147,7 +147,6 @@ export function DocumentViewer({
       return;
     }
 
-    let intervalId: any;
     let isCancelled = false;
 
     async function checkProgress() {
@@ -187,7 +186,7 @@ export function DocumentViewer({
     }
 
     checkProgress();
-    intervalId = setInterval(checkProgress, 1200);
+    const intervalId = setInterval(checkProgress, 1200);
 
     return () => {
       isCancelled = true;
@@ -217,6 +216,36 @@ export function DocumentViewer({
       setIsTranslationHudDismissed(false);
     }
   }, [activeHighlight]);
+
+  const renderPage = async (pageNumber: number, pdf: any) => {
+    if (!canvasRef.current || !pdf) return;
+
+    try {
+      setRendering(true);
+      const page = await pdf.getPage(pageNumber);
+      const scale = (zoom / 100) * 1.25;
+      const viewport = page.getViewport({ scale });
+
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
+      if (!context) return;
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      setCanvasDimensions({ width: viewport.width, height: viewport.height });
+
+      const renderContext = {
+        canvasContext: context,
+        viewport: viewport,
+      };
+
+      await page.render(renderContext).promise;
+    } catch (err) {
+      console.error("Error rendering PDF page:", err);
+    } finally {
+      setRendering(false);
+    }
+  };
 
   // Load PDF with PDF.js whenever documentId changes
   useEffect(() => {
@@ -258,36 +287,6 @@ export function DocumentViewer({
       renderPage(currentPage, pdfDocRef.current);
     }
   }, [currentPage, zoom, docViewMode]);
-
-  const renderPage = async (pageNumber: number, pdf: any) => {
-    if (!canvasRef.current || !pdf) return;
-
-    try {
-      setRendering(true);
-      const page = await pdf.getPage(pageNumber);
-      const scale = (zoom / 100) * 1.25;
-      const viewport = page.getViewport({ scale });
-
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
-      if (!context) return;
-
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      setCanvasDimensions({ width: viewport.width, height: viewport.height });
-
-      const renderContext = {
-        canvasContext: context,
-        viewport: viewport,
-      };
-
-      await page.render(renderContext).promise;
-    } catch (err) {
-      console.error("Error rendering PDF page:", err);
-    } finally {
-      setRendering(false);
-    }
-  };
 
   const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

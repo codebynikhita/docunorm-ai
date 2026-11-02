@@ -248,7 +248,7 @@ export function StandaloneAuditorStudio({
     }
 
     setAuditWarning(null);
-    const userMessageId = `msg-user-${Date.now()}`;
+    const userMessageId = `msg-user-${(activeThread?.messages || []).length + 1}`;
     const userMsg = {
       id: userMessageId,
       sender: "user" as const,
@@ -283,7 +283,7 @@ export function StandaloneAuditorStudio({
       const citationsList = res.citations || [];
 
       const auditorMsg = {
-        id: `msg-auditor-${Date.now()}`,
+        id: `msg-auditor-${(activeThread?.messages || []).length + 2}`,
         sender: "auditor" as const,
         text: resultText,
         citations: citationsList,
@@ -909,7 +909,7 @@ export function StandaloneAuditorStudio({
                   {lang === "DE" ? "Originaltext (Authentischer Wortlaut):" : "Verified Statutory Content (English):"}
                 </span>
                 <div className="p-3 rounded-lg bg-[var(--surface-dark)] border-l-2 border-[var(--accent-tangerine)] border-r border-t border-b border-[var(--surface-border)] text-xs font-sans text-[var(--foreground)] leading-relaxed">
-                  "{lang === "EN" ? translateGermanToEnglish(selectedCitation.content || "") : selectedCitation.content}"
+                  &ldquo;{lang === "EN" ? translateGermanToEnglish(selectedCitation.content || "") : selectedCitation.content}&rdquo;
                 </div>
                 {lang === "EN" && (
                   <details className="mt-2 group/citation">
@@ -917,7 +917,7 @@ export function StandaloneAuditorStudio({
                       Show German Statutory Source (DE 🇩🇪)
                     </summary>
                     <div className="mt-1 p-2.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[11px] font-sans opacity-80 leading-relaxed">
-                      "{selectedCitation.content}"
+                      &ldquo;{selectedCitation.content}&rdquo;
                     </div>
                   </details>
                 )}

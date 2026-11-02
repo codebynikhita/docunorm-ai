@@ -313,7 +313,7 @@ export function DoraExitInspectorModal({
                             )}
                           </div>
                           <p className="text-[11px] text-[var(--foreground)] opacity-85 italic leading-relaxed">
-                            "{check.extracted_clause}"
+                            &ldquo;{check.extracted_clause}&rdquo;
                           </p>
                         </div>
                       )}

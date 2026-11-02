@@ -421,7 +421,7 @@ export function AuditRightsModal({
                               )}
                             </div>
                             <blockquote className="text-xs text-slate-300 italic border-l-2 border-blue-500/50 pl-2.5 py-0.5">
-                              "{c.extracted_clause}"
+                              &ldquo;{c.extracted_clause}&rdquo;
                             </blockquote>
                           </div>
                         ) : (

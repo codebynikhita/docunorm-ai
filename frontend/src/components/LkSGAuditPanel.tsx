@@ -66,13 +66,6 @@ export function LkSGAuditPanel({
   const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks">("overview");
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({ 1: true, 2: true });
 
-  useEffect(() => {
-    if (isOpen && documentId) {
-      loadAudit();
-      loadBafaQuestionnaire();
-    }
-  }, [isOpen, documentId]);
-
   const loadAudit = async () => {
     if (!documentId) return;
     setLoading(true);
@@ -99,6 +92,13 @@ export function LkSGAuditPanel({
       setLoadingBafa(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen && documentId) {
+      loadAudit();
+      loadBafaQuestionnaire();
+    }
+  }, [isOpen, documentId]);
 
   const handleDownloadPdf = async () => {
     if (!documentId || downloadingPdf) return;

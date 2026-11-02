@@ -53,6 +53,18 @@ export function RemediationModal({
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<"split" | "inline">("split");
 
+  const loadProposal = async (docId: string, ruleId: string, clause: string) => {
+    setGenerating(true);
+    try {
+      const p = await generateAmendmentProposal(docId, ruleId, clause);
+      setProposal(p);
+    } catch (err) {
+      console.error("Failed to generate amendment:", err);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   useEffect(() => {
     if (!isOpen || !documentId) return;
     setLoading(true);
@@ -74,18 +86,6 @@ export function RemediationModal({
         setLoading(false);
       });
   }, [isOpen, documentId]);
-
-  const loadProposal = async (docId: string, ruleId: string, clause: string) => {
-    setGenerating(true);
-    try {
-      const p = await generateAmendmentProposal(docId, ruleId, clause);
-      setProposal(p);
-    } catch (err) {
-      console.error("Failed to generate amendment:", err);
-    } finally {
-      setGenerating(false);
-    }
-  };
 
   const handleCopy = () => {
     if (!proposal) return;

@@ -1302,8 +1302,8 @@ async def generate_legal_amendment(
 )
 async def export_amendment_pdf(
     document_id: UUID,
-    payload: dict,
     db: Annotated[AsyncSession, Depends(get_session)],
+    payload: dict | None = None,
 ) -> FileResponse:
     """
     Generates a formal, binding German Contract Addendum PDF (Nachtragsvereinbarung
@@ -1316,7 +1316,7 @@ async def export_amendment_pdf(
             detail="Document not found.",
         )
 
-    proposals_data = payload.get("proposals", [])
+    proposals_data = (payload or {}).get("proposals", [])
     proposals = [AmendmentProposal(**p) for p in proposals_data]
     if not proposals:
         stmt = (
