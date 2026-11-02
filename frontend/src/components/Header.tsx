@@ -14,6 +14,9 @@ import {
   PanelLeftClose,
   PanelLeft,
   Search,
+  Zap,
+  Sun,
+  Terminal,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
@@ -276,52 +279,54 @@ export function Header({
           </button>
         )}
 
-        {/* Color Palette Switcher */}
-        <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 font-mono text-[10px]">
+        {/* Theme Palette Switcher with Modern Lucide Icons */}
+        <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 font-mono text-[10px] shadow-sm">
           <button
             onClick={() => onThemeChange("cyber")}
-            className={`px-2 py-0.5 rounded transition-all font-bold cursor-pointer ${
+            className={`p-1.5 rounded transition-all font-bold cursor-pointer flex items-center justify-center ${
               theme === "cyber"
-                ? "bg-[var(--accent-tangerine)] text-black"
+                ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
-            title="Cyber-Onyx Dark"
+            title="Cyber-Onyx Dark Mode"
           >
-            ⚡
+            <Zap className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onThemeChange("bauhaus")}
-            className={`px-2 py-0.5 rounded transition-all font-bold cursor-pointer ${
+            className={`p-1.5 rounded transition-all font-bold cursor-pointer flex items-center justify-center ${
               theme === "bauhaus"
-                ? "bg-[var(--accent-tangerine)] text-white"
+                ? "bg-[var(--accent-tangerine)] text-white shadow-sm"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
-            title="Bauhaus German Architectural Light"
+            title="Bauhaus German Architectural Light Mode"
           >
-            🏛️
+            <Sun className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onThemeChange("terminal")}
-            className={`px-2 py-0.5 rounded transition-all font-bold cursor-pointer ${
+            className={`p-1.5 rounded transition-all font-bold cursor-pointer flex items-center justify-center ${
               theme === "terminal"
                 ? "bg-[var(--accent-tangerine)] text-black shadow-sm"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
-            title="Prussian Navy Blueprint"
+            title="Prussian Navy Terminal Mode"
           >
-            🌊
+            <Terminal className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Language Switcher DE | EN */}
-        <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 font-mono text-[10px]">
+        <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 font-mono text-[10px] shadow-sm">
+          <Globe className="w-3 h-3 text-[var(--foreground)] opacity-40 ml-1 mr-0.5" />
           <button
             onClick={() => onToggleLang("DE")}
             className={`px-1.5 py-0.5 rounded transition-all font-bold cursor-pointer ${
               lang === "DE"
-                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
+                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
+            title="Deutsche Spracheinstellung"
           >
             DE
           </button>
@@ -329,9 +334,10 @@ export function Header({
             onClick={() => onToggleLang("EN")}
             className={`px-1.5 py-0.5 rounded transition-all font-bold cursor-pointer ${
               lang === "EN"
-                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
+                ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
                 : "text-[var(--foreground)] opacity-60 hover:opacity-100"
             }`}
+            title="English Language Mode"
           >
             EN
           </button>

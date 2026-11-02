@@ -901,18 +901,22 @@ export function DocumentViewer({
                     if (!searchFilter.trim()) return true;
                     const q = searchFilter.toLowerCase();
                     const trans = (
-                      detectedDocLang === "EN"
+                      chunk.translated_content && chunk.translated_content.trim() !== ""
+                        ? chunk.translated_content
+                        : detectedDocLang === "EN"
                         ? translateEnglishToGerman(chunk.content)
-                        : (translateGermanToEnglish(chunk.content) || chunk.translated_content || chunk.content)
+                        : (translateGermanToEnglish(chunk.content) || chunk.content)
                     ).toLowerCase();
                     const orig = chunk.content.toLowerCase();
                     return trans.includes(q) || orig.includes(q);
                   })
                   .map((chunk, idx) => {
                     const translatedText =
-                      detectedDocLang === "EN"
+                      chunk.translated_content && chunk.translated_content.trim() !== ""
+                        ? chunk.translated_content
+                        : detectedDocLang === "EN"
                         ? translateEnglishToGerman(chunk.content)
-                        : (translateGermanToEnglish(chunk.content) || chunk.translated_content || chunk.content);
+                        : (translateGermanToEnglish(chunk.content) || chunk.content);
                     const isSelected = selectedChunkId === chunk.id;
 
                     let primaryText = "";

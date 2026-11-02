@@ -35,7 +35,7 @@ export default function Home() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
-    "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights"
+    "documents" | "dora" | "subcontractor" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights"
   >("documents");
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>("");
@@ -317,10 +317,12 @@ export default function Home() {
                 setLayoutMode("auditor");
               } else if (tab === "dora") {
                 setIsDoraExitModalOpen(true);
+              } else if (tab === "subcontractor") {
+                setIsDoraSubcontractorModalOpen(true);
               } else if (tab === "audit_rights") {
                 setIsAuditRightsModalOpen(true);
               } else if (tab === "lksg") {
-                setIsDoraSubcontractorModalOpen(true);
+                setIsLkSGAuditOpen(true);
               } else if (tab === "zugferd") {
                 setIsZugferdModalOpen(true);
               } else if (tab === "audit_log") {

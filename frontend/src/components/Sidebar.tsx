@@ -14,14 +14,16 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeft,
+  Scale,
+  Network,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
 
 interface SidebarProps {
   lang: Language;
-  activeTab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights";
-  onTabChange: (tab: "documents" | "dora" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights") => void;
+  activeTab: "documents" | "dora" | "subcontractor" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights";
+  onTabChange: (tab: "documents" | "dora" | "subcontractor" | "lksg" | "zugferd" | "audit_log" | "auditor" | "audit_rights") => void;
   documentCount: number;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -57,6 +59,12 @@ export function Sidebar({
       badge: "Exit (30.2)",
     },
     {
+      id: "subcontractor" as const,
+      label: lang === "DE" ? "Kaskade & 4th-Party" : "4th-Party Cascade",
+      icon: Network,
+      badge: "Art. 30.3",
+    },
+    {
       id: "audit_rights" as const,
       label: lang === "DE" ? "Prüfrechte KWG § 25b" : "Audit Rights (DIN 5008)",
       icon: ShieldCheck,
@@ -71,7 +79,7 @@ export function Sidebar({
     {
       id: "lksg" as const,
       label: lang === "DE" ? "LkSG Lieferkette" : "LkSG Supply Chain",
-      icon: Layers,
+      icon: Scale,
       badge: "BAFA",
     },
     {

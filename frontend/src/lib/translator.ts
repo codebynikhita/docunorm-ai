@@ -863,13 +863,44 @@ export function translateGermanToEnglish(text: string): string {
     return "Sub-Contracting Governance: The engagement of sub-outsourcers is subject to prior written approval with a mandatory 30-day objection window pursuant to DORA Art. 30 Para. 3.";
   }
 
-  // Generic sentence transformer
+  // Generic sentence transformer & institutional legal glossary
   let result = text;
   result = result.replace(/Geprüfte Revisionsnachweise:/gi, "Verified Audit Evidence:");
   result = result.replace(/Geprüfte Quellen:/gi, "Verified Sources:");
   result = result.replace(/Absatz/gi, "Paragraph");
   result = result.replace(/Abs\./gi, "Para.");
   result = result.replace(/Seite/gi, "Page");
+  result = result.replace(/Geprüftes Dokument gem\. DIN 66399 Schutzklasse 3 • Vertraulich/gi, "Audited Document pursuant to DIN 66399 Protection Class 3 • Confidential");
+  result = result.replace(/Geprüftes Dokument gem\. DIN 66399 Schutzklasse 3/gi, "Audited Document pursuant to DIN 66399 Protection Class 3");
+  result = result.replace(/Rahmenvereinbarung über/gi, "Master Agreement for");
+  result = result.replace(/Rahmenvereinbarung/gi, "Master Agreement");
+  result = result.replace(/Gegenstand der Vereinbarung und Leistungsumfang/gi, "Subject Matter of Agreement and Scope of Services");
+  result = result.replace(/Gegenstand der Vereinbarung/gi, "Subject Matter of Agreement");
+  result = result.replace(/Kündigung, Übergangsfristen und Ausstiegsstrategie/gi, "Termination, Transition Periods, and Exit Strategy");
+  result = result.replace(/Haftungsobergrenzen und Verzugsstrafen/gi, "Liability Caps and Delay Penalties");
+  result = result.replace(/Unterauftragsvergaben und Sub-Dienstleister/gi, "Sub-contracting and Sub-service Providers");
+  result = result.replace(/Auftragsverarbeitungsvereinbarung \(AVV\)/gi, "Data Processing Agreement (DPA)");
+  result = result.replace(/Auftragsverarbeitungsvereinbarung/gi, "Data Processing Agreement");
+  result = result.replace(/Datenschutz nach BDSG § 26 und EU-DSGVO/gi, "Data Protection under BDSG Section 26 and EU GDPR");
+  result = result.replace(/Datenschutz nach BDSG § 26/gi, "Data Protection under BDSG Section 26");
+  result = result.replace(/Elektronische Rechnungsstellung gem\. ZUGFeRD 2\.3 \/ EN 16931/gi, "Electronic Invoicing pursuant to ZUGFeRD 2.3 / EN 16931");
+  result = result.replace(/Elektronische Rechnungsstellung/gi, "Electronic Invoicing");
+  result = result.replace(/Zahlungsverbindung und Steuerangaben \(Geprüft\):/gi, "Banking Details and Tax Information (Verified):");
+  result = result.replace(/Zahlungsverbindung und Steuerangaben:/gi, "Banking Details and Tax Identification:");
+  result = result.replace(/Unterschriften der Parteien:/gi, "Signatures of the Authorized Contractual Parties:");
+  result = result.replace(/Unterschriften der Parteien/gi, "Signatures of the Parties");
+  result = result.replace(/Zwischen der/gi, "Between");
+  result = result.replace(/Auftraggeber/gi, "Client / Principal");
+  result = result.replace(/Auftragnehmer/gi, "Contractor / Vendor");
+  result = result.replace(/ohne Unterbrechung des Geschäftsbetriebs/gi, "without business interruption");
+  result = result.replace(/Serverstandort ist ausschließlich/gi, "Server location is exclusively");
+  result = result.replace(/Schadensersatzansprüche wegen grober Fahrlässigkeit, Vorsatz oder Verletzung von Datenschutzgesetzen bleiben unberührt/gi, "Claims for damages due to gross negligence, willful intent, or violation of data protection laws remain unaffected");
+  result = result.replace(/bleiben unberührt/gi, "remain unaffected");
+  result = result.replace(/Revisionsfähig/gi, "Audit-Ready / Compliant");
+  result = result.replace(/Salvatorische Klausel/gi, "Severability Clause");
+  result = result.replace(/Anwendbares Recht/gi, "Governing Law");
+  result = result.replace(/Gerichtsstand/gi, "Jurisdiction");
+  result = result.replace(/Schlussbestimmungen/gi, "Final Provisions");
 
   return result;
 }
