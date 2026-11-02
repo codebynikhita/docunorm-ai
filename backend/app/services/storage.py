@@ -19,8 +19,12 @@ class StorageService:
     and SHA-256 tamper-evident fingerprint computation.
     """
 
-    def __init__(self, base_storage_dir: str = "./storage") -> None:
-        self.base_dir = Path(base_storage_dir)
+    def __init__(self, base_storage_dir: str | Path | None = None) -> None:
+        if base_storage_dir is None:
+            backend_root = Path(__file__).resolve().parent.parent.parent
+            self.base_dir = backend_root / "storage"
+        else:
+            self.base_dir = Path(base_storage_dir).resolve()
         self.documents_dir = self.base_dir / "documents"
         # Ensure directories exist
         self.documents_dir.mkdir(parents=True, exist_ok=True)
