@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-11-01T10:46:41.102268",
-  "total_samples": 65,
+  "timestamp": "2026-11-02T19:56:51.820122",
+  "total_samples": 40,
   "epochs": 5,
   "final_train_loss": 0.25,
   "final_val_loss": 0.3044,
