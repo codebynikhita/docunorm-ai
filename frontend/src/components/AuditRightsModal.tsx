@@ -373,7 +373,7 @@ export function AuditRightsModal({
                   </div>
 
                   <div className="grid grid-cols-1 gap-4">
-                    {report.checks.map((c, idx) => (
+                    {(report.checks || []).map((c, idx) => (
                       <div
                         key={c.rule_id}
                         className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 hover:border-slate-700 transition-all shadow-md"

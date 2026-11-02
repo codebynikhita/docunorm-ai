@@ -399,13 +399,13 @@ export function TableInspectorModal({
                   )}
 
                   {/* Assessed Penalty Scales */}
-                  {currentTable.regulatory_analysis.penalty_scale_assessed.length > 0 && (
+                  {Boolean(currentTable.regulatory_analysis.penalty_scale_assessed?.length) && (
                     <div className="pt-1">
                       <div className="text-[10px] font-mono opacity-60 uppercase tracking-wider mb-1">
                         {isDe ? "Aufsichtsrechtliche Einstufung & Pönalstaffel:" : "Regulatory Assessment & Penalty Tiers:"}
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {currentTable.regulatory_analysis.penalty_scale_assessed.map((p, pIdx) => (
+                        {currentTable.regulatory_analysis.penalty_scale_assessed?.map((p, pIdx) => (
                           <span
                             key={pIdx}
                             className="text-[11px] font-mono px-2 py-0.5 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] text-[var(--foreground)]"
@@ -643,13 +643,13 @@ export function TableInspectorModal({
                         </span>
                       </div>
 
-                      {currentTable.regulatory_analysis.recommendations.length > 0 && (
+                      {Boolean(currentTable.regulatory_analysis.recommendations?.length) && (
                         <div className="pt-2 space-y-1.5">
                           <span className="font-mono text-[10px] opacity-60 uppercase tracking-wider block">
                             {isDe ? "Audit-Empfehlungen zur Revisionssicherheit:" : "Audit Recommendations:"}
                           </span>
                           <ul className="space-y-1 list-disc list-inside text-xs opacity-90 text-[var(--foreground)]">
-                            {currentTable.regulatory_analysis.recommendations.map((rec, rIdx) => (
+                            {currentTable.regulatory_analysis.recommendations?.map((rec, rIdx) => (
                               <li key={rIdx}>{rec}</li>
                             ))}
                           </ul>

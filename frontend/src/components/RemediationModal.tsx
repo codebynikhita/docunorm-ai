@@ -172,7 +172,7 @@ export function RemediationModal({
                     {isDe ? "Identifizierte Klauselmängel zum Nachbessern:" : "Identified Contractual Gaps to Remediate:"}
                   </span>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                    {heatmap.risk_items.map((item, i) => {
+                    {(heatmap.risk_items || []).map((item, i) => {
                       const isSelected = selectedRuleId === item.statutory_ref;
                       return (
                         <button
@@ -321,7 +321,7 @@ export function RemediationModal({
                     ) : (
                       /* VIEW 2: INLINE REDLINE DIFF - HIGH CONTRAST RED & GREEN TOKENS */
                       <div className="p-4 rounded-xl bg-[var(--surface-dark)] font-mono text-xs leading-loose border border-[var(--surface-border)]">
-                        {proposal.diff_tokens.map((token, idx) => {
+                        {(proposal.diff_tokens || []).map((token, idx) => {
                           if (token.type === "delete") {
                             return (
                               <span

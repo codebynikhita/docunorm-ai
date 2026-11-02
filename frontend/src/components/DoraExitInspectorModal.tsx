@@ -259,7 +259,7 @@ export function DoraExitInspectorModal({
                 </h3>
 
                 <div className="grid gap-3.5">
-                  {report.checks.map((check) => (
+                  {(report.checks || []).map((check) => (
                     <div
                       key={check.rule_id}
                       className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] hover:border-[var(--accent-cyan)]/40 transition-colors space-y-3"

@@ -281,7 +281,7 @@ export function DoraSubcontractorModal({
                 </div>
 
                 <div className="relative flex flex-col md:flex-row items-stretch justify-between gap-3 overflow-x-auto pb-2">
-                  {report.cascading_nodes.map((node, idx) => (
+                  {(report.cascading_nodes || []).map((node, idx) => (
                     <React.Fragment key={node.node_id}>
                       <div
                         className={`flex-1 min-w-[200px] p-4 rounded-xl border transition-all ${
@@ -432,7 +432,7 @@ export function DoraSubcontractorModal({
                 </div>
 
                 <div className="grid grid-cols-1 gap-3">
-                  {report.checks.map((check) => (
+                  {(report.checks || []).map((check) => (
                     <div
                       key={check.rule_id}
                       className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-purple-500/40 transition-colors shadow-sm"

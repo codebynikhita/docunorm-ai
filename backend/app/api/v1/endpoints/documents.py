@@ -1460,11 +1460,18 @@ async def export_table_csv(
 async def calculate_table_sla_penalty(
     document_id: UUID,
     request: SlaPenaltyCalculationRequest,
+    db: Annotated[AsyncSession, Depends(get_session)],
 ) -> SlaPenaltyCalculationResponse:
     """
     Computes exact excess downtime, contract penalty rate, statutory caps (5.0%),
     and assesses DORA Art. 30 termination rights.
     """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
     request.document_id = document_id
     return TableExtractorService.calculate_sla_penalty(request)
 
@@ -1583,6 +1590,11 @@ async def export_din_audit_report(
     )
 
 
+@router.get(
+    "/{document_id}/lksg-audit",
+    response_model=LkSGAuditResponse,
+    summary="Retrieve German Supply Chain Due Diligence (LkSG §§ 2-10) Statutory Audit",
+)
 @router.post(
     "/{document_id}/lksg-audit",
     response_model=LkSGAuditResponse,
