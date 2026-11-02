@@ -1,7 +1,7 @@
 import uuid
 from pathlib import Path
 import pytest
-import fitz
+import pymupdf as fitz
 
 from app.models.document import Document
 from app.schemas.lksg import BafaComplianceStatus, BafaQuestionnaireResponse

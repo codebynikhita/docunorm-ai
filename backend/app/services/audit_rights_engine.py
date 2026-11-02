@@ -1,6 +1,7 @@
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
+
 from app.schemas.audit_rights import (
     AuditRightCheckResult,
     DoraAuditRightsReport,
@@ -84,7 +85,7 @@ class DoraAuditRightsEngine:
             document_id=document_id,
             overall_score=round(total_score, 1),
             compliance_rating=rating,
-            evaluated_at=datetime.now(timezone.utc),
+            evaluated_at=datetime.now(UTC),
             checks=all_checks,
             notice_letter=notice_letter,
             summary_de=summary_de,

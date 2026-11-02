@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Shield,
   ShieldCheck,
@@ -66,7 +66,7 @@ export function LkSGAuditPanel({
   const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks">("overview");
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({ 1: true, 2: true });
 
-  const loadAudit = async () => {
+  const loadAudit = useCallback(async () => {
     if (!documentId) return;
     setLoading(true);
     setError(null);
@@ -78,9 +78,9 @@ export function LkSGAuditPanel({
     } finally {
       setLoading(false);
     }
-  };
+  }, [documentId, isDE]);
 
-  const loadBafaQuestionnaire = async () => {
+  const loadBafaQuestionnaire = useCallback(async () => {
     if (!documentId) return;
     setLoadingBafa(true);
     try {
@@ -91,14 +91,14 @@ export function LkSGAuditPanel({
     } finally {
       setLoadingBafa(false);
     }
-  };
+  }, [documentId]);
 
   useEffect(() => {
     if (isOpen && documentId) {
       loadAudit();
       loadBafaQuestionnaire();
     }
-  }, [isOpen, documentId]);
+  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire]);
 
   const handleDownloadPdf = async () => {
     if (!documentId || downloadingPdf) return;

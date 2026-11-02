@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
-import fitz
+
+import pymupdf as fitz
 
 
 def extract_embedded_zugferd_xml(pdf_path: str) -> str | None:

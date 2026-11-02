@@ -1,6 +1,7 @@
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
+
 from app.schemas.subcontractor import (
     CascadingChainNode,
     DoraSubcontractorAuditReport,
@@ -83,7 +84,7 @@ class DoraSubcontractorEngine:
             document_id=document_id,
             overall_score=round(total_score, 1),
             compliance_rating=rating,
-            evaluated_at=datetime.now(timezone.utc),
+            evaluated_at=datetime.now(UTC),
             checks=all_checks,
             cascading_nodes=nodes,
             concentration_risk_level=concentration_risk,

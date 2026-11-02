@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-11-02T21:56:58.301636",
+  "timestamp": "2026-11-02T22:34:42.664265",
   "total_tests": 56,
   "passed_tests": 56,
   "accuracy_percent": 100.0,
-  "mean_latency_ms": 7.8,
-  "p95_latency_ms": 7.3,
+  "mean_latency_ms": 7.6,
+  "p95_latency_ms": 7.4,
   "pillars": {
     "Pillar IV (Cascading Subcontracting Trap)": {
       "passed": 1,
       "total": 1,
       "latencies": [
-        61.06281280517578
+        51.99790000915527
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -19,7 +19,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.627964019775391
+        7.673978805541992
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -28,7 +28,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.252931594848633
+        7.20524787902832
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -37,7 +37,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.879091262817383
+        6.955146789550781
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -46,7 +46,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.843805313110352
+        6.888866424560547
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -55,7 +55,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.783962249755859
+        6.746053695678711
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -64,7 +64,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.141828536987305
+        6.7958831787109375
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -73,7 +73,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.897211074829102
+        6.778955459594727
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -82,7 +82,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.800174713134766
+        7.028818130493164
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -91,7 +91,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.328033447265625
+        6.932258605957031
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -100,7 +100,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.819725036621094
+        6.73222541809082
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -109,7 +109,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.759166717529297
+        6.867885589599609
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -118,7 +118,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.707906723022461
+        6.797075271606445
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -127,7 +127,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.681680679321289
+        6.720066070556641
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -136,7 +136,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.042169570922852
+        6.752967834472656
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -145,7 +145,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.766796112060547
+        6.8531036376953125
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -154,7 +154,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.738901138305664
+        7.356882095336914
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -163,7 +163,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.614923477172852
+        6.841897964477539
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -172,7 +172,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.735801696777344
+        6.717920303344727
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -181,7 +181,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.857872009277344
+        6.784200668334961
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -190,8 +190,8 @@
       "passed": 2,
       "total": 2,
       "latencies": [
-        6.666898727416992,
-        6.669044494628906
+        6.7291259765625,
+        6.772041320800781
       ],
       "citations_ok": 2,
       "purity_ok": 2
@@ -200,7 +200,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.750822067260742
+        6.733894348144531
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -209,7 +209,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.6318511962890625
+        6.6928863525390625
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -218,7 +218,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.714105606079102
+        6.65283203125
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -227,7 +227,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.572961807250977
+        6.683826446533203
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -236,7 +236,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.665945053100586
+        6.734132766723633
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -245,7 +245,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.669044494628906
+        6.741046905517578
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -254,7 +254,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.651878356933594
+        6.829023361206055
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -263,7 +263,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.0781707763671875
+        7.158994674682617
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -272,7 +272,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.663799285888672
+        6.659030914306641
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -281,7 +281,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.691932678222656
+        6.586313247680664
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -290,7 +290,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.765842437744141
+        6.8340301513671875
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -299,7 +299,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.869077682495117
+        6.845951080322266
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -308,7 +308,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.669044494628906
+        6.734132766723633
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -317,7 +317,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.602287292480469
+        6.665945053100586
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -326,7 +326,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.255077362060547
+        6.696939468383789
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -335,7 +335,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.297039031982422
+        6.739377975463867
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -344,7 +344,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.906747817993164
+        7.013082504272461
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -353,7 +353,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.7882537841796875
+        6.804943084716797
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -362,7 +362,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.762027740478516
+        6.7272186279296875
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -371,7 +371,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.8359375
+        6.860256195068359
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -380,7 +380,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.749391555786133
+        6.685018539428711
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -389,7 +389,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.826162338256836
+        6.798028945922852
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -398,7 +398,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.729364395141602
+        6.763935089111328
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -407,7 +407,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.721019744873047
+        6.781101226806641
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -416,7 +416,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.745100021362305
+        6.728887557983398
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -425,7 +425,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.737947463989258
+        6.704807281494141
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -434,7 +434,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.630897521972656
+        6.712198257446289
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -443,7 +443,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.590843200683594
+        6.767034530639648
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -452,7 +452,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.591081619262695
+        6.757974624633789
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -461,7 +461,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.78706169128418
+        6.637096405029297
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -470,7 +470,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.812095642089844
+        6.794929504394531
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -479,7 +479,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        7.136106491088867
+        6.67119026184082
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -488,7 +488,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.661176681518555
+        6.685018539428711
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -497,7 +497,7 @@
       "passed": 1,
       "total": 1,
       "latencies": [
-        6.767988204956055
+        6.625175476074219
       ],
       "citations_ok": 1,
       "purity_ok": 1
@@ -508,7 +508,7 @@
       "id": "COMPLEX-TRAP-01-DEEMED-CONSENT",
       "pillar": "Pillar IV (Cascading Subcontracting Trap)",
       "passed": true,
-      "duration_ms": 61.1,
+      "duration_ms": 52.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -520,7 +520,7 @@
       "id": "COMPLEX-TRAP-02-HIDDEN-EXIT-TOLL",
       "pillar": "Pillar IV (Disguised Exit Toll)",
       "passed": true,
-      "duration_ms": 7.6,
+      "duration_ms": 7.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -532,7 +532,7 @@
       "id": "COMPLEX-TRAP-03-AUDIT-DEPOSIT-BARRIER",
       "pillar": "Pillar IV (Restricted Audit Access)",
       "passed": true,
-      "duration_ms": 7.3,
+      "duration_ms": 7.2,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -544,7 +544,7 @@
       "id": "COMPLEX-TRAP-04-CLOUD-ACT-CONFLICT",
       "pillar": "Pillar IV (Cross-Border CLOUD Act Conflict)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -556,7 +556,7 @@
       "id": "COMPLEX-TRAP-05-SLA-EXCLUSION-LOOPHOLE",
       "pillar": "Pillar IV (SLA Calculation Loophole)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -568,7 +568,7 @@
       "id": "COMPLEX-TRAP-06-SOURCE-CODE-ESCROW",
       "pillar": "Pillar IV (Conditional Escrow)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -580,7 +580,7 @@
       "id": "COMPLEX-GOLDEN-07-GOLD-STANDARD-EXIT",
       "pillar": "Pillar IV (Institutional Gold Standard)",
       "passed": true,
-      "duration_ms": 7.1,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -592,7 +592,7 @@
       "id": "COMPLEX-ZUGFERD-08-INVALID-VAT-TAX",
       "pillar": "Electronic Invoicing (Tax Compliance)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -604,7 +604,7 @@
       "id": "COMPLEX-AUDIT-09-DATACENTER-PHYSICAL-BAN",
       "pillar": "Pillar IV (Datacenter Physical Access Ban)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -616,7 +616,7 @@
       "id": "COMPLEX-REMEDY-10-BGB-LIABILITY-DISCLAIMER",
       "pillar": "Pillar IV (BGB § 307 Vicarious Liability Trap)",
       "passed": true,
-      "duration_ms": 7.3,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -628,7 +628,7 @@
       "id": "COMPLEX-POOLED-11-JOINT-AUDIT-DENIAL",
       "pillar": "Pillar IV (Pooled Audit Cooperation Denial)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -640,7 +640,7 @@
       "id": "COMPLEX-CROSSBORDER-12-ENGLISH-EU-TRANSFER",
       "pillar": "Pillar IV (Cross-Border English Contract Risk)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -652,7 +652,7 @@
       "id": "COMPLEX-SLA-13-PENALTY-MATRIX-CAP",
       "pillar": "Pillar IV (SLA & Penalty Matrices)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -676,7 +676,7 @@
       "id": "COMPLEX-BGB311-15-REMEDY-REDLINE-PROPOSAL",
       "pillar": "Pillar IV (BGB § 311 Contract Remediation)",
       "passed": true,
-      "duration_ms": 7.0,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -688,7 +688,7 @@
       "id": "COMPLEX-DIN5008-16-BAFIN-SUPERVISORY-NOTICE",
       "pillar": "Pillar IV (Supervisory Audit Notices)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -700,7 +700,7 @@
       "id": "COMPLEX-ZUGFERD-17-COMFORT-LEITWEG-COMPLIANT",
       "pillar": "Electronic Invoicing (ZUGFeRD 2.3)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 7.4,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -712,7 +712,7 @@
       "id": "COMPLEX-LANG-PURITY-18-ENGLISH-DORA-COMPLIANCE",
       "pillar": "Bilingual Purity (English Regulatory)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -736,7 +736,7 @@
       "id": "COMPLEX-AUDIT-20-CISO-INTERVIEW-LOG-ACCESS",
       "pillar": "Pillar IV (Forensic Revisionssicherheit)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -760,7 +760,7 @@
       "id": "COMPLEX-SHARED-RESP-22-HYPERSCALER-TRAP",
       "pillar": "Pillar IV (Hyperscaler Shared Responsibility Trap)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -772,7 +772,7 @@
       "id": "COMPLEX-AFFILIATE-23-SECRET-SUBCONTRACTING",
       "pillar": "Pillar IV (Secret Affiliate Sub-Outsourcing)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -796,7 +796,7 @@
       "id": "COMPLEX-REVERSE-ESCROW-25-COST-BLOCKADE",
       "pillar": "Pillar IV (Escrow Release Cost Trap)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -832,7 +832,7 @@
       "id": "ACADEMIC-TU9-28-MASTER-ADMISSION-VALIDITY",
       "pillar": "Academic Certification (German University Admission)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -844,7 +844,7 @@
       "id": "COMPLEX-MULTICLOUD-29-PORTABILITY-LOCKIN",
       "pillar": "Pillar IV (Vendor Lock-in & Portability)",
       "passed": true,
-      "duration_ms": 7.1,
+      "duration_ms": 7.2,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -868,7 +868,7 @@
       "id": "COMPLEX-BAFIN-31-OUTSOURCING-REGISTER-DEFICIT",
       "pillar": "Pillar IV (BaFin Outsourcing Register Art. 28)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.6,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -892,7 +892,7 @@
       "id": "COMPLEX-ESCROW-33-QUARTERLY-DEPOSIT-AUDIT",
       "pillar": "Pillar IV (Continuous Active Source Code Escrow)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -916,7 +916,7 @@
       "id": "COMPLEX-LKSG-35-ANNUAL-BAFA-REPORTING",
       "pillar": "LkSG German Supply Chain Due Diligence",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -928,7 +928,7 @@
       "id": "COMPLEX-EBA-36-INTRAGROUP-SUB-OUTSOURCING",
       "pillar": "Pillar IV (EBA Intragroup Outsourcing Guidelines)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -940,7 +940,7 @@
       "id": "COMPLEX-BSI-37-TR02102-CRYPTOGRAPHY-DEPRECATION",
       "pillar": "BSI TR-02102 Cryptographic Key Length Mandates",
       "passed": true,
-      "duration_ms": 7.3,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -952,7 +952,7 @@
       "id": "COMPLEX-DORA-38-CONCENTRATION-RISK-MULTI-REGION",
       "pillar": "Pillar IV (DORA Art. 29 ICT Concentration Risk)",
       "passed": true,
-      "duration_ms": 7.3,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -964,7 +964,7 @@
       "id": "COMPLEX-CSRD-39-GREEN-DATACENTER-PUE",
       "pillar": "EU CSRD & Green ICT Energy Efficiency (PUE < 1.3)",
       "passed": true,
-      "duration_ms": 6.9,
+      "duration_ms": 7.0,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -988,7 +988,7 @@
       "id": "COMPLEX-BAFIN-41-UNIFIED-AUDIT-TRAIL",
       "pillar": "BaFin GoBD & KWG § 25a Revision-Proof WORM Audit Trail",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1000,7 +1000,7 @@
       "id": "COMPLEX-DORA-42-CYBER-THREAT-SHARING",
       "pillar": "Pillar IV (DORA Art. 45 Cyber Threat Intelligence Sharing)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.9,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1036,7 +1036,7 @@
       "id": "COMPLEX-DORA-45-CHANGE-MANAGEMENT-ROLLBACK",
       "pillar": "Pillar IV (DORA Art. 9 Major Change Management & Rollback)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1048,7 +1048,7 @@
       "id": "COMPLEX-ZUGFERD-46-HYBRID-PDF-INTEGRITY",
       "pillar": "Electronic Invoicing (ZUGFeRD 2.3 / Factur-X PDF/A-3 Integrity)",
       "passed": true,
-      "duration_ms": 6.7,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1084,7 +1084,7 @@
       "id": "COMPLEX-BAFIN-49-SUBCONTRACTOR-CHAIN-AUDIT",
       "pillar": "Pillar IV (BaFin BAIT 8.3 Subcontractor Chain Inspection Pass-Through)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1096,7 +1096,7 @@
       "id": "COMPLEX-DORA-50-STATUTORY-TERMINATION-RIGHTS",
       "pillar": "Pillar IV (DORA Art. 28 Abs. 7 Statutory Extraordinary Termination)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1108,7 +1108,7 @@
       "id": "COMPLEX-LKSG-51-MINAMATA-MERCURY-DISPOSAL",
       "pillar": "Pillar V (LkSG § 2 Abs. 3 Nr. 1 Minamata Convention Mercury Violations)",
       "passed": true,
-      "duration_ms": 6.6,
+      "duration_ms": 6.8,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1120,7 +1120,7 @@
       "id": "COMPLEX-LKSG-52-CHILD-LABOUR-PROHIBITION",
       "pillar": "Pillar V (LkSG § 2 Abs. 2 Nr. 1 ILO 138/182 Child Labour Prohibition)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.6,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1144,7 +1144,7 @@
       "id": "COMPLEX-LKSG-54-WHISTLEBLOWER-PROCEDURE-INTEGRITY",
       "pillar": "Pillar V (LkSG § 8 Statutory Complaints Procedure & Anonymity)",
       "passed": true,
-      "duration_ms": 7.1,
+      "duration_ms": 6.7,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,
@@ -1168,7 +1168,7 @@
       "id": "COMPLEX-BAFA-56-STATUTORY-RISK-QUESTIONNAIRE",
       "pillar": "Pillar V (BAFA § 5 LkSG Handreichung Risikoanalyse)",
       "passed": true,
-      "duration_ms": 6.8,
+      "duration_ms": 6.6,
       "citation_ok": true,
       "facts_ok": true,
       "status_ok": true,

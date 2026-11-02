@@ -1,5 +1,5 @@
 import pytest
-import fitz
+import pymupdf as fitz
 from app.services.zugferd import extract_embedded_zugferd_xml, parse_zugferd_xml_metadata
 
 

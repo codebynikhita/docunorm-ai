@@ -77,7 +77,7 @@ def create_access_token(
 
     h_str = _b64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8"))
     p_str = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode("utf-8"))
-    msg = f"{h_str}.{p_str}".encode("utf-8")
+    msg = f"{h_str}.{p_str}".encode()
     sig = hmac.new(settings.SECRET_KEY.encode("utf-8"), msg, hashlib.sha256).digest()
     sig_str = _b64url_encode(sig)
 
@@ -95,7 +95,7 @@ def decode_access_token(token: str) -> dict[str, Any] | None:
             return None
         h_str, p_str, sig_str = parts
 
-        msg = f"{h_str}.{p_str}".encode("utf-8")
+        msg = f"{h_str}.{p_str}".encode()
         expected_sig = hmac.new(settings.SECRET_KEY.encode("utf-8"), msg, hashlib.sha256).digest()
         actual_sig = _b64url_decode(sig_str)
 

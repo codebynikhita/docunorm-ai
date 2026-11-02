@@ -22,7 +22,7 @@ backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
 import httpx
-import fitz  # PyMuPDF
+import pymupdf as fitz
 from app.main import app
 from app.services.zugferd import extract_embedded_zugferd_xml, parse_zugferd_xml_metadata
 from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf

@@ -1,8 +1,9 @@
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-import fitz
+
+import pymupdf as fitz
 
 from app.models.document import Document
 
@@ -24,7 +25,7 @@ def generate_din_audit_report_pdf(
     output_path = Path(output_dir) / f"{clean_name}_DIN_AUDIT_REPORT.pdf"
 
     doc = fitz.open()
-    created_at_dt = datetime.now(timezone.utc)
+    created_at_dt = datetime.now(UTC)
     created_at_str = created_at_dt.strftime("%d. %B %Y • %H:%M:%S UTC")
     date_stamp = created_at_dt.strftime("%d.%m.%Y")
 
@@ -220,7 +221,7 @@ def generate_english_dossier_pdf(
     sorted_pages = sorted(pages_map.keys()) if pages_map else [1]
     total_dossier_pages = len(sorted_pages)
 
-    current_date_str = datetime.now(timezone.utc).strftime("%d. %B %Y • %H:%M UTC")
+    current_date_str = datetime.now(UTC).strftime("%d. %B %Y • %H:%M UTC")
 
     # Detect whether source is English or German
     is_english_source = any(c.get("source_language") == "EN" for c in chunks)
@@ -331,7 +332,7 @@ def generate_english_dossier_markdown(
     """
     Generates a Markdown dossier suitable for copying into Word or report drafting.
     """
-    current_date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    current_date_str = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
 
     # Detect language
     is_english_source = any(c.get("source_language") == "EN" for c in chunks)

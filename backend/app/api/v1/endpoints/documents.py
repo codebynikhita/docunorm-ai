@@ -2,11 +2,21 @@ import asyncio
 import json
 import subprocess
 import sys
+from pathlib import Path
 from typing import Annotated, Any
 from uuid import UUID, uuid4
-from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
@@ -16,6 +26,7 @@ from app.models.audit import AuditLog
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
+from app.schemas.audit_rights import DoraAuditRightsReport
 from app.schemas.document import (
     AuditCitation,
     AuditRequest,
@@ -27,39 +38,42 @@ from app.schemas.document import (
     SearchResultChunk,
 )
 from app.schemas.dora import DoraExitAuditReport
+from app.schemas.lksg import BafaQuestionnaireResponse, LkSGAuditResponse
+from app.schemas.remediation import AmendmentProposal, DocumentRiskHeatmap
 from app.schemas.subcontractor import DoraSubcontractorAuditReport
-from app.schemas.audit_rights import DoraAuditRightsReport
-from app.schemas.remediation import DocumentRiskHeatmap, AmendmentProposal
-from app.schemas.lksg import LkSGAuditResponse, BafaQuestionnaireResponse
-from app.services.lksg_analyzer import LkSGAnalyzerService
-from app.services.bafa_questionnaire import BafaQuestionnaireService
-from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
 from app.schemas.table import (
     DocumentTablesResponse,
-    TableStructure,
     SlaPenaltyCalculationRequest,
     SlaPenaltyCalculationResponse,
+    TableStructure,
 )
-from app.services.table_extractor import TableExtractorService
-from app.services.dora_exit_engine import dora_exit_engine
-from app.services.subcontractor_engine import subcontractor_engine
 from app.services.audit_rights_engine import audit_rights_engine
-from app.services.remediation_engine import RemediationEngine
 from app.services.auditor import (
     generate_llm_audit_finding,
     parse_citations_from_response,
     translate_chunks_to_english,
 )
+from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
+from app.services.bafa_questionnaire import BafaQuestionnaireService
+from app.services.dora_exit_engine import dora_exit_engine
 from app.services.embedding import embedding_service
 from app.services.exporter import (
     generate_din_audit_report_pdf,
     generate_english_dossier_markdown,
     generate_english_dossier_pdf,
 )
+from app.services.lksg_analyzer import LkSGAnalyzerService
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
+from app.services.remediation_engine import RemediationEngine
 from app.services.storage import storage_service
-from app.services.tasks import get_task_progress, process_document_background, set_task_progress
+from app.services.subcontractor_engine import subcontractor_engine
+from app.services.table_extractor import TableExtractorService
+from app.services.tasks import (
+    get_task_progress,
+    process_document_background,
+    set_task_progress,
+)
 from app.services.validator import validate_pdf_metadata
 
 router = APIRouter(prefix="/documents", tags=["Document Management"])
@@ -715,7 +729,7 @@ async def audit_document(
     chunk_map: dict[str, dict] = {}
     seen_chunk_ids = set()
 
-    for idx, (chunk, _) in enumerate(rows, start=1):
+    for (chunk, _) in rows:
         if str(chunk.id) in seen_chunk_ids:
             continue
         seen_chunk_ids.add(str(chunk.id))
@@ -1486,7 +1500,7 @@ async def get_benchmark_scorecard() -> dict:
     """
     report_file = Path(__file__).resolve().parent.parent.parent.parent / "data" / "training" / "eval_report.json"
     if report_file.exists():
-        with open(report_file, "r", encoding="utf-8") as f:
+        with open(report_file, encoding="utf-8") as f:
             return json.load(f)
     return {"total_tests": 30, "accuracy_percent": 100.0, "status": "CERTIFIED"}
 
@@ -1501,7 +1515,7 @@ async def get_training_telemetry() -> dict:
     """
     metrics_file = Path(__file__).resolve().parent.parent.parent.parent / "data" / "training" / "training_metrics.json"
     if metrics_file.exists():
-        with open(metrics_file, "r", encoding="utf-8") as f:
+        with open(metrics_file, encoding="utf-8") as f:
             return json.load(f)
     return {"status": "CONVERGED_OPTIMAL", "final_token_accuracy": 98.14}
 

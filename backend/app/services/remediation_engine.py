@@ -1,14 +1,15 @@
 import difflib
-from uuid import UUID
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, timezone
-import fitz
+from uuid import UUID
+
+import pymupdf as fitz
 
 from app.schemas.remediation import (
-    ClauseRiskItem,
-    DocumentRiskHeatmap,
     AmendmentProposal,
+    ClauseRiskItem,
     DiffToken,
+    DocumentRiskHeatmap,
 )
 
 
@@ -386,7 +387,7 @@ class RemediationEngine:
         page.draw_line(fitz.Point(45, y), fitz.Point(550, y), color=(0.7, 0.75, 0.8), width=1)
         y += 15
 
-        now_str = datetime.now(timezone.utc).strftime("%d. %B %Y")
+        now_str = datetime.now(UTC).strftime("%d. %B %Y")
         page.insert_text(fitz.Point(45, y), f"Ort, Datum: Frankfurt am Main, den {now_str}", fontsize=8, fontname="helv", color=(0.3, 0.35, 0.4))
         y += 28
 

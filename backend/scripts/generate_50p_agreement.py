@@ -7,7 +7,7 @@ Strictly drafted under German Law, BaFin RS 10/2018 (BAIT), KWG § 25b, and EU D
 """
 import sys
 from pathlib import Path
-import fitz
+import pymupdf as fitz
 
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "Deutsche_Bank_Master_Cloud_Agreement_50P.pdf"
 

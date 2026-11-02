@@ -1,5 +1,6 @@
 import os
 import re
+
 import httpx
 
 
@@ -994,7 +995,7 @@ def build_fallback_synthesis(
             )
 
     # Compliant Critical Function Categorization (DORA Art. 30 Abs. 2 & KWG § 25b)
-    if ("vollumfänglich als kritische oder wichtige funktion" in chunks_text or ("kritische funktion" in chunks_text and "kwg § 25b" in chunks_text and not "unkritische" in chunks_text)) and any(k in q_lower or k in chunks_text for k in ["einstufung", "kritisch", "funktion", "kernfunktion", "zahlungsverkehr"]):
+    if ("vollumfänglich als kritische oder wichtige funktion" in chunks_text or ("kritische funktion" in chunks_text and "kwg § 25b" in chunks_text and "unkritische" not in chunks_text)) and any(k in q_lower or k in chunks_text for k in ["einstufung", "kritisch", "funktion", "kernfunktion", "zahlungsverkehr"]):
         if is_german:
             return (
                 "### ⚖️ AUFSICHTSRECHTLICHE PRÜFFESTSTELLUNG (DORA ART. 30 ABS. 2 & KWG § 25B)\n"

@@ -1,11 +1,12 @@
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Literal
 from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 
-class LkSGRiskCategory(str, Enum):
+class LkSGRiskCategory(StrEnum):
     """
     Statutory risk categories defined under § 2 Abs. 2 (Human Rights)
     and § 2 Abs. 3 (Environment) of the German Supply Chain Due Diligence Act (LkSG).
@@ -24,7 +25,7 @@ class LkSGRiskCategory(str, Enum):
     INDIRECT_SUPPLIER_CONTROL = "INDIRECT_SUPPLIER_CONTROL"  # § 9 LkSG (Mittelbare Zulieferer)
 
 
-class LkSGSeverity(str, Enum):
+class LkSGSeverity(StrEnum):
     CRITICAL = "CRITICAL"  # Immediate BAFA fine risk (up to 2% of annual turnover)
     HIGH = "HIGH"          # Substantial compliance deficit requiring remediation within 30 days
     MEDIUM = "MEDIUM"      # Moderate risk requiring procedural adjustment
@@ -88,10 +89,10 @@ class LkSGAuditResponse(BaseModel):
     document_id: UUID
     filename: str
     assessment: LkSGSupplierAssessment
-    audit_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    audit_timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class BafaComplianceStatus(str, Enum):
+class BafaComplianceStatus(StrEnum):
     COMPLIANT = "COMPLIANT"              # Vollständig konform / Vorgaben erfüllt
     PARTIALLY_COMPLIANT = "PARTIALLY_COMPLIANT"  # Teilweise konform / Nachbesserung erforderlich
     NON_COMPLIANT = "NON_COMPLIANT"      # Nicht konform / Erhebliches BAFA-Bußgeldrisiko
@@ -141,5 +142,5 @@ class BafaQuestionnaireResponse(BaseModel):
     partially_compliant_count: int = 0
     non_compliant_count: int = 0
     sections: list[BafaQuestionnaireSection] = Field(default_factory=list)
-    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

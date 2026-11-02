@@ -77,7 +77,7 @@ export function RealTimeStreamHud({
     return () => {
       eventSource.close();
     };
-  }, [documentId]);
+  }, [documentId, onComplete]);
 
   if (!isVisible || !documentId) return null;
 

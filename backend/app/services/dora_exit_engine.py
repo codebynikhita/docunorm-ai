@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
+
 from app.schemas.dora import DoraExitAuditReport, DoraExitCheckResult
 
 
@@ -78,7 +79,7 @@ class DoraExitStrategyEngine:
             document_id=document_id,
             overall_score=round(total_score, 1),
             compliance_rating=rating,
-            evaluated_at=datetime.now(timezone.utc),
+            evaluated_at=datetime.now(UTC),
             dora_article="Art. 30 Abs. 2 VO (EU) 2022/2554 & BaFin RS 10/2018",
             checks=all_checks,
             summary_de=summary_de,

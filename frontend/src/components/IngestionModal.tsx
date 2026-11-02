@@ -124,7 +124,7 @@ export function IngestionModal({
     }, 450);
 
     return () => clearInterval(timer);
-  }, [isOpen]);
+  }, [isOpen, steps.length]);
 
   if (!isOpen) return null;
 

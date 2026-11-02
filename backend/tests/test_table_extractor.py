@@ -1,5 +1,5 @@
 from uuid import uuid4
-import fitz
+import pymupdf as fitz
 import pytest
 
 from app.schemas.table import TableStructure, TableRegulatoryAnalysis

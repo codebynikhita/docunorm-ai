@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Literal
 from uuid import UUID
 
@@ -639,5 +639,5 @@ class BafaQuestionnaireService:
             partially_compliant_count=partially_count,
             non_compliant_count=non_compliant_count,
             sections=sections,
-            generated_at=datetime.now(timezone.utc),
+            generated_at=datetime.now(UTC),
         )

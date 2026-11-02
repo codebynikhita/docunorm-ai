@@ -3,15 +3,16 @@ import io
 import re
 from pathlib import Path
 from uuid import UUID
-import fitz
+
+import pymupdf as fitz
 
 from app.schemas.table import (
-    TableCell,
-    TableRegulatoryAnalysis,
-    TableStructure,
     DocumentTablesResponse,
     SlaPenaltyCalculationRequest,
     SlaPenaltyCalculationResponse,
+    TableCell,
+    TableRegulatoryAnalysis,
+    TableStructure,
 )
 
 

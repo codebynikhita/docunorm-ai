@@ -1,7 +1,8 @@
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-import fitz
+
+import pymupdf as fitz
 
 from app.models.document import Document
 from app.schemas.lksg import BafaComplianceStatus, BafaQuestionnaireResponse
@@ -23,7 +24,7 @@ def generate_bafa_audit_report_pdf(
     output_path = Path(output_dir) / f"{clean_name}_BAFA_LKSG_AUDIT_REPORT.pdf"
 
     doc = fitz.open()
-    created_at_dt = datetime.now(timezone.utc)
+    created_at_dt = datetime.now(UTC)
     created_at_str = created_at_dt.strftime("%d. %B %Y • %H:%M:%S UTC")
     date_stamp = created_at_dt.strftime("%d.%m.%Y")
 
@@ -101,7 +102,7 @@ def generate_bafa_audit_report_pdf(
     active_page = page1
     current_page_idx = 1
 
-    for idx, sec in enumerate(questionnaire.sections, 1):
+    for sec in questionnaire.sections:
         if p_y > 700:
             # Footer on active page
             active_page.draw_line(fitz.Point(40, 800), fitz.Point(555, 800), color=(0.8, 0.85, 0.9), width=1.0)

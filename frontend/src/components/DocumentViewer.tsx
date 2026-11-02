@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   UploadCloud,
   FileText,
@@ -217,7 +217,7 @@ export function DocumentViewer({
     }
   }, [activeHighlight]);
 
-  const renderPage = async (pageNumber: number, pdf: any) => {
+  const renderPage = useCallback(async (pageNumber: number, pdf: any) => {
     if (!canvasRef.current || !pdf) return;
 
     try {
@@ -245,7 +245,7 @@ export function DocumentViewer({
     } finally {
       setRendering(false);
     }
-  };
+  }, [zoom]);
 
   // Load PDF with PDF.js whenever documentId changes
   useEffect(() => {
@@ -279,14 +279,14 @@ export function DocumentViewer({
     return () => {
       isCancelled = true;
     };
-  }, [documentId]);
+  }, [documentId, currentPage, renderPage]);
 
   // Re-render page whenever currentPage, zoom, or docViewMode changes back to canvas
   useEffect(() => {
     if (pdfDocRef.current && docViewMode !== "english") {
       renderPage(currentPage, pdfDocRef.current);
     }
-  }, [currentPage, zoom, docViewMode]);
+  }, [currentPage, zoom, docViewMode, renderPage]);
 
   const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
