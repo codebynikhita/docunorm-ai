@@ -496,37 +496,79 @@ async def search_document(
     # 1. Generate 1024-dimensional query vector
     query_vector = embedding_service.generate_embedding(payload.query)
 
-    # 2. Query PostgreSQL pgvector with cosine distance
-    distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label(
-        "distance"
-    )
-    stmt = (
-        select(DocumentChunk, distance_expr)
-        .where(
-            DocumentChunk.document_id == document_id,
-            DocumentChunk.tenant_id == tenant.id,
-            DocumentChunk.embedding.is_not(None),
-        )
-        .order_by(distance_expr.asc())
-        .limit(payload.limit)
-    )
-    result = await db.execute(stmt)
-    rows = result.all()
+    # 2. Check database dialect (SQLite vs PostgreSQL with pgvector)
+    is_sqlite = True
+    try:
+        bind = db.get_bind()
+        if bind and bind.dialect.name != "sqlite":
+            is_sqlite = False
+    except Exception:
+        is_sqlite = True
 
     matches: list[SearchResultChunk] = []
-    for chunk, distance in rows:
-        # Distance is in range [0, 2]. Cosine similarity = 1 - distance
-        similarity = round(max(0.0, 1.0 - float(distance)), 4)
-        matches.append(
-            SearchResultChunk(
-                chunk_id=chunk.id,
-                document_id=chunk.document_id,
-                page_number=chunk.page_number,
-                bounding_box=chunk.bounding_box,
-                content=chunk.content,
-                similarity_score=similarity,
+
+    if is_sqlite:
+        # Sovereign SQLite Mode: Compute in-memory cosine similarity via embedding_service
+        stmt = (
+            select(DocumentChunk)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+                DocumentChunk.embedding.is_not(None),
             )
         )
+        result = await db.execute(stmt)
+        all_chunks = result.scalars().all()
+        scored_chunks = []
+        for c in all_chunks:
+            if c.embedding:
+                try:
+                    sim = embedding_service.cosine_similarity(query_vector, c.embedding)
+                    scored_chunks.append((c, sim))
+                except Exception:
+                    continue
+        scored_chunks.sort(key=lambda x: x[1], reverse=True)
+        for chunk, similarity in scored_chunks[: payload.limit]:
+            matches.append(
+                SearchResultChunk(
+                    chunk_id=chunk.id,
+                    document_id=chunk.document_id,
+                    page_number=chunk.page_number,
+                    bounding_box=chunk.bounding_box,
+                    content=chunk.content,
+                    similarity_score=similarity,
+                )
+            )
+    else:
+        # PostgreSQL pgvector mode with native <=> cosine distance operator
+        distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label(
+            "distance"
+        )
+        stmt = (
+            select(DocumentChunk, distance_expr)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+                DocumentChunk.embedding.is_not(None),
+            )
+            .order_by(distance_expr.asc())
+            .limit(payload.limit)
+        )
+        result = await db.execute(stmt)
+        rows = result.all()
+
+        for chunk, distance in rows:
+            similarity = round(max(0.0, 1.0 - float(distance)), 4)
+            matches.append(
+                SearchResultChunk(
+                    chunk_id=chunk.id,
+                    document_id=chunk.document_id,
+                    page_number=chunk.page_number,
+                    bounding_box=chunk.bounding_box,
+                    content=chunk.content,
+                    similarity_score=similarity,
+                )
+            )
 
     return SearchResponse(
         query=payload.query,
@@ -607,20 +649,50 @@ async def audit_document(
                 effective_search_query = f"{last_query} {payload.query}"
 
     query_vector = embedding_service.generate_embedding(effective_search_query)
-    distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label("distance")
 
-    stmt = (
-        select(DocumentChunk, distance_expr)
-        .where(
-            DocumentChunk.document_id == document_id,
-            DocumentChunk.tenant_id == tenant.id,
-            DocumentChunk.embedding.is_not(None),
+    is_sqlite = True
+    try:
+        bind = db.get_bind()
+        if bind and bind.dialect.name != "sqlite":
+            is_sqlite = False
+    except Exception:
+        is_sqlite = True
+
+    if is_sqlite:
+        stmt = (
+            select(DocumentChunk)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+                DocumentChunk.embedding.is_not(None),
+            )
         )
-        .order_by(distance_expr.asc())
-        .limit(8)
-    )
-    result = await db.execute(stmt)
-    rows = result.all()
+        result = await db.execute(stmt)
+        all_chunks = result.scalars().all()
+        scored_chunks = []
+        for c in all_chunks:
+            if c.embedding:
+                try:
+                    sim = embedding_service.cosine_similarity(query_vector, c.embedding)
+                    scored_chunks.append((c, 1.0 - sim))
+                except Exception:
+                    continue
+        scored_chunks.sort(key=lambda x: x[1])
+        rows = scored_chunks[:8]
+    else:
+        distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label("distance")
+        stmt = (
+            select(DocumentChunk, distance_expr)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+                DocumentChunk.embedding.is_not(None),
+            )
+            .order_by(distance_expr.asc())
+            .limit(8)
+        )
+        result = await db.execute(stmt)
+        rows = result.all()
 
     if not rows:
         return AuditResponse(
