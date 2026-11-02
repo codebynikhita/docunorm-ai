@@ -514,19 +514,26 @@ async def search_document(
             .where(
                 DocumentChunk.document_id == document_id,
                 DocumentChunk.tenant_id == tenant.id,
-                DocumentChunk.embedding.is_not(None),
             )
         )
         result = await db.execute(stmt)
         all_chunks = result.scalars().all()
         scored_chunks = []
+        needs_flush = False
         for c in all_chunks:
-            if c.embedding:
+            emb = c.embedding
+            if emb is None and c.content:
+                emb = embedding_service.generate_embedding(c.content)
+                c.embedding = emb
+                needs_flush = True
+            if emb:
                 try:
-                    sim = embedding_service.cosine_similarity(query_vector, c.embedding)
+                    sim = embedding_service.cosine_similarity(query_vector, emb)
                     scored_chunks.append((c, sim))
                 except Exception:
                     continue
+        if needs_flush:
+            await db.flush()
         scored_chunks.sort(key=lambda x: x[1], reverse=True)
         for chunk, similarity in scored_chunks[: payload.limit]:
             matches.append(
