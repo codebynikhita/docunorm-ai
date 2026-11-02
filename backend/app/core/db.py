@@ -37,12 +37,16 @@ else:
     _is_sqlite = True
     print(f"📦 [Database] Operating in persistent SQLite Sovereign Mode ({_sqlite_file.name})")
 
+# Extra engine arguments (e.g. SQLite concurrency timeout)
+_engine_args = {"connect_args": {"timeout": 30.0}} if _is_sqlite else {}
+
 # Asynchronous engine for high-throughput API requests
 async_engine = create_async_engine(
     _async_url,
     echo=False,
     future=True,
     pool_pre_ping=True,
+    **_engine_args,
 )
 
 # Session factory for generating request-scoped database sessions
@@ -59,6 +63,7 @@ sync_engine = create_engine(
     _sync_url,
     echo=False,
     pool_pre_ping=True,
+    **_engine_args,
 )
 
 
@@ -74,7 +79,14 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 def init_db() -> None:
     """
     Creates all database tables defined in SQLModel metadata if they do not exist.
+    Configures SQLite Write-Ahead Logging (WAL) and foreign keys for concurrency.
     """
     import app.models as _  # noqa: F401
 
     SQLModel.metadata.create_all(sync_engine)
+
+    if _is_sqlite:
+        with sync_engine.connect() as conn:
+            conn.exec_driver_sql("PRAGMA journal_mode=WAL;")
+            conn.exec_driver_sql("PRAGMA synchronous=NORMAL;")
+            conn.exec_driver_sql("PRAGMA foreign_keys=ON;")

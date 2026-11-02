@@ -36,34 +36,39 @@ class PDFParserService:
             raise FileNotFoundError(f"PDF file not found at: {file_path}")
 
         doc = fitz.open(str(file_path))
-        total_pages = len(doc)
-        parsed_blocks: list[ParsedBlock] = []
+        try:
+            if doc.is_encrypted and not doc.authenticate(""):
+                raise ValueError("Password-protected or encrypted PDF documents are not supported.")
 
-        # Iterate over each page in the PDF (0-indexed)
-        for page_idx in range(total_pages):
-            page = doc[page_idx]
-            page_number = page_idx + 1  # Humans count pages starting at 1
+            total_pages = len(doc)
+            parsed_blocks: list[ParsedBlock] = []
 
-            # Extract visual blocks: (x0, y0, x1, y1, text, block_no, block_type)
-            raw_blocks = page.get_text("blocks")
+            # Iterate over each page in the PDF (0-indexed)
+            for page_idx in range(total_pages):
+                page = doc[page_idx]
+                page_number = page_idx + 1  # Humans count pages starting at 1
 
-            for b_idx, block in enumerate(raw_blocks):
-                # block[4] contains the extracted text
-                content = block[4].strip()
-                if not content:
-                    continue  # Skip empty whitespace blocks
+                # Extract visual blocks: (x0, y0, x1, y1, text, block_no, block_type)
+                raw_blocks = page.get_text("blocks")
 
-                # block[0:4] are the visual bounding box coordinates (x0, y0, x1, y1)
-                bbox = [round(float(coord), 2) for coord in block[0:4]]
+                for b_idx, block in enumerate(raw_blocks):
+                    # block[4] contains the extracted text
+                    content = block[4].strip()
+                    if not content:
+                        continue  # Skip empty whitespace blocks
 
-                parsed_blocks.append(
-                    ParsedBlock(
-                        text=content,
-                        page_number=page_number,
-                        bounding_box=bbox,
-                        block_index=b_idx,
+                    # block[0:4] are the visual bounding box coordinates (x0, y0, x1, y1)
+                    bbox = [round(float(coord), 2) for coord in block[0:4]]
+
+                    parsed_blocks.append(
+                        ParsedBlock(
+                            text=content,
+                            page_number=page_number,
+                            bounding_box=bbox,
+                            block_index=b_idx,
+                        )
                     )
-                )
 
-        doc.close()
-        return ParseResult(total_pages=total_pages, blocks=parsed_blocks)
+            return ParseResult(total_pages=total_pages, blocks=parsed_blocks)
+        finally:
+            doc.close()

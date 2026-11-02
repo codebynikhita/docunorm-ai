@@ -69,6 +69,8 @@ pnpm-debug.log*
 docker-data/
 *.log
 *.db
+*.db-wal
+*.db-shm
 storage/
 backend/storage/
 backend/*.pdf
