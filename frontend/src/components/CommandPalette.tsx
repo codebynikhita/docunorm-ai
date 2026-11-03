@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Table as TableIcon,
   Scale,
+  Flame,
   X,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
@@ -44,6 +45,7 @@ interface CommandPaletteProps {
   onOpenRemediation?: () => void;
   onOpenTableInspector?: () => void;
   onOpenLkSGAudit?: () => void;
+  onOpenNegotiationBattlecard?: () => void;
   onOpenZugferd: () => void;
   onOpenCertificate: () => void;
   availableDocuments?: any[];
@@ -63,6 +65,7 @@ export function CommandPalette({
   onOpenRemediation,
   onOpenTableInspector,
   onOpenLkSGAudit,
+  onOpenNegotiationBattlecard,
   onOpenZugferd,
   onOpenCertificate,
   availableDocuments = [],
@@ -177,6 +180,18 @@ export function CommandPalette({
       shortcut: "L S",
       action: () => {
         if (onOpenLkSGAudit) onOpenLkSGAudit();
+        onClose();
+      },
+    },
+    {
+      id: "reg-negotiation-battlecard",
+      title_de: "Aufsichtsrechtliche Verhandlungs-Battlecard & Schrems II TIA",
+      title_en: "Procurement Negotiation Battlecard & Schrems II TIA",
+      category: "regulatory",
+      icon: Flame,
+      shortcut: "N B",
+      action: () => {
+        if (onOpenNegotiationBattlecard) onOpenNegotiationBattlecard();
         onClose();
       },
     },

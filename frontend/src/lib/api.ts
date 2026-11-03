@@ -743,6 +743,106 @@ export async function downloadBafaReportPdf(documentId: string, signatoryName?: 
   document.body.removeChild(a);
 }
 
+export interface BattlecardItem {
+  id: string;
+  pillar: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM";
+  title_de: string;
+  title_en: string;
+  statutory_reference: string;
+  vendor_clause_quote: string;
+  page_number: number;
+  vendor_common_defense: string;
+  bank_counter_argument: string;
+  non_negotiable_clause_de: string;
+  bafin_escalation_script: string;
+}
+
+export interface TiaAssessment {
+  overall_transfer_risk: "CRITICAL" | "ELEVATED" | "RESILIENT" | "COMPLIANT";
+  transfer_risk_score: number;
+  cloud_act_exposure: boolean;
+  encryption_hyok_verified: boolean;
+  eu_data_residency_guaranteed: boolean;
+  bafin_audit_clearance: string;
+  mitigation_recommendation: string;
+}
+
+export interface SlaSimulationRequest {
+  downtime_hours: number;
+  contract_value_eur: number;
+  availability_target_pct: number;
+}
+
+export interface SlaSimulationResponse {
+  downtime_hours: number;
+  contract_value_eur: number;
+  availability_target_pct: number;
+  tolerated_annual_downtime_hours: number;
+  excess_downtime_hours: number;
+  penalty_eur: number;
+  penalty_pct_of_annual_contract: number;
+  dora_incident_classification: "NEGLIGIBLE" | "MAJOR_INCIDENT" | "CRITICAL_SYSTEMIC_INCIDENT";
+  bafin_initial_notification_deadline: string;
+  bafin_intermediate_report_deadline: string;
+  statutory_extraordinary_termination_triggered: boolean;
+  rationale: string;
+}
+
+export interface NegotiationBattlecardResponse {
+  document_id: string;
+  filename: string;
+  overall_negotiation_posture: "UNACCEPTABLE_HIGH_RISK" | "CONDITIONAL_APPROVAL_REQUIRED" | "MARKET_STANDARD_COMPLIANT";
+  total_battlecards: number;
+  critical_count: number;
+  high_count: number;
+  tia_assessment: TiaAssessment;
+  battlecards: BattlecardItem[];
+  generated_at: string;
+}
+
+export async function getNegotiationBattlecard(documentId: string): Promise<NegotiationBattlecardResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/negotiation-battlecard`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load negotiation battlecard (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function simulateSlaOutage(request: SlaSimulationRequest): Promise<SlaSimulationResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/simulate-sla-outage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to simulate SLA outage (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadBattlecardPdf(documentId: string, signatoryName?: string): Promise<void> {
+  const query = signatoryName ? `?signatory_name=${encodeURIComponent(signatoryName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-battlecard-pdf${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export Negotiation Battlecard PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `NEGOTIATION_BATTLECARD_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 
 
 

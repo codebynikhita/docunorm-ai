@@ -25,6 +25,7 @@ import {
   Network,
   Table as TableIcon,
   Scale,
+  Flame,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
@@ -66,6 +67,7 @@ interface DocumentViewerProps {
   onOpenRemediation?: () => void;
   onOpenTableInspector?: () => void;
   onOpenLkSGAudit?: () => void;
+  onOpenNegotiationBattlecard?: () => void;
 }
 
 export function DocumentViewer({
@@ -86,6 +88,7 @@ export function DocumentViewer({
   onOpenRemediation,
   onOpenTableInspector,
   onOpenLkSGAudit,
+  onOpenNegotiationBattlecard,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -468,6 +471,19 @@ export function DocumentViewer({
                   <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   <span className="hidden xl:inline">
                     {lang === "DE" ? "LkSG-Audit" : "LkSG Audit"}
+                  </span>
+                </button>
+              )}
+
+              {onOpenNegotiationBattlecard && (
+                <button
+                  onClick={onOpenNegotiationBattlecard}
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-red-600 dark:text-red-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  title={lang === "DE" ? "Aufsichtsrechtliche Verhandlungs-Battlecard & Schrems II TIA" : "Procurement Negotiation Battlecard & Schrems II TIA"}
+                >
+                  <Flame className="w-3.5 h-3.5 text-red-600 dark:text-red-400 animate-pulse" />
+                  <span className="hidden xl:inline">
+                    {lang === "DE" ? "Battlecard & TIA" : "Battlecard & TIA"}
                   </span>
                 </button>
               )}

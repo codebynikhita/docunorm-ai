@@ -27,6 +27,11 @@ from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.tenant import Tenant
 from app.models.user import User, UserRole
 from app.schemas.audit_rights import DoraAuditRightsReport
+from app.schemas.battlecard import (
+    NegotiationBattlecardResponse,
+    SlaSimulationRequest,
+    SlaSimulationResponse,
+)
 from app.schemas.document import (
     AuditCitation,
     AuditRequest,
@@ -55,6 +60,8 @@ from app.services.auditor import (
 )
 from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
 from app.services.bafa_questionnaire import BafaQuestionnaireService
+from app.services.battlecard_engine import BattlecardEngine
+from app.services.battlecard_pdf_exporter import generate_battlecard_report_pdf
 from app.services.dora_exit_engine import dora_exit_engine
 from app.services.embedding import embedding_service
 from app.services.exporter import (
@@ -1826,6 +1833,178 @@ async def export_bafa_report_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
     )
+
+
+@router.post(
+    "/{document_id}/negotiation-battlecard",
+    response_model=NegotiationBattlecardResponse,
+    summary="Generate Sovereign Negotiation Battlecard & Schrems II / CLOUD Act Assessment",
+)
+@router.get(
+    "/{document_id}/negotiation-battlecard",
+    response_model=NegotiationBattlecardResponse,
+    summary="Retrieve Sovereign Negotiation Battlecard & Schrems II / CLOUD Act Assessment",
+)
+async def get_negotiation_battlecard(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> NegotiationBattlecardResponse:
+    """
+    Synthesizes unassailable statutory counter-arguments, non-negotiable BGB/DORA clauses,
+    and a Schrems II Transfer Impact Assessment for banking procurement teams.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "content": c.content,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+        }
+        for c in chunks
+    ]
+
+    if not chunk_dicts and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            chunk_dicts = [
+                {
+                    "id": f"p{b.page_number}_b{b.block_index}",
+                    "content": b.text,
+                    "page_number": b.page_number,
+                    "bounding_box": b.bounding_box,
+                }
+                for b in parse_res.blocks
+            ]
+
+    return BattlecardEngine.evaluate_contract(
+        document_id=document.id,
+        filename=document.filename,
+        chunks=chunk_dicts,
+    )
+
+
+@router.post(
+    "/simulate-sla-outage",
+    response_model=SlaSimulationResponse,
+    summary="Interactive What-If SLA Outage Stress Simulator",
+)
+async def simulate_sla_outage(
+    payload: SlaSimulationRequest,
+) -> SlaSimulationResponse:
+    """
+    Simulates hypothetical service downtime, calculates exact penalty accruals,
+    evaluates DORA Art. 11/19 incident severity, and alerts on statutory termination triggers.
+    """
+    return BattlecardEngine.simulate_sla_outage(payload)
+
+
+@router.post(
+    "/{document_id}/export-battlecard-pdf",
+    summary="Export Certified DIN 5008 Procurement Battlecard & TIA PDF",
+)
+@router.get(
+    "/{document_id}/export-battlecard-pdf",
+    summary="Download Certified DIN 5008 Procurement Battlecard & TIA PDF",
+)
+async def export_battlecard_pdf(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+    signatory_name: str = "Dr. Michael Weber, Leitender DORA- & BaFin-Prüfer",
+) -> Response:
+    """
+    Generates and downloads an official DIN 5008 Procurement Battlecard & Schrems II TIA
+    dossier PDF with cryptographic SHA-256 seal.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "content": c.content,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+        }
+        for c in chunks
+    ]
+
+    if not chunk_dicts and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            chunk_dicts = [
+                {
+                    "id": f"p{b.page_number}_b{b.block_index}",
+                    "content": b.text,
+                    "page_number": b.page_number,
+                    "bounding_box": b.bounding_box,
+                }
+                for b in parse_res.blocks
+            ]
+
+    battlecard_data = BattlecardEngine.evaluate_contract(
+        document_id=document.id,
+        filename=document.filename,
+        chunks=chunk_dicts,
+    )
+
+    pdf_path = generate_battlecard_report_pdf(
+        document=document,
+        battlecard_data=battlecard_data,
+        signatory_name=signatory_name,
+    )
+
+    clean_filename = f"BATTLECARD_TIA_{document.filename.replace('.pdf', '')}.pdf"
+
+    with open(pdf_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
+    )
+
 
 
 

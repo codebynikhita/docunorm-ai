@@ -21,6 +21,7 @@ import { RemediationModal } from "@/components/RemediationModal";
 import { TableInspectorModal } from "@/components/TableInspectorModal";
 import { AuditReportExporterModal } from "@/components/AuditReportExporterModal";
 import { LkSGAuditPanel } from "@/components/LkSGAuditPanel";
+import { NegotiationBattlecardModal } from "@/components/NegotiationBattlecardModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -54,6 +55,7 @@ export default function Home() {
   const [isTableInspectorOpen, setIsTableInspectorOpen] = useState(false);
   const [isDinReportModalOpen, setIsDinReportModalOpen] = useState(false);
   const [isLkSGAuditOpen, setIsLkSGAuditOpen] = useState(false);
+  const [isNegotiationBattlecardOpen, setIsNegotiationBattlecardOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -388,6 +390,7 @@ export default function Home() {
                 onOpenRemediation={() => setIsRemediationModalOpen(true)}
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
                 onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
+                onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -439,6 +442,7 @@ export default function Home() {
                 onOpenRemediation={() => setIsRemediationModalOpen(true)}
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
                 onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
+                onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
               />
             </main>
           )}
@@ -604,6 +608,19 @@ export default function Home() {
         }}
       />
 
+      {/* Sovereign Negotiation Battlecard & Schrems II TIA Modal */}
+      <NegotiationBattlecardModal
+        isOpen={isNegotiationBattlecardOpen}
+        onClose={() => setIsNegotiationBattlecardOpen(false)}
+        lang={lang}
+        documentId={documentId || undefined}
+        onJumpToCitation={(cit) => {
+          setCurrentPage(cit.page_number);
+          setIsNegotiationBattlecardOpen(false);
+          setLayoutMode("workbench");
+        }}
+      />
+
       {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
@@ -624,6 +641,7 @@ export default function Home() {
         onOpenRemediation={() => setIsRemediationModalOpen(true)}
         onOpenTableInspector={() => setIsTableInspectorOpen(true)}
         onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
+        onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
         onOpenZugferd={() => setIsZugferdModalOpen(true)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}
