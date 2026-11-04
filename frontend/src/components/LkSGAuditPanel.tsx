@@ -25,6 +25,9 @@ import {
   Loader2,
   Check,
   HelpCircle,
+  CalendarCheck,
+  Clock,
+  Coins,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
 import {
@@ -35,6 +38,9 @@ import {
   BafaQuestionnaireSection,
   getBafaQuestionnaire,
   downloadBafaReportPdf,
+  SupplierCapaPlan,
+  getSupplierCapaPlan,
+  downloadCapaPlanPdf,
 } from "@/lib/api";
 
 interface LkSGAuditPanelProps {
@@ -58,12 +64,15 @@ export function LkSGAuditPanel({
 
   const [auditData, setAuditData] = useState<LkSGAuditResponse | null>(null);
   const [bafaData, setBafaData] = useState<BafaQuestionnaireResponse | null>(null);
+  const [capaData, setCapaData] = useState<SupplierCapaPlan | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingBafa, setLoadingBafa] = useState<boolean>(false);
+  const [loadingCapa, setLoadingCapa] = useState<boolean>(false);
   const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
+  const [downloadingCapaPdf, setDownloadingCapaPdf] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<string>("ALL");
-  const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks" | "capa_plan">("overview");
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({ 1: true, 2: true });
 
   const loadAudit = useCallback(async () => {
@@ -93,12 +102,38 @@ export function LkSGAuditPanel({
     }
   }, [documentId]);
 
+  const loadCapaPlan = useCallback(async () => {
+    if (!documentId) return;
+    setLoadingCapa(true);
+    try {
+      const cData = await getSupplierCapaPlan(documentId);
+      setCapaData(cData);
+    } catch (err: any) {
+      console.error("Failed to load CAPA plan:", err);
+    } finally {
+      setLoadingCapa(false);
+    }
+  }, [documentId]);
+
   useEffect(() => {
     if (isOpen && documentId) {
       loadAudit();
       loadBafaQuestionnaire();
+      loadCapaPlan();
     }
-  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire]);
+  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire, loadCapaPlan]);
+
+  const handleDownloadCapaPdf = async () => {
+    if (!documentId || downloadingCapaPdf) return;
+    setDownloadingCapaPdf(true);
+    try {
+      await downloadCapaPlanPdf(documentId, "Dr. Michael Weber, Leitender LkSG- & BaFin-Prüfer");
+    } catch (err: any) {
+      alert(err?.message || "Failed to download CAPA plan PDF");
+    } finally {
+      setDownloadingCapaPdf(false);
+    }
+  };
 
   const handleDownloadPdf = async () => {
     if (!documentId || downloadingPdf) return;
@@ -268,6 +303,22 @@ export function LkSGAuditPanel({
             <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 font-bold">
               {risks.length}
             </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("capa_plan")}
+            className={`py-3 px-3 border-b-2 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              activeTab === "capa_plan"
+                ? "border-emerald-600 text-emerald-700 dark:text-emerald-400"
+                : "border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+            }`}
+          >
+            <CalendarCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{isDE ? "Korrektur-Aktionsplan (CAPA § 7)" : "CAPA Action Plan (§ 7)"}</span>
+            {capaData && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold">
+                {capaData.total_milestones}
+              </span>
+            )}
           </button>
         </div>
 
@@ -729,6 +780,140 @@ export function LkSGAuditPanel({
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* TAB 4: CAPA REMEDIATION ACTION PLAN (§ 7 LkSG) */}
+          {activeTab === "capa_plan" && (
+            <div className="space-y-4">
+              {/* CAPA Header Banner */}
+              <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <CalendarCheck className="w-5 h-5 text-emerald-600" />
+                    <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                      {isDE
+                        ? "Gesetzlicher Korrekturmaßnahmenplan (CAPA) nach § 7 LkSG"
+                        : "Statutory Corrective Action Plan (CAPA) under § 7 LkSG"}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl">
+                    {isDE
+                      ? "Verbindlicher Abhilfeplan für festgestellte menschenrechtliche oder umweltbezogene Verletzungen mit Fristen, Nachweisprüfungen und Pönalen vor einer Beendigung der Geschäftsbeziehung."
+                      : "Binding remediation roadmap for human rights or environmental violations with deadlines, verification audits, and contractual penalties."}
+                  </p>
+                </div>
+
+                {capaData && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleDownloadCapaPdf}
+                      disabled={downloadingCapaPdf}
+                      className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 hover:opacity-90 transition flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{downloadingCapaPdf ? (isDE ? "Exportiere..." : "Exporting...") : isDE ? "CAPA-Aktionsplan (PDF)" : "CAPA Action Plan (PDF)"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* CAPA Posture & Stats Strip */}
+              {capaData && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-center">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">Status Abhilfeplan</span>
+                    <div className="text-xs font-bold font-mono mt-1 text-emerald-600 truncate">
+                      {capaData.overall_compliance_posture}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-center">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">Kritische Meilensteine</span>
+                    <div className="text-xl font-bold font-mono text-red-600 mt-0.5">
+                      {capaData.critical_milestones_count} / {capaData.total_milestones}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-center">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">Maximale Umsetzungsfrist</span>
+                    <div className="text-xl font-bold font-mono text-neutral-800 dark:text-neutral-200 mt-0.5">
+                      {capaData.max_remediation_timeline_days} Tage
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 text-center">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">Geschätztes Budget</span>
+                    <div className="text-sm font-bold font-mono text-neutral-800 dark:text-neutral-200 mt-1">
+                      EUR {capaData.estimated_remediation_cost_eur.toLocaleString("de-DE")}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Milestones Timeline Cards */}
+              {capaData && capaData.milestones.map((m, idx) => (
+                <div
+                  key={m.id}
+                  className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-3"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                        {idx + 1}
+                      </span>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                          {isDE ? m.title_de : m.title_en}
+                        </h4>
+                        <span className="text-[11px] font-mono text-neutral-400">
+                          {m.statutory_basis} • {m.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-neutral-400" />
+                        <span>Frist: {m.deadline_days} Tage</span>
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded ${
+                          m.severity === "CRITICAL"
+                            ? "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                            : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                        }`}
+                      >
+                        {m.severity}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-red-50/50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-900/30 text-xs">
+                    <span className="text-[10px] font-mono uppercase font-bold text-red-600 dark:text-red-400">
+                      Identifiziertes Defizit:
+                    </span>
+                    <p className="mt-0.5 text-neutral-800 dark:text-neutral-200">{m.deficiency_description}</p>
+                  </div>
+
+                  <div className="p-2.5 rounded-lg bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-900/40 text-xs">
+                    <span className="text-[10px] font-mono uppercase font-bold text-emerald-700 dark:text-emerald-400">
+                      Verbindlich geforderte Maßnahme (§ 7 LkSG):
+                    </span>
+                    <p className="mt-0.5 text-neutral-900 dark:text-neutral-100 font-medium">
+                      {isDE ? m.required_action_de : m.required_action_en}
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                    <div className="p-2 rounded bg-neutral-100 dark:bg-neutral-950 font-mono text-[11px] text-neutral-600 dark:text-neutral-400">
+                      <span className="font-bold text-neutral-700 dark:text-neutral-300">Prüfmethode: </span>
+                      {m.verification_method}
+                    </div>
+                    <div className="p-2 rounded bg-neutral-100 dark:bg-neutral-950 font-mono text-[11px] text-neutral-600 dark:text-neutral-400 flex items-center justify-between">
+                      <span className="font-bold text-neutral-700 dark:text-neutral-300">Pönale bei Verzug: </span>
+                      <span className="text-red-600 font-bold">EUR {m.penalty_upon_default_eur.toLocaleString("de-DE")}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

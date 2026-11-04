@@ -843,6 +843,69 @@ export async function downloadBattlecardPdf(documentId: string, signatoryName?: 
   document.body.removeChild(a);
 }
 
+export interface CapaMilestone {
+  id: string;
+  title_de: string;
+  title_en: string;
+  category: string;
+  severity: "CRITICAL" | "HIGH" | "MEDIUM";
+  deadline_days: number;
+  statutory_basis: string;
+  deficiency_description: string;
+  required_action_de: string;
+  required_action_en: string;
+  verification_method: string;
+  penalty_upon_default_eur: number;
+  status: "OPEN" | "IN_REMEDIATION" | "VERIFIED_RESOLVED" | "ESCALATED_TO_BAFA";
+}
+
+export interface SupplierCapaPlan {
+  plan_id: string;
+  document_id: string;
+  filename: string;
+  supplier_name: string;
+  overall_compliance_posture: "CRITICAL_ACTION_REQUIRED" | "REMEDIATION_REQUIRED" | "ACCEPTABLE";
+  total_milestones: number;
+  critical_milestones_count: number;
+  max_remediation_timeline_days: number;
+  estimated_remediation_cost_eur: number;
+  bafa_notification_required: boolean;
+  milestones: CapaMilestone[];
+  executive_summary_de: string;
+  executive_summary_en: string;
+  generated_at: string;
+}
+
+export async function getSupplierCapaPlan(documentId: string): Promise<SupplierCapaPlan> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/lksg-capa-plan`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load supplier CAPA plan (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadCapaPlanPdf(documentId: string, signatoryName?: string): Promise<void> {
+  const query = signatoryName ? `?signatory_name=${encodeURIComponent(signatoryName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-capa-plan-pdf${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export CAPA plan PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `CAPA_PLAN_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 
 
 
