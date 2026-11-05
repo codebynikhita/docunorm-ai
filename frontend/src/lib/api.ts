@@ -906,6 +906,83 @@ export async function downloadCapaPlanPdf(documentId: string, signatoryName?: st
   document.body.removeChild(a);
 }
 
+export interface SubstanceTrackingItem {
+  id: string;
+  substance_name: string;
+  cas_number: string;
+  convention: "MINAMATA_MERCURY" | "STOCKHOLM_POPS" | "BASEL_HAZARDOUS_WASTE";
+  status: "PROHIBITED" | "RESTRICTED_PHASEOUT" | "CONTROLLED" | "COMPLIANT";
+  threshold_limit: string;
+  detected_in_contract: boolean;
+  evidence_snippet?: string | null;
+  page_number?: number | null;
+  statutory_article: string;
+  remediation_guidance: string;
+}
+
+export interface WasteShipmentManifest {
+  manifest_id: string;
+  waste_code: string;
+  waste_description: string;
+  origin_country: string;
+  destination_country: string;
+  pic_status: "VERIFIED_APPROVED" | "MISSING_CONSENT" | "PROHIBITED_EXPORT";
+  export_authorized: boolean;
+  disposal_or_recycling_facility: string;
+  certifying_authority: string;
+  statutory_reference: string;
+}
+
+export interface EnvironmentalAuditReport {
+  document_id: string;
+  filename: string;
+  supplier_name: string;
+  overall_environmental_score: number;
+  environmental_rating: "AAA" | "AA" | "A" | "BBB" | "BB" | "B" | "CCC";
+  minamata_mercury_status: "PROHIBITED" | "RESTRICTED_PHASEOUT" | "CONTROLLED" | "COMPLIANT";
+  stockholm_pops_status: "PROHIBITED" | "RESTRICTED_PHASEOUT" | "CONTROLLED" | "COMPLIANT";
+  basel_waste_status: "VERIFIED_APPROVED" | "MISSING_CONSENT" | "PROHIBITED_EXPORT";
+  total_substances_audited: number;
+  prohibited_substances_count: number;
+  waste_shipments_audited: number;
+  unauthorized_shipments_count: number;
+  substances: SubstanceTrackingItem[];
+  waste_manifests: WasteShipmentManifest[];
+  bafa_environmental_verdict_de: string;
+  bafa_environmental_verdict_en: string;
+  generated_at: string;
+}
+
+export async function getEnvironmentalAudit(documentId: string): Promise<EnvironmentalAuditReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/environmental-audit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load environmental audit (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadEnvironmentalCertificatePdf(documentId: string, signatoryName?: string): Promise<void> {
+  const query = signatoryName ? `?signatory_name=${encodeURIComponent(signatoryName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-environmental-certificate-pdf${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export Environmental Certificate PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `UMWELTZERTIFIKAT_LKSG_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 
 
 

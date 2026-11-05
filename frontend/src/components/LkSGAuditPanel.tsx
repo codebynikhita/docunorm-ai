@@ -41,6 +41,9 @@ import {
   SupplierCapaPlan,
   getSupplierCapaPlan,
   downloadCapaPlanPdf,
+  EnvironmentalAuditReport,
+  getEnvironmentalAudit,
+  downloadEnvironmentalCertificatePdf,
 } from "@/lib/api";
 
 interface LkSGAuditPanelProps {
@@ -65,14 +68,17 @@ export function LkSGAuditPanel({
   const [auditData, setAuditData] = useState<LkSGAuditResponse | null>(null);
   const [bafaData, setBafaData] = useState<BafaQuestionnaireResponse | null>(null);
   const [capaData, setCapaData] = useState<SupplierCapaPlan | null>(null);
+  const [envData, setEnvData] = useState<EnvironmentalAuditReport | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingBafa, setLoadingBafa] = useState<boolean>(false);
   const [loadingCapa, setLoadingCapa] = useState<boolean>(false);
+  const [loadingEnv, setLoadingEnv] = useState<boolean>(false);
   const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
   const [downloadingCapaPdf, setDownloadingCapaPdf] = useState<boolean>(false);
+  const [downloadingEnvPdf, setDownloadingEnvPdf] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<string>("ALL");
-  const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks" | "capa_plan">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks" | "capa_plan" | "environmental">("overview");
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({ 1: true, 2: true });
 
   const loadAudit = useCallback(async () => {
@@ -115,13 +121,39 @@ export function LkSGAuditPanel({
     }
   }, [documentId]);
 
+  const loadEnvironmentalAudit = useCallback(async () => {
+    if (!documentId) return;
+    setLoadingEnv(true);
+    try {
+      const eData = await getEnvironmentalAudit(documentId);
+      setEnvData(eData);
+    } catch (err: any) {
+      console.error("Failed to load environmental audit:", err);
+    } finally {
+      setLoadingEnv(false);
+    }
+  }, [documentId]);
+
   useEffect(() => {
     if (isOpen && documentId) {
       loadAudit();
       loadBafaQuestionnaire();
       loadCapaPlan();
+      loadEnvironmentalAudit();
     }
-  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire, loadCapaPlan]);
+  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire, loadCapaPlan, loadEnvironmentalAudit]);
+
+  const handleDownloadEnvPdf = async () => {
+    if (!documentId || downloadingEnvPdf) return;
+    setDownloadingEnvPdf(true);
+    try {
+      await downloadEnvironmentalCertificatePdf(documentId, "Dr. Michael Weber, Leitender LkSG- & BaFin-Prüfer");
+    } catch (err: any) {
+      alert(err?.message || "Failed to download environmental certificate PDF");
+    } finally {
+      setDownloadingEnvPdf(false);
+    }
+  };
 
   const handleDownloadCapaPdf = async () => {
     if (!documentId || downloadingCapaPdf) return;
@@ -317,6 +349,22 @@ export function LkSGAuditPanel({
             {capaData && (
               <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold">
                 {capaData.total_milestones}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("environmental")}
+            className={`py-3 px-3 border-b-2 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              activeTab === "environmental"
+                ? "border-emerald-600 text-emerald-700 dark:text-emerald-400"
+                : "border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+            }`}
+          >
+            <Leaf className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{isDE ? "Umwelt-Compliance (§ 2 Abs. 3)" : "Environmental Compliance"}</span>
+            {envData && (
+              <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold">
+                {envData.environmental_rating}
               </span>
             )}
           </button>
@@ -914,6 +962,193 @@ export function LkSGAuditPanel({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* TAB 5: ENVIRONMENTAL CONVENTIONS & HAZARDOUS WASTE (§ 2 ABS. 3 LkSG) */}
+          {activeTab === "environmental" && (
+            <div className="space-y-4">
+              {/* Environmental Header Banner */}
+              <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Leaf className="w-5 h-5 text-emerald-600" />
+                    <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                      {isDE
+                        ? "Umweltübereinkommen & Gefahrgutüberwachung nach § 2 Abs. 3 LkSG"
+                        : "Environmental Conventions & Hazardous Substances (§ 2 Abs. 3 LkSG)"}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl">
+                    {isDE
+                      ? "Verbindliche Prüfung der drei internationalen Umweltübereinkommen: Minamata (Quecksilber), Stockholm (Persistente organische Schadstoffe / POPs) und Basel (Grenzüberschreitende Sonderabfallverbringung)."
+                      : "Statutory compliance audit against the Minamata (Mercury), Stockholm (POPs), and Basel (Hazardous Waste PIC) conventions."}
+                  </p>
+                </div>
+
+                {envData && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleDownloadEnvPdf}
+                      disabled={downloadingEnvPdf}
+                      className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 hover:opacity-90 transition flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{downloadingEnvPdf ? (isDE ? "Exportiere..." : "Exporting...") : isDE ? "Umweltzertifikat (PDF)" : "Environmental Cert (PDF)"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Convention Gauges */}
+              {envData && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">1. Minamata (Quecksilber)</span>
+                    <div className="text-sm font-bold mt-1 text-neutral-900 dark:text-neutral-100 flex items-center justify-between">
+                      <span>Quecksilberfreie Fertigung</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          envData.minamata_mercury_status === "COMPLIANT"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300"
+                            : "bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300"
+                        }`}
+                      >
+                        {envData.minamata_mercury_status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 mt-1">§ 2 Abs. 3 Nr. 1 LkSG · Verbot in Schaltern, Lampen & Chlor-Alkali</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">2. Stockholm (POPs)</span>
+                    <div className="text-sm font-bold mt-1 text-neutral-900 dark:text-neutral-100 flex items-center justify-between">
+                      <span>PCB & PFAS Überwachung</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          envData.stockholm_pops_status === "COMPLIANT"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300"
+                            : "bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300"
+                        }`}
+                      >
+                        {envData.stockholm_pops_status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 mt-1">§ 2 Abs. 3 Nr. 2 LkSG · Verbot persistenter Schadstoffe (Annex A/B)</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">3. Basler Übereinkommen</span>
+                    <div className="text-sm font-bold mt-1 text-neutral-900 dark:text-neutral-100 flex items-center justify-between">
+                      <span>PIC-Exportzustimmung</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          envData.basel_waste_status === "VERIFIED_APPROVED"
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300"
+                            : "bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300"
+                        }`}
+                      >
+                        {envData.basel_waste_status}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 mt-1">§ 2 Abs. 3 Nr. 3 LkSG · Notifizierungspflicht für Sonderabfall-Exporte</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Chemical Substance Inventory List */}
+              {envData && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100 font-mono uppercase tracking-wide">
+                    {isDE ? "Chemische Stoffe & Konventions-Inventar:" : "Chemical Substances Inventory:"}
+                  </h4>
+                  {envData.substances.map((s) => (
+                    <div
+                      key={s.id}
+                      className="p-3.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-2 text-xs"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm">
+                            {s.substance_name}
+                          </span>
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+                            CAS: {s.cas_number}
+                          </span>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded ${
+                            s.status === "COMPLIANT"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300"
+                              : s.status === "PROHIBITED"
+                              ? "bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300"
+                          }`}
+                        >
+                          {s.status}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] font-mono text-neutral-500 flex flex-wrap gap-x-4 gap-y-1">
+                        <span>Grenzwert: <strong className="text-neutral-700 dark:text-neutral-300">{s.threshold_limit}</strong></span>
+                        <span>Norm: <strong className="text-neutral-700 dark:text-neutral-300">{s.statutory_article}</strong></span>
+                      </div>
+
+                      <div className="p-2 rounded bg-neutral-50 dark:bg-neutral-950 border border-neutral-200/60 dark:border-neutral-800 text-[11px] font-mono text-neutral-600 dark:text-neutral-400">
+                        {s.remediation_guidance}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Basel Transboundary Waste Manifests */}
+              {envData && (
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100 font-mono uppercase tracking-wide">
+                    {isDE ? "Basler Sonderabfall-Begleitscheine (Transboundary Waste):" : "Basel Waste Shipment Manifests:"}
+                  </h4>
+                  {envData.waste_manifests.map((w) => (
+                    <div
+                      key={w.manifest_id}
+                      className="p-3.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-2 text-xs"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-xs text-neutral-900 dark:text-neutral-100">
+                            {w.manifest_id}
+                          </span>
+                          <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
+                            {w.waste_code}
+                          </span>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded ${
+                            w.pic_status === "VERIFIED_APPROVED"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300"
+                              : "bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300"
+                          }`}
+                        >
+                          {w.pic_status}
+                        </span>
+                      </div>
+
+                      <p className="text-neutral-700 dark:text-neutral-300 font-medium text-xs">{w.waste_description}</p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] font-mono text-neutral-500 pt-1">
+                        <div>
+                          <span>Route: </span>
+                          <strong className="text-neutral-800 dark:text-neutral-200">{w.origin_country} ➔ {w.destination_country}</strong>
+                        </div>
+                        <div>
+                          <span>Anlage: </span>
+                          <strong className="text-neutral-800 dark:text-neutral-200">{w.disposal_or_recycling_facility}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

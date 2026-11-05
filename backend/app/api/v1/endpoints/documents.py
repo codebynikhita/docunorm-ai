@@ -44,6 +44,7 @@ from app.schemas.document import (
     SearchResultChunk,
 )
 from app.schemas.dora import DoraExitAuditReport
+from app.schemas.environmental import EnvironmentalAuditReport
 from app.schemas.lksg import BafaQuestionnaireResponse, LkSGAuditResponse
 from app.schemas.remediation import AmendmentProposal, DocumentRiskHeatmap
 from app.schemas.subcontractor import DoraSubcontractorAuditReport
@@ -67,6 +68,10 @@ from app.services.capa_engine import CapaEngine
 from app.services.capa_pdf_exporter import generate_capa_report_pdf
 from app.services.dora_exit_engine import dora_exit_engine
 from app.services.embedding import embedding_service
+from app.services.environmental_engine import EnvironmentalEngine
+from app.services.environmental_pdf_exporter import (
+    generate_environmental_certificate_pdf,
+)
 from app.services.exporter import (
     generate_din_audit_report_pdf,
     generate_english_dossier_markdown,
@@ -2163,6 +2168,165 @@ async def export_capa_plan_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
     )
+
+
+@router.post(
+    "/{document_id}/environmental-audit",
+    response_model=EnvironmentalAuditReport,
+    summary="Generate Statutory Environmental Audit under § 2 Abs. 3 LkSG",
+)
+@router.get(
+    "/{document_id}/environmental-audit",
+    response_model=EnvironmentalAuditReport,
+    summary="Retrieve Statutory Environmental Audit under § 2 Abs. 3 LkSG",
+)
+async def get_environmental_audit(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> EnvironmentalAuditReport:
+    """
+    Audits supplier agreements against international environmental conventions:
+    1. Minamata Convention on Mercury (§ 2 Abs. 3 Nr. 1)
+    2. Stockholm Convention on POPs (§ 2 Abs. 3 Nr. 2)
+    3. Basel Convention on Transboundary Hazardous Waste (§ 2 Abs. 3 Nr. 3)
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "content": c.content,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+        }
+        for c in chunks
+    ]
+
+    if not chunk_dicts and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            chunk_dicts = [
+                {
+                    "id": f"p{b.page_number}_b{b.block_index}",
+                    "content": b.text,
+                    "page_number": b.page_number,
+                    "bounding_box": b.bounding_box,
+                }
+                for b in parse_res.blocks
+            ]
+
+    return EnvironmentalEngine.evaluate_contract(
+        document_id=document.id,
+        filename=document.filename,
+        chunks=chunk_dicts,
+    )
+
+
+@router.post(
+    "/{document_id}/export-environmental-certificate-pdf",
+    summary="Export Certified DIN 5008 Environmental Compliance Certificate PDF",
+)
+@router.get(
+    "/{document_id}/export-environmental-certificate-pdf",
+    summary="Download Certified DIN 5008 Environmental Compliance Certificate PDF",
+)
+async def export_environmental_certificate_pdf(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+    signatory_name: str = "Dr. Michael Weber, Leitender LkSG- & BaFin-Prüfer",
+) -> Response:
+    """
+    Generates and downloads an official DIN 5008 Environmental Compliance Certificate
+    dossier PDF with cryptographic SHA-256 seal.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    chunk_dicts = [
+        {
+            "id": str(c.id),
+            "content": c.content,
+            "page_number": c.page_number,
+            "bounding_box": c.bounding_box,
+        }
+        for c in chunks
+    ]
+
+    if not chunk_dicts and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            chunk_dicts = [
+                {
+                    "id": f"p{b.page_number}_b{b.block_index}",
+                    "content": b.text,
+                    "page_number": b.page_number,
+                    "bounding_box": b.bounding_box,
+                }
+                for b in parse_res.blocks
+            ]
+
+    report = EnvironmentalEngine.evaluate_contract(
+        document_id=document.id,
+        filename=document.filename,
+        chunks=chunk_dicts,
+    )
+
+    pdf_path = generate_environmental_certificate_pdf(
+        document=document,
+        report=report,
+        signatory_name=signatory_name,
+    )
+
+    clean_filename = f"ENVIRONMENTAL_CERTIFICATE_{document.filename.replace('.pdf', '')}.pdf"
+
+    with open(pdf_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
+    )
+
 
 
 
