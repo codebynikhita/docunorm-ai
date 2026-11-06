@@ -54,6 +54,7 @@ from app.schemas.table import (
     SlaPenaltyCalculationResponse,
     TableStructure,
 )
+from app.schemas.tier_n_cascade import TierNCascadeAuditReport
 from app.services.audit_rights_engine import audit_rights_engine
 from app.services.auditor import (
     generate_llm_audit_finding,
@@ -89,6 +90,8 @@ from app.services.tasks import (
     process_document_background,
     set_task_progress,
 )
+from app.services.tier_n_cascade_engine import tier_n_cascade_engine
+from app.services.tier_n_cascade_pdf_exporter import generate_tier_n_cascade_pdf
 from app.services.validator import validate_pdf_metadata
 
 router = APIRouter(prefix="/documents", tags=["Document Management"])
@@ -2326,6 +2329,132 @@ async def export_environmental_certificate_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
     )
+
+
+@router.post(
+    "/{document_id}/tier-n-cascade-audit",
+    response_model=TierNCascadeAuditReport,
+    summary="Audit Multi-Tier Supply Chain Cascade & Cross-Border Vendors (§ 9 LkSG)",
+)
+@router.get(
+    "/{document_id}/tier-n-cascade-audit",
+    response_model=TierNCascadeAuditReport,
+    summary="Get Multi-Tier Supply Chain Cascade Audit Report (§ 9 LkSG)",
+)
+async def get_tier_n_cascade_audit(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> TierNCascadeAuditReport:
+    """
+    Evaluates contract for multi-tier supply chain cascade compliance under § 9 LkSG:
+    1. Pass-through covenants (Weitergabeklauseln).
+    2. Cascade audit rights along the upstream supply chain.
+    3. Cross-border jurisdiction risk indexing (ITUC / Basel Annex VII).
+    4. Substantiated knowledge incident tracking & mandatory ad-hoc escalation workflows.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    full_text = " ".join(c.content for c in chunks)
+
+    if not full_text.strip() and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            full_text = " ".join(b.text for b in parse_res.blocks)
+
+    return tier_n_cascade_engine.analyze_cascade(
+        text=full_text,
+        document_id=document.id,
+    )
+
+
+@router.post(
+    "/{document_id}/export-tier-n-cascade-pdf",
+    summary="Export Certified DIN 5008 Tier-N Cascade Dossier PDF (§ 9 LkSG)",
+)
+@router.get(
+    "/{document_id}/export-tier-n-cascade-pdf",
+    summary="Download Certified DIN 5008 Tier-N Cascade Dossier PDF (§ 9 LkSG)",
+)
+async def export_tier_n_cascade_pdf(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+    signatory_name: str = "Dr. Michael Weber, Leitender LkSG- & BaFin-Prüfer",
+) -> Response:
+    """
+    Generates and downloads an official DIN 5008 Multi-Tier Supply Chain Cascade Dossier
+    under § 9 LkSG with cryptographic SHA-256 seal.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+
+    stmt = select(Document).where(Document.id == document_id, Document.tenant_id == tenant.id)
+    doc_res = await db.execute(stmt)
+    document = doc_res.scalar_one_or_none()
+
+    if not document:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Document '{document_id}' not found.",
+        )
+
+    chunk_stmt = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id, DocumentChunk.tenant_id == tenant.id)
+        .order_by(DocumentChunk.page_number.asc(), DocumentChunk.chunk_index.asc())
+    )
+    chunks_res = await db.execute(chunk_stmt)
+    chunks = chunks_res.scalars().all()
+
+    full_text = " ".join(c.content for c in chunks)
+
+    if not full_text.strip() and document.file_path:
+        pdf_path = Path(document.file_path)
+        if pdf_path.exists():
+            parser = PDFParserService()
+            parse_res = parser.parse_pdf(pdf_path)
+            full_text = " ".join(b.text for b in parse_res.blocks)
+
+    report = tier_n_cascade_engine.analyze_cascade(
+        text=full_text,
+        document_id=document.id,
+    )
+
+    pdf_path = generate_tier_n_cascade_pdf(
+        document=document,
+        report=report,
+        signatory_name=signatory_name,
+    )
+
+    clean_filename = f"TIER_N_CASCADE_DOSSIER_{document.filename.replace('.pdf', '')}.pdf"
+
+    with open(pdf_path, "rb") as f:
+        pdf_bytes = f.read()
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{clean_filename}"'},
+    )
+
 
 
 

@@ -28,6 +28,10 @@ import {
   CalendarCheck,
   Clock,
   Coins,
+  Network,
+  Globe,
+  Workflow,
+  AlertCircle,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
 import {
@@ -44,6 +48,9 @@ import {
   EnvironmentalAuditReport,
   getEnvironmentalAudit,
   downloadEnvironmentalCertificatePdf,
+  TierNCascadeAuditReport,
+  getTierNCascadeAudit,
+  downloadTierNCascadePdf,
 } from "@/lib/api";
 
 interface LkSGAuditPanelProps {
@@ -69,16 +76,19 @@ export function LkSGAuditPanel({
   const [bafaData, setBafaData] = useState<BafaQuestionnaireResponse | null>(null);
   const [capaData, setCapaData] = useState<SupplierCapaPlan | null>(null);
   const [envData, setEnvData] = useState<EnvironmentalAuditReport | null>(null);
+  const [cascadeData, setCascadeData] = useState<TierNCascadeAuditReport | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingBafa, setLoadingBafa] = useState<boolean>(false);
   const [loadingCapa, setLoadingCapa] = useState<boolean>(false);
   const [loadingEnv, setLoadingEnv] = useState<boolean>(false);
+  const [loadingCascade, setLoadingCascade] = useState<boolean>(false);
   const [downloadingPdf, setDownloadingPdf] = useState<boolean>(false);
   const [downloadingCapaPdf, setDownloadingCapaPdf] = useState<boolean>(false);
   const [downloadingEnvPdf, setDownloadingEnvPdf] = useState<boolean>(false);
+  const [downloadingCascadePdf, setDownloadingCascadePdf] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [filterSeverity, setFilterSeverity] = useState<string>("ALL");
-  const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks" | "capa_plan" | "environmental">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "bafa_questionnaire" | "risks" | "capa_plan" | "environmental" | "cascade">("overview");
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({ 1: true, 2: true });
 
   const loadAudit = useCallback(async () => {
@@ -134,14 +144,40 @@ export function LkSGAuditPanel({
     }
   }, [documentId]);
 
+  const loadCascadeAudit = useCallback(async () => {
+    if (!documentId) return;
+    setLoadingCascade(true);
+    try {
+      const cData = await getTierNCascadeAudit(documentId);
+      setCascadeData(cData);
+    } catch (err: any) {
+      console.error("Failed to load Tier-N cascade audit:", err);
+    } finally {
+      setLoadingCascade(false);
+    }
+  }, [documentId]);
+
   useEffect(() => {
     if (isOpen && documentId) {
       loadAudit();
       loadBafaQuestionnaire();
       loadCapaPlan();
       loadEnvironmentalAudit();
+      loadCascadeAudit();
     }
-  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire, loadCapaPlan, loadEnvironmentalAudit]);
+  }, [isOpen, documentId, loadAudit, loadBafaQuestionnaire, loadCapaPlan, loadEnvironmentalAudit, loadCascadeAudit]);
+
+  const handleDownloadCascadePdf = async () => {
+    if (!documentId || downloadingCascadePdf) return;
+    setDownloadingCascadePdf(true);
+    try {
+      await downloadTierNCascadePdf(documentId, "Dr. Michael Weber, Leitender LkSG- & BaFin-Prüfer");
+    } catch (err: any) {
+      alert(err?.message || "Failed to download cascade dossier PDF");
+    } finally {
+      setDownloadingCascadePdf(false);
+    }
+  };
 
   const handleDownloadEnvPdf = async () => {
     if (!documentId || downloadingEnvPdf) return;
@@ -361,10 +397,30 @@ export function LkSGAuditPanel({
             }`}
           >
             <Leaf className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>{isDE ? "Umwelt-Compliance (§ 2 Abs. 3)" : "Environmental Compliance"}</span>
+            <span>{isDE ? "Umwelt (§ 2 Abs. 3)" : "Environment"}</span>
             {envData && (
               <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 font-bold">
                 {envData.environmental_rating}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab("cascade")}
+            className={`py-3 px-3 border-b-2 font-mono text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              activeTab === "cascade"
+                ? "border-emerald-600 text-emerald-700 dark:text-emerald-400"
+                : "border-transparent text-neutral-500 hover:text-neutral-800 dark:hover:text-neutral-200"
+            }`}
+          >
+            <Network className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>{isDE ? "Kaskade (§ 9)" : "Cascade (§ 9)"}</span>
+            {cascadeData && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                cascadeData.substantiated_knowledge_active
+                  ? "bg-red-100 text-red-700 dark:bg-red-950/80 dark:text-red-300"
+                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300"
+              }`}>
+                {cascadeData.overall_cascade_score.toFixed(0)}%
               </span>
             )}
           </button>
@@ -1147,6 +1203,336 @@ export function LkSGAuditPanel({
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 6: MULTI-TIER SUPPLY CHAIN CASCADE & CROSS-BORDER VENDOR TRACKER (§ 9 LkSG) */}
+          {activeTab === "cascade" && (
+            <div className="space-y-4">
+              {/* Cascade Header Banner */}
+              <div className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-transparent flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Network className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <h3 className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                      {isDE
+                        ? "Multilaterale Lieferketten-Kaskadenprüfung (§ 9 LkSG)"
+                        : "Multi-Tier Supply Chain Cascade & Cross-Border Governance (§ 9 LkSG)"}
+                    </h3>
+                  </div>
+                  <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-2xl">
+                    {isDE
+                      ? "Prüfung mittelbarer Zulieferer (Tier-2 bis Tier-N): Durchsetzung von vertraglichen Weitergabeklauseln, vorgelagerten Kontrollrechten, standortspezifischen Risiken und anlassbezogener Eskalation bei substantiierter Kenntnis."
+                      : "Governance of indirect suppliers (Tier-2 to Tier-N): Pass-through covenant enforcement, upstream audit rights, cross-border hazard indices, and statutory ad-hoc escalation."}
+                  </p>
+                </div>
+
+                {cascadeData && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleDownloadCascadePdf}
+                      disabled={downloadingCascadePdf}
+                      className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 hover:opacity-90 transition flex items-center gap-1.5 cursor-pointer shadow-sm disabled:opacity-50"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{downloadingCascadePdf ? (isDE ? "Exportiere..." : "Exporting...") : isDE ? "Kaskadendossier (DIN 5008 PDF)" : "Cascade Dossier (PDF)"}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Cascade Top Metrics */}
+              {cascadeData && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">1. Kaskaden-Konformität</span>
+                    <div className="text-sm font-bold mt-1 text-neutral-900 dark:text-neutral-100 flex items-center justify-between">
+                      <span>{cascadeData.compliance_rating}</span>
+                      <span className={`font-mono text-base font-extrabold ${
+                        cascadeData.overall_cascade_score >= 80 ? "text-emerald-600" : cascadeData.overall_cascade_score >= 50 ? "text-amber-600" : "text-red-600"
+                      }`}>
+                        {cascadeData.overall_cascade_score.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                      <div
+                        className={`h-full ${
+                          cascadeData.overall_cascade_score >= 80 ? "bg-emerald-500" : cascadeData.overall_cascade_score >= 50 ? "bg-amber-500" : "bg-red-500"
+                        }`}
+                        style={{ width: `${cascadeData.overall_cascade_score}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">2. Vertragliche Weitergabe</span>
+                    <div className="text-sm font-bold mt-1 text-neutral-900 dark:text-neutral-100 flex items-center justify-between">
+                      <span>{isDE ? "Weitergabeklausel" : "Pass-Through"}</span>
+                      <span className="font-mono text-base font-extrabold text-indigo-600 dark:text-indigo-400">
+                        {cascadeData.pass_through_enforceable_rate.toFixed(1)}%
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 font-mono">
+                      {isDE ? `Direkt: ${cascadeData.direct_suppliers_count} | Mittelbar: ${cascadeData.indirect_suppliers_count} Stufen` : `Direct: ${cascadeData.direct_suppliers_count} | Indirect: ${cascadeData.indirect_suppliers_count}`}
+                    </p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase">3. Substantiierte Kenntnis (§ 9 Abs. 2)</span>
+                    <div className="text-sm font-bold mt-1 flex items-center justify-between">
+                      <span className={cascadeData.substantiated_knowledge_active ? "text-red-600" : "text-emerald-600"}>
+                        {cascadeData.substantiated_knowledge_active
+                          ? `${cascadeData.active_incidents.length} ${isDE ? "Vorfälle aktiv" : "Active Incidents"}`
+                          : isDE ? "Keine Vorfälle" : "Zero Alerts"}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                        cascadeData.bafa_adhoc_filing_recommended
+                          ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+                          : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                      }`}>
+                        {cascadeData.bafa_adhoc_filing_recommended ? (isDE ? "BAFA-Meldung erforderlich" : "BAFA Notice Req.") : (isDE ? "Regelkonform" : "Compliant")}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
+                      {cascadeData.bafa_adhoc_filing_recommended
+                        ? (isDE ? "Sofortige anlassbezogene Risikoanalyse erforderlich" : "Immediate ad-hoc analysis required")
+                        : (isDE ? "Reguläre jährliche Berichterstattung" : "Regular annual reporting cycle")}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Supply Chain Cascade Hierarchy Tree */}
+              {cascadeData && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100 font-mono uppercase tracking-wide flex items-center gap-2">
+                      <Workflow className="w-4 h-4 text-indigo-600" />
+                      <span>{isDE ? "Multilaterale Lieferantenkaskade (Tier-1 bis Tier-3):" : "Multilateral Supplier Hierarchy (Tier-1 to Tier-3):"}</span>
+                    </h4>
+                    <span className="text-[11px] font-mono text-neutral-500">
+                      {cascadeData.supplier_nodes.length} {isDE ? "erfasste Entitäten" : "entities audited"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {cascadeData.supplier_nodes.map((node) => {
+                      const isTier1 = node.tier === "TIER_1_DIREKT";
+                      const isTier2 = node.tier === "TIER_2_KOMPONENTEN";
+                      return (
+                        <div
+                          key={node.node_id}
+                          className={`p-4 rounded-xl border transition shadow-sm ${
+                            isTier1
+                              ? "bg-white dark:bg-neutral-900 border-indigo-200 dark:border-indigo-950/70 pl-4"
+                              : isTier2
+                              ? "bg-neutral-50/70 dark:bg-neutral-900/60 border-neutral-200 dark:border-neutral-800 ml-4 md:ml-6"
+                              : "bg-neutral-100/60 dark:bg-neutral-950 border-neutral-300 dark:border-neutral-800 ml-8 md:ml-12"
+                          }`}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2.5">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                                isTier1
+                                  ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300"
+                                  : isTier2
+                                  ? "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"
+                                  : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                              }`}>
+                                {isTier1 ? "Tier 1: Direkt" : isTier2 ? "Tier 2: Komponenten" : "Tier 3: Rohstoffe"}
+                              </span>
+                              <h5 className="font-bold text-xs text-neutral-900 dark:text-neutral-100 flex items-center gap-1.5">
+                                <Building2 className="w-3.5 h-3.5 text-neutral-400" />
+                                <span>{node.name}</span>
+                              </h5>
+                              <span className="text-[10px] font-mono text-neutral-400">
+                                ({node.node_id})
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              {/* Country Hazard Badge */}
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold flex items-center gap-1 ${
+                                node.country.hazard_level === "NIEDRIG"
+                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300"
+                                  : node.country.hazard_level === "MODERAT"
+                                  ? "bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300"
+                                  : node.country.hazard_level === "ERHÖHT"
+                                  ? "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300"
+                                  : "bg-red-100 text-red-800 dark:bg-red-950/80 dark:text-red-300"
+                              }`}>
+                                <Globe className="w-3 h-3" />
+                                <span>{node.country.country_code} ({node.country.hazard_level})</span>
+                              </span>
+
+                              {/* Substantiated Knowledge Incident Tag */}
+                              {node.has_substantiated_knowledge ? (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 flex items-center gap-1">
+                                  <AlertCircle className="w-3 h-3" />
+                                  <span>VORFALL AKTIV</span>
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                  UNAUFFÄLLIG
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-2 pt-2 border-t border-neutral-100 dark:border-neutral-800/60 text-neutral-600 dark:text-neutral-400 text-xs">
+                            <div>
+                              <span className="text-[10px] font-mono text-neutral-400 block">{isDE ? "LEISTUNG / KOMPONENTE" : "COMPONENT / ROLE"}</span>
+                              <span className="font-medium text-neutral-800 dark:text-neutral-200">{node.component_or_service}</span>
+                            </div>
+
+                            <div>
+                              <span className="text-[10px] font-mono text-neutral-400 block">{isDE ? "VERTRAGLICHE WEITERGABE" : "PASS-THROUGH COVENANT"}</span>
+                              <span className={`font-mono text-[11px] font-bold ${
+                                node.pass_through_status === "VOLLSTÄNDIG_DURCHSETZBAR"
+                                  ? "text-emerald-600"
+                                  : node.pass_through_status === "TEILWEISE_UNVOLLSTÄNDIG"
+                                  ? "text-amber-600"
+                                  : "text-red-600"
+                              }`}>
+                                {node.pass_through_status}
+                              </span>
+                            </div>
+
+                            <div>
+                              <span className="text-[10px] font-mono text-neutral-400 block">{isDE ? "AUDIT- & PRÜFRECHTE" : "AUDIT RIGHTS CASCADE"}</span>
+                              <span className="font-mono text-[11px] text-neutral-800 dark:text-neutral-200 font-semibold">
+                                {node.audit_rights}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Cross-Border Jurisdictions Hazard Matrix */}
+              {cascadeData && (
+                <div className="space-y-3 pt-3">
+                  <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100 font-mono uppercase tracking-wide flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-neutral-500" />
+                    <span>{isDE ? "Grenzüberschreitende Standort-Risikoprofile (ITUC & Basel Index):" : "Cross-Border Jurisdiction Risk Matrix:"}</span>
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {cascadeData.jurisdiction_breakdown.map((j) => (
+                      <div
+                        key={j.country_code}
+                        className="p-3 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm space-y-1.5 text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-neutral-900 dark:text-neutral-100">
+                            [{j.country_code}] {j.country_name_de}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                            j.hazard_level === "NIEDRIG"
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                              : j.hazard_level === "MODERAT"
+                              ? "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300"
+                              : j.hazard_level === "ERHÖHT"
+                              ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
+                          }`}>
+                            {j.hazard_level}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] font-mono text-neutral-500">
+                          <span>ITUC: {j.ituc_rating}/5</span>
+                          <span>CPI Score: {j.cpi_score}/100</span>
+                          <span>Basel Anhang VII: {j.basel_annex_vii ? "Ja (OECD)" : "Nein"}</span>
+                        </div>
+                        <p className="text-[11px] text-neutral-600 dark:text-neutral-400">
+                          {j.risk_summary_de}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Substantiated Knowledge Incidents & Escalation Schedule */}
+              {cascadeData && (
+                <div className="space-y-3 pt-3">
+                  <h4 className="text-xs font-bold text-neutral-900 dark:text-neutral-100 font-mono uppercase tracking-wide flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-600" />
+                    <span>{isDE ? "Substantiierte Kenntnis & Gesetzliche Eskalationskaskade (§ 9 Abs. 2):" : "Substantiated Knowledge Incidents (§ 9(2) LkSG):"}</span>
+                  </h4>
+
+                  {cascadeData.active_incidents.length === 0 ? (
+                    <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-950/60 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-800 dark:text-emerald-300 text-xs">
+                      {isDE
+                        ? "Aktuell liegen keine offenen Vorfälle substantiierter Kenntnis bezüglich mittelbarer Vorlieferanten vor. Die gesetzlichen Anforderungen nach § 9 Abs. 1 LkSG sind formal erfüllt."
+                        : "No active substantiated knowledge alerts reported for indirect suppliers. Regular audit cycle active."}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {cascadeData.active_incidents.map((inc) => (
+                        <div
+                          key={inc.incident_id}
+                          className="p-4 rounded-xl border border-red-200 dark:border-red-900/60 bg-white dark:bg-neutral-900 shadow-sm space-y-2.5 text-xs"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-red-600 dark:text-red-400">
+                                [{inc.incident_id}]
+                              </span>
+                              <h5 className="font-bold text-neutral-900 dark:text-neutral-100">
+                                {inc.violation_title_de}
+                              </h5>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300">
+                              {inc.severity}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px] text-neutral-600 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-800/40 p-2.5 rounded-lg font-mono">
+                            <div>
+                              <span>Betroffene Entität: </span>
+                              <strong className="text-neutral-900 dark:text-neutral-100">{inc.supplier_name}</strong>
+                            </div>
+                            <div>
+                              <span>Rechtsgrundlage: </span>
+                              <strong className="text-neutral-900 dark:text-neutral-100">{inc.statutory_basis}</strong>
+                            </div>
+                            <div>
+                              <span>Quelle: </span>
+                              <strong className="text-neutral-900 dark:text-neutral-100">{inc.source_of_knowledge}</strong>
+                            </div>
+                          </div>
+
+                          {/* Escalation Stage & Countdown */}
+                          <div className="p-2.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                              <span className="font-mono font-bold text-[11px] text-indigo-900 dark:text-indigo-200">
+                                {inc.escalation_stage}
+                              </span>
+                            </div>
+                            <span className="font-mono text-[11px] font-bold text-amber-700 dark:text-amber-300">
+                              {isDE ? `Gesetzliche Frist: ${inc.statutory_deadline_days} Tage (${inc.days_remaining} Tage verbleibend)` : `Deadline: ${inc.statutory_deadline_days}d (${inc.days_remaining}d left)`}
+                            </span>
+                          </div>
+
+                          <div>
+                            <span className="text-[10px] font-mono text-neutral-400 block mb-1">
+                              {isDE ? "ERFORDERLICHE ABHILFEMASSNAHMEN (BAFA-LEITFADEN):" : "REQUIRED STATUTORY ACTIONS:"}
+                            </span>
+                            <pre className="text-[11px] text-neutral-700 dark:text-neutral-300 whitespace-pre-wrap font-sans bg-neutral-50 dark:bg-neutral-800/60 p-2.5 rounded-lg border border-neutral-200 dark:border-neutral-800">
+                              {inc.required_remediation_de}
+                            </pre>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

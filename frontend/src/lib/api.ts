@@ -983,6 +983,100 @@ export async function downloadEnvironmentalCertificatePdf(documentId: string, si
   document.body.removeChild(a);
 }
 
+export interface CountryRiskProfile {
+  country_code: string;
+  country_name_de: string;
+  country_name_en: string;
+  ituc_rating: number;
+  cpi_score: number;
+  basel_annex_vii: boolean;
+  hazard_level: "NIEDRIG" | "MODERAT" | "ERHÖHT" | "EXTREM_HOCH";
+  risk_summary_de: string;
+}
+
+export interface CascadeSupplierNode {
+  node_id: string;
+  name: string;
+  tier: "TIER_1_DIREKT" | "TIER_2_KOMPONENTEN" | "TIER_3_ROHSTOFFE" | "TIER_N_LOGISTIK_SERVICES";
+  country: CountryRiskProfile;
+  sector: string;
+  component_or_service: string;
+  pass_through_status: "VOLLSTÄNDIG_DURCHSETZBAR" | "TEILWEISE_UNVOLLSTÄNDIG" | "FEHLEND_RECHTSWIDRIG";
+  audit_rights: "UNEINGESCHRÄNKT_VOR_ORT" | "BEDINGT_48H_VORANKÜNDIGUNG" | "KEINE_KONTROLLRECHTE";
+  has_substantiated_knowledge: boolean;
+  active_incidents_count: number;
+  statutory_citation: string;
+}
+
+export interface SubstantiatedKnowledgeIncident {
+  incident_id: string;
+  supplier_node_id: string;
+  supplier_name: string;
+  tier: "TIER_1_DIREKT" | "TIER_2_KOMPONENTEN" | "TIER_3_ROHSTOFFE" | "TIER_N_LOGISTIK_SERVICES";
+  violation_title_de: string;
+  violation_title_en: string;
+  statutory_basis: string;
+  source_of_knowledge: string;
+  severity: "KRITISCH" | "HOCH" | "MITTEL";
+  escalation_stage: "STUFE_1_ANLASSBEZOGENE_ANALYSE" | "STUFE_2_PRAEVENTIONSKONZEPT" | "STUFE_3_VOR_ORT_AUDIT" | "STUFE_4_VERTRAGSSUSPENSION";
+  statutory_deadline_days: number;
+  days_remaining: number;
+  required_remediation_de: string;
+  required_remediation_en: string;
+  bafa_notification_required: boolean;
+}
+
+export interface TierNCascadeAuditReport {
+  document_id: string;
+  evaluation_timestamp: string;
+  overall_cascade_score: number;
+  compliance_rating: string;
+  statutory_framework: string;
+  primary_vendor_name: string;
+  pass_through_enforceable_rate: number;
+  total_tiers_tracked: number;
+  direct_suppliers_count: number;
+  indirect_suppliers_count: number;
+  substantiated_knowledge_active: boolean;
+  supplier_nodes: CascadeSupplierNode[];
+  active_incidents: SubstantiatedKnowledgeIncident[];
+  jurisdiction_breakdown: CountryRiskProfile[];
+  bafa_adhoc_filing_recommended: boolean;
+  summary_de: string;
+  summary_en: string;
+}
+
+export async function getTierNCascadeAudit(documentId: string): Promise<TierNCascadeAuditReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/tier-n-cascade-audit`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load Tier-N cascade audit (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadTierNCascadePdf(documentId: string, signatoryName?: string): Promise<void> {
+  const query = signatoryName ? `?signatory_name=${encodeURIComponent(signatoryName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-tier-n-cascade-pdf${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export Tier-N Cascade PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `KASKADENDOSSIER_LKSG_9_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 
 
 
