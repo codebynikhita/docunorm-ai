@@ -6,17 +6,18 @@ from pathlib import Path
 # Add backend directory to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app.core.db import async_session_factory
+from uuid import uuid4
+
+from sqlmodel import select
+
 from app.api.v1.endpoints.documents import get_or_create_default_tenant_and_user
+from app.core.db import async_session_factory
 from app.models.document import Document, DocumentChunk, DocumentStatus
-from app.models.audit import AuditLog
-from app.services.storage import storage_service
-from app.services.validator import validate_pdf_metadata
+from app.services.embedding import embedding_service
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
-from app.services.embedding import embedding_service
-from uuid import uuid4
-from sqlmodel import select
+from app.services.storage import storage_service
+
 
 async def ingest_demo_file():
     pdf_path = "/Users/nikhitagp/.gemini/antigravity/scratch/docunorm-ai/Siemens_Master_IKT_Vertrag_2026.pdf"

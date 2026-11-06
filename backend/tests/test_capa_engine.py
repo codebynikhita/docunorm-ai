@@ -1,6 +1,5 @@
 import uuid
-from pathlib import Path
-import pytest
+
 import pymupdf as fitz
 
 from app.models.document import Document

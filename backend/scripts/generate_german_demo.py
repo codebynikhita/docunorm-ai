@@ -1,6 +1,7 @@
-import pymupdf as fitz
 import os
-from pathlib import Path
+
+import pymupdf as fitz
+
 
 def generate_german_demo_pdf(output_path: str):
     """

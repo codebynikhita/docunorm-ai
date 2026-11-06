@@ -1,4 +1,5 @@
 import pytest
+
 from app.services.auditor import build_audit_prompt, parse_citations_from_response
 
 

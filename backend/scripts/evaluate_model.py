@@ -13,12 +13,12 @@ Performs rigorous, automated regression testing across all statutory mandates:
 """
 import asyncio
 import json
-import os
 import re
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Ensure backend directory is in sys.path
@@ -68,7 +68,7 @@ async def run_evaluation():
         print(f"❌ Error: Benchmark dataset not found at: {benchmark_file}")
         return
 
-    with open(benchmark_file, "r", encoding="utf-8") as f:
+    with open(benchmark_file, encoding="utf-8") as f:
         benchmarks = json.load(f)
 
     passed = 0
@@ -212,7 +212,7 @@ async def run_evaluation():
         "# 🏛️ DocuNorm Sovereign AI - Regulatory Benchmark Scorecard",
         "",
         f"**Audit Timestamp:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}  ",
-        f"**Statutory Scope:** EU DORA (Art. 30), BaFin BAIT 8.1, KWG § 25b, ZUGFeRD 2.3, BGB § 311  ",
+        "**Statutory Scope:** EU DORA (Art. 30), BaFin BAIT 8.1, KWG § 25b, ZUGFeRD 2.3, BGB § 311  ",
         f"**Overall Accuracy:** **{overall_score:.1f}%** ({passed}/{total} Ground-Truth Tests Passed)  ",
         f"**Latency Profile:** Mean: {mean_latency:.0f}ms | P95: {p95_latency:.0f}ms  ",
         "",

@@ -8,7 +8,6 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from generate_50p_agreement import SECTIONS
 
 PART_TRANSLATIONS = {
     "TEIL I: PRÄAMBEL & REGULATORISCHE GRUNDLAGEN": "PART I: PREAMBLE & REGULATORY FRAMEWORK",

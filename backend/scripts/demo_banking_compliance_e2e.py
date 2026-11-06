@@ -16,7 +16,7 @@ Verification Pipeline:
 import hashlib
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -26,12 +26,12 @@ backend_dir = root_dir / "backend"
 sys.path.insert(0, str(backend_dir))
 
 from app.models.document import Document, DocumentStatus
+from app.services.auditor import build_fallback_synthesis
+from app.services.exporter import generate_din_audit_report_pdf
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
+from app.services.remediation_engine import compute_word_diff
 from app.services.table_extractor import TableExtractorService
-from app.services.auditor import build_fallback_synthesis
-from app.services.remediation_engine import RemediationEngine, compute_word_diff
-from app.services.exporter import generate_din_audit_report_pdf
 
 
 def run_demo():
@@ -39,7 +39,7 @@ def run_demo():
     print("🏛️  DOCUNORM SOVEREIGN AI — DAY 14 WEEK 2 CAPSTONE INTEGRATION")
     print("🏦 Client: Deutsche Bank AG / Commerzbank AG (Frankfurt am Main)")
     print("📄 Document: Deutsche_Bank_Master_Cloud_Agreement_50P.pdf (50 Pages)")
-    print(f"🕒 Execution Time: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    print(f"🕒 Execution Time: {datetime.now(UTC).strftime('%Y-%m-%d %H:%M:%S UTC')}")
     print("=" * 85)
 
     pdf_path = backend_dir / "Deutsche_Bank_Master_Cloud_Agreement_50P.pdf"
@@ -56,7 +56,7 @@ def run_demo():
     file_size_kb = len(pdf_bytes) / 1024
     print(f"   • File Size       : {file_size_kb:.1f} KB ({len(pdf_bytes)} bytes)")
     print(f"   • Cryptographic Seal: SHA-256:{sha256_hash}")
-    print(f"   • Tamper Evidence : Non-repudiation timestamp anchored to UTC.")
+    print("   • Tamper Evidence : Non-repudiation timestamp anchored to UTC.")
     print("   ✅ PASSED: Document cryptographic seal generated.")
 
     # -------------------------------------------------------------
@@ -69,7 +69,7 @@ def run_demo():
     parse_time = time.time() - t0
     print(f"   • Total Pages Parsed : {parse_result.total_pages} / 50")
     print(f"   • Atomic Text Blocks : {len(parse_result.blocks)} blocks extracted")
-    print(f"   • Geometry Engine    : Coordinate bounding boxes [x0, y0, x1, y1] verified")
+    print("   • Geometry Engine    : Coordinate bounding boxes [x0, y0, x1, y1] verified")
     print(f"   • Processing Latency : {parse_time:.3f}s ({parse_time/50*1000:.1f}ms/page)")
     assert parse_result.total_pages == 50
     assert len(parse_result.blocks) >= 50
@@ -217,8 +217,8 @@ def run_demo():
     )
     print(f"   • Export File Generated : {report_pdf_path.name}")
     print(f"   • Report Size           : {report_pdf_path.stat().st_size} bytes")
-    print(f"   • Signatory Authority   : Dr. Florian von Schmettow (BaFin / DORA Examiner)")
-    print(f"   • Non-Repudiation Seal  : Cryptographically signed & timestamped")
+    print("   • Signatory Authority   : Dr. Florian von Schmettow (BaFin / DORA Examiner)")
+    print("   • Non-Repudiation Seal  : Cryptographically signed & timestamped")
     print("   ✅ PASSED: Institutional DIN 5008 PDF Report successfully exported.")
 
     # -------------------------------------------------------------
@@ -227,14 +227,14 @@ def run_demo():
     print("\n" + "=" * 85)
     print("🏆 DAY 14 CAPSTONE COMPLETION SCORECARD — DEUTSCHE BANK AG")
     print("=" * 85)
-    print(f"  • Contract Title        : Deutsche Bank Master Cloud Services Agreement (50P)")
-    print(f"  • Total Scope           : 50 Pages · 10 Sections · 50 Statutory Clauses")
-    print(f"  • Ingestion Status      : 100% Parsed (750 text blocks, 0 errors)")
-    print(f"  • Regulatory Rating     : AAA - INSTITUTIONAL REVISIONSFÄHIG (98.4%)")
-    print(f"  • BaFin BAIT 8.1        : 100% Compliant")
-    print(f"  • EU DORA Art. 30       : 100% Compliant")
-    print(f"  • KWG § 25b Outsourcing : 100% Compliant")
-    print(f"  • BGB § 305-311 AGB-Safe: 100% Compliant")
+    print("  • Contract Title        : Deutsche Bank Master Cloud Services Agreement (50P)")
+    print("  • Total Scope           : 50 Pages · 10 Sections · 50 Statutory Clauses")
+    print("  • Ingestion Status      : 100% Parsed (750 text blocks, 0 errors)")
+    print("  • Regulatory Rating     : AAA - INSTITUTIONAL REVISIONSFÄHIG (98.4%)")
+    print("  • BaFin BAIT 8.1        : 100% Compliant")
+    print("  • EU DORA Art. 30       : 100% Compliant")
+    print("  • KWG § 25b Outsourcing : 100% Compliant")
+    print("  • BGB § 305-311 AGB-Safe: 100% Compliant")
     print(f"  • Official Report PDF   : {report_pdf_path}")
     print("=" * 85)
     print("🌟 WEEK 2 COMPLIANCE CAPSTONE FULLY ACHIEVED & VERIFIED!")

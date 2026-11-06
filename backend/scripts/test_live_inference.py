@@ -4,14 +4,15 @@ Test Live Gemini 2.0 Flash Inference with newly configured API Key
 Run with: python scripts/test_live_inference.py
 """
 import asyncio
-import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 backend_dir = Path(__file__).resolve().parent.parent
 load_dotenv(backend_dir / ".env", override=True)
 
 from app.services.auditor import generate_llm_audit_finding
+
 
 async def main():
     print("=" * 70)

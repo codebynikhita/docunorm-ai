@@ -10,24 +10,22 @@ Deeply validates:
 """
 import asyncio
 import hashlib
-import io
-import json
-import os
 import sys
 import time
 from pathlib import Path
-from uuid import UUID
 
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
 import httpx
 import pymupdf as fitz
+
 from app.main import app
-from app.services.zugferd import extract_embedded_zugferd_xml, parse_zugferd_xml_metadata
-from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
-from app.services.exporter import generate_din_audit_report_pdf
 from app.services.privacy import privacy_firewall
+from app.services.zugferd import (
+    extract_embedded_zugferd_xml,
+    parse_zugferd_xml_metadata,
+)
 
 
 async def run_extreme_audit():
@@ -141,8 +139,8 @@ async def run_extreme_audit():
         min_lat = min(latencies)
 
         assert all_200, "Some concurrent requests failed!"
-        print(f"  • Concurrency Target: 10 Parallel Regulatory Auditors")
-        print(f"  • Success Rate:       100% (10/10 requests returned HTTP 200)")
+        print("  • Concurrency Target: 10 Parallel Regulatory Auditors")
+        print("  • Success Rate:       100% (10/10 requests returned HTTP 200)")
         print(f"  • Total Burst Time:   {total_stress_time:.1f}ms")
         print(f"  • Latency Profile:    Min={min_lat:.1f}ms | Avg={avg_lat:.1f}ms | Max={max_lat:.1f}ms")
         print("  ✅ PASSED: System handled 10 concurrent 750-chunk audit queries with zero degradation.")
@@ -167,7 +165,7 @@ async def run_extreme_audit():
             )
             assert r.status_code == 200, f"SQLi probe triggered unhandled error: {payload}"
             assert isinstance(r.json().get("results"), list)
-        print(f"  • SQL Injection Fuzzing: 4 hostile payloads neutralized safely (PASSED)")
+        print("  • SQL Injection Fuzzing: 4 hostile payloads neutralized safely (PASSED)")
 
         # 3.2 XSS / HTML Injection in Legal Query
         xss_queries = [
@@ -183,7 +181,7 @@ async def run_extreme_audit():
             assert r.status_code == 200
             finding = r.json().get("finding_summary", "")
             assert "<script>" not in finding, "Script tag reflected in response!"
-        print(f"  • Cross-Site Scripting (XSS): 3 payloads sanitized without injection (PASSED)")
+        print("  • Cross-Site Scripting (XSS): 3 payloads sanitized without injection (PASSED)")
 
         # 3.3 BDSG § 26 / GDPR Privacy Firewall Sanitization
         raw_sensitive_snippet = (
@@ -195,7 +193,7 @@ async def run_extreme_audit():
         clean_text = anonymized.sanitized_text
         assert "j.mueller@deutsche-bank.de" not in clean_text
         assert "DE89370400440532013000" not in clean_text
-        print(f"  • BDSG § 26 Privacy Firewall: PII completely masked (Email, IBAN, Names) (PASSED)")
+        print("  • BDSG § 26 Privacy Firewall: PII completely masked (Email, IBAN, Names) (PASSED)")
 
         # 3.4 Boundary Fuzzing (Extreme Strings & Empty Payloads)
         r_empty = await client.post(
@@ -209,7 +207,7 @@ async def run_extreme_audit():
             json={"query": "Kündigung " * 1000, "limit": 5},
         )
         assert r_huge.status_code == 200
-        print(f"  • Boundary Input Fuzzing: Empty and 10,000-char queries handled cleanly (PASSED)")
+        print("  • Boundary Input Fuzzing: Empty and 10,000-char queries handled cleanly (PASSED)")
 
         # -------------------------------------------------------------------------
         # SECTION 4: DIN 5008 GEOMETRY & CRYPTOGRAPHIC SEAL VALIDATION
@@ -239,7 +237,7 @@ async def run_extreme_audit():
 
         text_page1 = page1.get_text()
         assert "DIN 5008" in text_page1 or "DORA" in text_page1 or "AUDIT" in text_page1
-        print(f"  • DIN 5008 Layout: Statutory headers, margins, and certification notice verified (PASSED)")
+        print("  • DIN 5008 Layout: Statutory headers, margins, and certification notice verified (PASSED)")
 
         # -------------------------------------------------------------------------
         # SECTION 5: ZUGFeRD 2.3 / FACTUR-X XML VALIDATION
@@ -300,7 +298,7 @@ async def run_extreme_audit():
         assert "CrossIndustryInvoice" in extracted_xml
         assert "INV-2026-DORA-9941" in extracted_xml
 
-        print(f"  • XML Profile:  UN/CEFACT CrossIndustryInvoice:100 (EN 16931 Conformance)")
+        print("  • XML Profile:  UN/CEFACT CrossIndustryInvoice:100 (EN 16931 Conformance)")
         print(f"  • Invoice ID:   {parsed_meta['invoice_id']}")
         print(f"  • Grand Total:  {parsed_meta['currency']} {parsed_meta['grand_total']:,.2f} (Tax: {parsed_meta['currency']} {parsed_meta['tax_total']:,.2f})")
         print(f"  • PDF/A-3 Embed: Embedded {len(sample_xml)} bytes XML in hybrid PDF and extracted with 100% integrity")

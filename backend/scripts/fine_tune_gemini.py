@@ -8,8 +8,9 @@ import os
 import sys
 import time
 from pathlib import Path
-from dotenv import load_dotenv
+
 import httpx
+from dotenv import load_dotenv
 
 # 1. Automatically load backend .env (override session env vars)
 backend_dir = Path(__file__).resolve().parent.parent
@@ -37,7 +38,7 @@ if not training_file_path.exists():
 
 # Parse JSONL dataset into Gemini tuning pairs: {"text_input": ..., "output": ...}
 training_examples = []
-with open(training_file_path, "r", encoding="utf-8") as f:
+with open(training_file_path, encoding="utf-8") as f:
     for line in f:
         line = line.strip()
         if not line:
@@ -72,7 +73,7 @@ try:
     # Force REST transport to avoid macOS gRPC IPv6 socket timeouts
     genai.configure(api_key=api_key, transport="rest")
     
-    print(f"⏳ Submitting training pairs via Google GenAI REST...")
+    print("⏳ Submitting training pairs via Google GenAI REST...")
     operation = genai.create_tuned_model(
         source_model="models/gemini-1.5-flash-001",
         training_data=training_examples,

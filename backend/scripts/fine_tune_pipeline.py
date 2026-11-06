@@ -14,6 +14,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 backend_dir = Path(__file__).resolve().parent.parent
@@ -68,7 +69,7 @@ def run_pipeline():
 
     # 2. Extract Training Pairs
     training_examples = []
-    with open(train_path, "r", encoding="utf-8") as f:
+    with open(train_path, encoding="utf-8") as f:
         for line in f:
             if not line.strip():
                 continue
@@ -151,7 +152,7 @@ def run_pipeline():
     print("\n" + "=" * 80)
     print("🏆 TRAINING PIPELINE COMPLETE & CERTIFIED:")
     print(f"  • Training Samples:         {len(training_examples)}")
-    print(f"  • Grounding Quality:        100.0% Verified")
+    print("  • Grounding Quality:        100.0% Verified")
     print(f"  • LoRA PEFT Config:         {lora_config_file.name}")
     print(f"  • Model Manifest:           {manifest_file.name}")
     print("=" * 80)

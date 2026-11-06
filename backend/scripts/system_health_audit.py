@@ -4,7 +4,6 @@ DocuNorm Sovereign AI - Comprehensive End-to-End System Verification Audit
 Tests all core systems, database, translation, LkSG/BAFA, DORA, and API endpoints.
 """
 import asyncio
-import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -13,15 +12,15 @@ from pathlib import Path
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
-import httpx
-from app.main import app
-from app.services.banking_translations import lookup_banking_translation
-from app.services.auditor import fallback_translate_german_text
-from app.services.bafa_questionnaire import BafaQuestionnaireService
-from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
-from app.services.lksg_analyzer import LkSGAnalyzerService
-from app.models.document import Document
 import uuid
+
+import httpx
+
+from app.main import app
+from app.models.document import Document
+from app.services.auditor import fallback_translate_german_text
+from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
+from app.services.bafa_questionnaire import BafaQuestionnaireService
 
 
 async def test_all_systems():

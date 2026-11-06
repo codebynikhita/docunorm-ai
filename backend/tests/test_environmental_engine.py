@@ -1,6 +1,5 @@
 import uuid
-from pathlib import Path
-import pytest
+
 import pymupdf as fitz
 
 from app.models.document import Document
@@ -11,7 +10,9 @@ from app.schemas.environmental import (
     SubstanceComplianceStatus,
 )
 from app.services.environmental_engine import EnvironmentalEngine
-from app.services.environmental_pdf_exporter import generate_environmental_certificate_pdf
+from app.services.environmental_pdf_exporter import (
+    generate_environmental_certificate_pdf,
+)
 
 
 def test_environmental_engine_compliant():

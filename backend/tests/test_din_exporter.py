@@ -1,6 +1,6 @@
-import pytest
-from uuid import uuid4
 from pathlib import Path
+from uuid import uuid4
+
 from app.models.document import Document
 from app.services.exporter import generate_din_audit_report_pdf
 

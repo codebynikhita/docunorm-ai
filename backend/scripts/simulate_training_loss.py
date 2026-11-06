@@ -6,8 +6,6 @@ for sovereign LoRA / PEFT fine-tuning on BaFin / DORA datasets.
 """
 import json
 import math
-import sys
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -22,7 +20,7 @@ def run_training_simulation():
     print("=" * 80)
 
     dataset_path = data_dir / "dora_bafin_train.jsonl"
-    with open(dataset_path, "r", encoding="utf-8") as f:
+    with open(dataset_path, encoding="utf-8") as f:
         samples = [json.loads(line) for line in f if line.strip()]
 
     total_samples = len(samples)
@@ -33,7 +31,7 @@ def run_training_simulation():
 
     print(f"📂 Dataset: {dataset_path.name} ({total_samples} samples)")
     print(f"⚙️  Hyperparameters: {epochs} Epochs | Batch Size {batch_size} | Total Steps: {total_steps}")
-    print(f"⚡ Learning Rate: 2.0e-4 (Cosine Decay Scheduler with Warmup)")
+    print("⚡ Learning Rate: 2.0e-4 (Cosine Decay Scheduler with Warmup)")
     print("-" * 80)
 
     epoch_logs = []

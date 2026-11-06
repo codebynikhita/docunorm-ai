@@ -34,7 +34,7 @@ def validate_training_file(path: Path) -> dict:
     token_counts = []
     pillars = {}
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for idx, line in enumerate(f, 1):
             line = line.strip()
             if not line:
@@ -114,7 +114,7 @@ def validate_benchmark_file(path: Path) -> dict:
     if not path.exists():
         return {"error": f"File not found: {path}"}
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
     if not isinstance(data, list):
@@ -152,7 +152,7 @@ def main():
     print(f"  • Grounding Citation Density: {train_res.get('citation_density_pct')}%")
     print(f"  • Raw Asterisk Faults:        {train_res.get('raw_asterisk_faults')} (Clean)")
     print(f"  • Token Distribution:         Mean={train_res.get('mean_tokens_per_sample')} | Min={train_res.get('min_tokens')} | Max={train_res.get('max_tokens')} | P95={train_res.get('p95_tokens')}")
-    print(f"\n  🏛️  Pillar Diversity Breakdown:")
+    print("\n  🏛️  Pillar Diversity Breakdown:")
     for p, count in train_res.get("pillars", {}).items():
         print(f"     - {p:<42} : {count:>2} samples")
 

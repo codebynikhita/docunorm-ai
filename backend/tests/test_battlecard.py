@@ -1,15 +1,12 @@
 import uuid
-from pathlib import Path
-import pytest
+
 import pymupdf as fitz
 
 from app.models.document import Document
 from app.schemas.battlecard import (
-    BattlecardSeverity,
     ConflictPillar,
     NegotiationBattlecardResponse,
     SlaSimulationRequest,
-    SlaSimulationResponse,
 )
 from app.services.battlecard_engine import BattlecardEngine
 from app.services.battlecard_pdf_exporter import generate_battlecard_report_pdf

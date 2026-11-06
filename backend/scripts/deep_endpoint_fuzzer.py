@@ -4,16 +4,14 @@ DocuNorm Sovereign AI - Deep Forensic Endpoint Fuzzer & Verification Matrix
 Tests all 34 FastAPI endpoints against live database documents.
 """
 import asyncio
-import io
-import json
 import sys
 from pathlib import Path
-from uuid import UUID
 
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
 import httpx
+
 from app.main import app
 
 

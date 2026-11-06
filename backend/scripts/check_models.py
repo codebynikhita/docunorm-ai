@@ -5,8 +5,9 @@ Run with: python scripts/check_models.py
 """
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+
 import google.generativeai as genai
+from dotenv import load_dotenv
 
 backend_dir = Path(__file__).resolve().parent.parent
 load_dotenv(backend_dir / ".env", override=True)

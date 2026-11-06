@@ -1,12 +1,11 @@
 import uuid
-from pathlib import Path
-import pytest
+
 import pymupdf as fitz
 
 from app.models.document import Document
 from app.schemas.lksg import BafaComplianceStatus, BafaQuestionnaireResponse
-from app.services.bafa_questionnaire import BafaQuestionnaireService
 from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
+from app.services.bafa_questionnaire import BafaQuestionnaireService
 
 
 def test_bafa_questionnaire_gold_standard():

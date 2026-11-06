@@ -2,7 +2,6 @@ from pathlib import Path
 from uuid import uuid4
 
 import pymupdf as fitz
-import pytest
 
 from app.models.document import Document
 from app.schemas.tier_n_cascade import (
@@ -13,7 +12,6 @@ from app.schemas.tier_n_cascade import (
 )
 from app.services.tier_n_cascade_engine import tier_n_cascade_engine
 from app.services.tier_n_cascade_pdf_exporter import generate_tier_n_cascade_pdf
-
 
 SAMPLE_COMPLIANT_CONTRACT = """
 HAUPTVERTRAG ÜBER HARDWARE-SYSTEME UND RECHENZENTRUMS-INFRASTRUKTUR

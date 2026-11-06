@@ -1,4 +1,5 @@
 import pytest
+
 from app.services.hybrid import compute_rrf_score, merge_search_results
 
 

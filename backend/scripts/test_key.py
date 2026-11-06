@@ -5,8 +5,9 @@ Run with: python scripts/test_key.py
 """
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+
 import httpx
+from dotenv import load_dotenv
 
 backend_dir = Path(__file__).resolve().parent.parent
 load_dotenv(backend_dir / ".env", override=True)

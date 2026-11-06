@@ -4,7 +4,6 @@ DocuNorm Sovereign AI - Regulatory Training & Benchmark Dataset Generator
 Generates high-precision BaFin & DORA Article 30 JSONL fine-tuning and evaluation datasets (25+ pairs).
 """
 import json
-import os
 from pathlib import Path
 
 TRAIN_DATA = [

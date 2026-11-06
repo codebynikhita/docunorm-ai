@@ -10,19 +10,18 @@ Systematically tests:
 6. Zero-byte and Corrupted PDF Upload Validation
 """
 import asyncio
-import io
-import os
 import sys
 import time
 from pathlib import Path
-from uuid import uuid4
 
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
-import httpx
-from app.main import app
 import sqlite3
+
+import httpx
+
+from app.main import app
 
 
 async def run_fault_injection_suite():
@@ -210,7 +209,7 @@ async def run_fault_injection_suite():
                 passed_tests += 1
                 print(f"  • Orphaned Chunks:  {orphaned_chunks} (CLEAN)")
                 print(f"  • Orphaned Docs:    {orphaned_docs} (CLEAN)")
-                print(f"  • Database Integrity: 100% Consistent Relational Graph (PASSED)")
+                print("  • Database Integrity: 100% Consistent Relational Graph (PASSED)")
             else:
                 print(f"  ❌ Integrity Fault: Found {orphaned_chunks} orphaned chunks and {orphaned_docs} orphaned docs!")
 

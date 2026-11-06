@@ -1,9 +1,13 @@
 from uuid import uuid4
+
 import pymupdf as fitz
 import pytest
 
-from app.schemas.table import TableStructure, TableRegulatoryAnalysis
-from app.services.table_extractor import TableExtractorService, to_csv_string, to_markdown_table
+from app.services.table_extractor import (
+    TableExtractorService,
+    to_csv_string,
+    to_markdown_table,
+)
 
 
 @pytest.fixture
@@ -123,9 +127,11 @@ def test_extract_tables_missing_file():
 @pytest.mark.asyncio
 async def test_get_tables_endpoint_not_found():
     from unittest.mock import AsyncMock
+
     from httpx import ASGITransport, AsyncClient
-    from app.main import app
+
     from app.core.db import get_session
+    from app.main import app
 
     mock_session = AsyncMock()
     mock_session.get.return_value = None

@@ -1,7 +1,10 @@
-import pytest
 import pymupdf as fitz
-from app.services.zugferd import extract_embedded_zugferd_xml, parse_zugferd_xml_metadata
+import pytest
 
+from app.services.zugferd import (
+    extract_embedded_zugferd_xml,
+    parse_zugferd_xml_metadata,
+)
 
 SAMPLE_ZUGFERD_XML = b"""<?xml version="1.0" encoding="UTF-8"?>
 <rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
