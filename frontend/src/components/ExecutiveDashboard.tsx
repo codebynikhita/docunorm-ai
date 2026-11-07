@@ -24,6 +24,7 @@ import {
   Download,
   Search,
   Filter,
+  Landmark,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { getBenchmarkScorecard, getTrainingTelemetry, triggerBenchmarkRun } from "@/lib/api";
@@ -37,6 +38,7 @@ interface ExecutiveDashboardProps {
   onAuditQuery: (query: string) => void;
   onSwitchToWorkbench: () => void;
   onOpenDinReport?: () => void;
+  onOpenPortfolioCockpit?: () => void;
 }
 
 export function ExecutiveDashboard({
@@ -48,6 +50,7 @@ export function ExecutiveDashboard({
   onAuditQuery,
   onSwitchToWorkbench,
   onOpenDinReport,
+  onOpenPortfolioCockpit,
 }: ExecutiveDashboardProps) {
   const isDe = lang === "DE";
 
@@ -276,6 +279,17 @@ export function ExecutiveDashboard({
                 </option>
               ))}
             </select>
+          )}
+
+          {onOpenPortfolioCockpit && (
+            <button
+              onClick={onOpenPortfolioCockpit}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-xs font-mono font-bold text-blue-600 dark:text-blue-400 transition-all shadow-sm cursor-pointer flex-shrink-0"
+              title="Open Annual BAFA Due Diligence & Portfolio Governance Cockpit (§ 10 LkSG)"
+            >
+              <Landmark className="w-3.5 h-3.5 text-blue-500" />
+              <span>{isDe ? "BAFA-Portfolio (§ 10)" : "BAFA Portfolio (§ 10)"}</span>
+            </button>
           )}
 
           {onOpenDinReport && documentId && (

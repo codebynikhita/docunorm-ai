@@ -1076,6 +1076,99 @@ export async function downloadTierNCascadePdf(documentId: string, signatoryName?
   document.body.removeChild(a);
 }
 
+export interface SupplierPortfolioItem {
+  document_id: string;
+  supplier_name: string;
+  contract_filename: string;
+  lksg_rating: string;
+  overall_score: number;
+  human_rights_score: number;
+  environmental_score: number;
+  governance_score: number;
+  tier1_pass_through_status: string;
+  active_incidents_count: number;
+  annual_spend_eur: number;
+  spend_share_percentage: number;
+}
+
+export interface JurisdictionExposure {
+  country_code: string;
+  country_name_de: string;
+  country_name_en: string;
+  supplier_count: number;
+  exposure_spend_eur: number;
+  exposure_percentage: number;
+  ituc_rating: number;
+  cpi_score: number;
+  basel_annex_vii: boolean;
+  hazard_level: string;
+}
+
+export interface PortfolioConcentrationMetrics {
+  herfindahl_hirschman_index: number;
+  concentration_level: "DIVERSIFIZIERT" | "MODERAT_KONZENTRIERT" | "HOCH_KONZENTRIERT" | "KRITISCH_MONOPOLISTISCH";
+  top_3_vendor_share_percentage: number;
+  single_points_of_failure_count: number;
+  recommendation_de: string;
+  recommendation_en: string;
+}
+
+export interface BafaAnnualReportSynthesis {
+  tenant_id: string;
+  reporting_year: number;
+  submission_deadline: string;
+  generated_at: string;
+  total_suppliers_audited: number;
+  direct_tier1_count: number;
+  indirect_tier_n_count: number;
+  portfolio_compliance_score: number;
+  portfolio_rating: string;
+  human_rights_portfolio_average: number;
+  environmental_portfolio_average: number;
+  governance_portfolio_average: number;
+  concentration_metrics: PortfolioConcentrationMetrics;
+  active_substantiated_knowledge_alerts: number;
+  resolved_capa_milestones_count: number;
+  total_capa_penalties_secured_eur: number;
+  grievance_cases_logged: number;
+  high_hazard_jurisdictions_count: number;
+  supplier_items: SupplierPortfolioItem[];
+  jurisdiction_breakdown: JurisdictionExposure[];
+  bafa_submission_readiness: string;
+  executive_summary_de: string;
+  executive_summary_en: string;
+}
+
+export async function getPortfolioLksgSummary(reportingYear: number = 2026): Promise<BafaAnnualReportSynthesis> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/portfolio/lksg-summary?reporting_year=${reportingYear}`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load portfolio LkSG summary (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadBafaAnnualReportPdf(companyName?: string, reportingYear: number = 2026): Promise<void> {
+  const companyQuery = companyName ? `&company_name=${encodeURIComponent(companyName)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/portfolio/export-bafa-annual-report-pdf?reporting_year=${reportingYear}${companyQuery}`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export Annual BAFA Report PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `BAFA_JAHRESBERICHT_${reportingYear}_LKSG_10.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 
 
 

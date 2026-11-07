@@ -22,6 +22,7 @@ import { TableInspectorModal } from "@/components/TableInspectorModal";
 import { AuditReportExporterModal } from "@/components/AuditReportExporterModal";
 import { LkSGAuditPanel } from "@/components/LkSGAuditPanel";
 import { NegotiationBattlecardModal } from "@/components/NegotiationBattlecardModal";
+import { PortfolioGovernanceCockpit } from "@/components/PortfolioGovernanceCockpit";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -56,6 +57,7 @@ export default function Home() {
   const [isDinReportModalOpen, setIsDinReportModalOpen] = useState(false);
   const [isLkSGAuditOpen, setIsLkSGAuditOpen] = useState(false);
   const [isNegotiationBattlecardOpen, setIsNegotiationBattlecardOpen] = useState(false);
+  const [isPortfolioCockpitOpen, setIsPortfolioCockpitOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -367,6 +369,7 @@ export default function Home() {
                 onAuditQuery={() => setLayoutMode("auditor")}
                 onSwitchToWorkbench={() => setLayoutMode("workbench")}
                 onOpenDinReport={() => setIsDinReportModalOpen(true)}
+                onOpenPortfolioCockpit={() => setIsPortfolioCockpitOpen(true)}
               />
             </main>
           ) : layoutMode === "focus" ? (
@@ -621,6 +624,22 @@ export default function Home() {
         }}
       />
 
+      {/* BAFA Annual Due Diligence & Supply Chain Portfolio Governance Cockpit (§ 10 LkSG) */}
+      <PortfolioGovernanceCockpit
+        isOpen={isPortfolioCockpitOpen}
+        onClose={() => setIsPortfolioCockpitOpen(false)}
+        lang={lang}
+        onSelectDocument={(docId) => {
+          const doc = availableDocuments.find((d) => d.id === docId);
+          if (doc) {
+            setDocumentId(doc.id);
+            setDocumentName(doc.filename);
+          }
+          setIsPortfolioCockpitOpen(false);
+          setLayoutMode("workbench");
+        }}
+      />
+
       {/* Silicon Valley Command Palette & Spotlight (⌘K / Ctrl+K) */}
       <CommandPalette
         isOpen={isCommandPaletteOpen}
@@ -642,6 +661,7 @@ export default function Home() {
         onOpenTableInspector={() => setIsTableInspectorOpen(true)}
         onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
         onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
+        onOpenPortfolioCockpit={() => setIsPortfolioCockpitOpen(true)}
         onOpenZugferd={() => setIsZugferdModalOpen(true)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}

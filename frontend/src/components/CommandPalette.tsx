@@ -18,6 +18,7 @@ import {
   Table as TableIcon,
   Scale,
   Flame,
+  Landmark,
   X,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
@@ -46,6 +47,7 @@ interface CommandPaletteProps {
   onOpenTableInspector?: () => void;
   onOpenLkSGAudit?: () => void;
   onOpenNegotiationBattlecard?: () => void;
+  onOpenPortfolioCockpit?: () => void;
   onOpenZugferd: () => void;
   onOpenCertificate: () => void;
   availableDocuments?: any[];
@@ -66,6 +68,7 @@ export function CommandPalette({
   onOpenTableInspector,
   onOpenLkSGAudit,
   onOpenNegotiationBattlecard,
+  onOpenPortfolioCockpit,
   onOpenZugferd,
   onOpenCertificate,
   availableDocuments = [],
@@ -192,6 +195,18 @@ export function CommandPalette({
       shortcut: "N B",
       action: () => {
         if (onOpenNegotiationBattlecard) onOpenNegotiationBattlecard();
+        onClose();
+      },
+    },
+    {
+      id: "reg-portfolio-cockpit",
+      title_de: "BAFA-Jahresbericht & Lieferanten-Portfolio Cockpit (§ 10 LkSG)",
+      title_en: "Annual BAFA Report & Supply Chain Portfolio Cockpit (§ 10 LkSG)",
+      category: "regulatory",
+      icon: Landmark,
+      shortcut: "B P",
+      action: () => {
+        if (onOpenPortfolioCockpit) onOpenPortfolioCockpit();
         onClose();
       },
     },

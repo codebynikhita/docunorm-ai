@@ -95,8 +95,10 @@ class DoraSubcontractorEngine:
     def _check_advance_notice_and_veto(self, chunks: list[dict], full_text: str) -> SubcontractorCheckResult:
         # Check for unannounced subcontracting or deemed consent traps
         has_unannounced = (
-            "ohne vorherige" in full_text
-            or "ohne gesonderte vorankündigung" in full_text
+            "ohne vorherige ankündigung" in full_text
+            or "ohne vorherige mitteilung" in full_text
+            or "ohne vorherige benachrichtigung" in full_text
+            or "ohne vorherige gesonderte vorankündigung" in full_text
             or "ohne vorankündigung" in full_text
             or "ohne gesonderte ankündigung" in full_text
         )
@@ -273,8 +275,19 @@ class DoraSubcontractorEngine:
             ]
         )
 
-        has_liability_exclusion = "haftung für subunternehmer ist ausgeschlossen" in full_text or (
-            "haftungsausschluss" in full_text and "sub" in full_text
+        norm_full_text = " ".join(full_text.split())
+        has_exclusion_ban = any(
+            k in norm_full_text
+            for k in [
+                "haftungsausschluss für erfüllungsgehilfen oder subunternehmer ist unwirksam",
+                "haftungsausschluss für subunternehmer ist unwirksam",
+                "haftungsausschluss ist unwirksam",
+                "haftungsausschluss greift nicht",
+            ]
+        )
+        has_liability_exclusion = (not has_exclusion_ban) and (
+            "haftung für subunternehmer ist ausgeschlossen" in norm_full_text
+            or ("haftungsausschluss" in norm_full_text and "sub" in norm_full_text)
         )
 
         clause_text, citation_tag, page_num = self._find_first_matching_chunk(
@@ -349,8 +362,11 @@ class DoraSubcontractorEngine:
             for k in [
                 "kaskadierung",
                 "weitergabe",
+                "weiterreichen",
+                "weiterzureichen",
+                "weiterreichung",
                 "weitergabe aller aufsichtsrechtlichen prüfrechte",
-                "verpflichtet jeden unterauftragnehmer zur weitergabe",
+                "verpflichtet jeden unterauftragnehmer",
                 "prüfrechte gelten auch für sub",
                 "flow-through",
                 "flow through of audit",
@@ -467,7 +483,18 @@ class DoraSubcontractorEngine:
                 )
             )
 
-        if "singapur" in full_text or "usa" in full_text or "virginia" in full_text or "cloud act" in full_text:
+        has_third_country_exclusion = any(
+            k in full_text
+            for k in [
+                "ausschluss von drittstaatentransfers",
+                "ausschluss von drittstaaten",
+                "cloud act immunität",
+                "hold your own key",
+                "hyok",
+            ]
+        )
+
+        if ("singapur" in full_text or "usa" in full_text or "virginia" in full_text or "cloud act" in full_text) and not has_third_country_exclusion:
             has_cross_border_risk = True
             concentration_risk = "KRITISCH"
             nodes.append(

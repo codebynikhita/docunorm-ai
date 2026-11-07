@@ -215,9 +215,24 @@ class DoraAuditRightsEngine:
             )
 
     def _check_cost_free_access(self, chunks: list[dict], full_text: str) -> AuditRightCheckResult:
-        has_fee_trap = any(
+        has_prohibition_of_traps = any(
             k in full_text
-            for k in ["prüfkaution", "kaution in höhe", "50.000", "25.000", "prüfpauschalbetrag", "sicherheitskaution in höhe"]
+            for k in [
+                "verbot von prüfkautionen",
+                "hinterlegung einer sicherheitskaution wird ausdrücklich ausgeschlossen",
+                "kautionsforderungen",
+            ]
+        ) and any(
+            neg in full_text
+            for neg in ["verbot", "rechtswidrig", "unwirksam", "ausgeschlossen"]
+        )
+
+        has_fee_trap = (not has_prohibition_of_traps) and (
+            any(
+                k in full_text
+                for k in ["kaution in höhe", "50.000", "25.000", "prüfpauschalbetrag", "sicherheitskaution in höhe"]
+            )
+            or ("prüfkaution" in full_text and not has_prohibition_of_traps)
         ) and any(k in full_text for k in ["audit", "prüf"])
 
         has_cost_free = (
