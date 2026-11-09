@@ -92,7 +92,7 @@ class PortfolioAggregatorService:
                         supplier_name=supplier_name,
                         contract_filename=doc.filename,
                         lksg_rating=lksg_rep.assessment.compliance_rating,
-                        overall_score=lksg_rep.assessment.overall_score,
+                        overall_score=lksg_rep.assessment.overall_compliance_score,
                         human_rights_score=lksg_rep.assessment.human_rights_score,
                         environmental_score=env_rep.overall_environmental_score,
                         governance_score=lksg_rep.assessment.governance_score,
