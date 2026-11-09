@@ -5,7 +5,6 @@ from uuid import uuid4
 import pymupdf as fitz
 import pytest
 
-from app.schemas.portfolio import ConcentrationRiskLevel
 from app.services.bafa_annual_report_exporter import generate_bafa_annual_report_pdf
 from app.services.capa_engine import CapaEngine
 from app.services.environmental_engine import EnvironmentalEngine

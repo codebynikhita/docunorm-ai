@@ -9,32 +9,32 @@ Implements automated forensic compliance verification across:
 """
 
 import asyncio
-from datetime import UTC, datetime
 import json
-from pathlib import Path
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 from uuid import uuid4
 
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
 import pymupdf as fitz
+
 from app.models.document import Document
-from app.schemas.portfolio import BafaAnnualReportSynthesis
 from app.services.bafa_annual_report_exporter import generate_bafa_annual_report_pdf
 from app.services.bafa_pdf_exporter import generate_bafa_audit_report_pdf
 from app.services.bafa_questionnaire import BafaQuestionnaireService
 from app.services.capa_engine import CapaEngine
-from app.services.capa_pdf_exporter import generate_capa_report_pdf
 from app.services.environmental_engine import EnvironmentalEngine
-from app.services.environmental_pdf_exporter import generate_environmental_certificate_pdf
+from app.services.environmental_pdf_exporter import (
+    generate_environmental_certificate_pdf,
+)
 from app.services.lksg_analyzer import LkSGAnalyzerService
 from app.services.portfolio_aggregator import portfolio_aggregator
 from app.services.privacy import privacy_firewall
 from app.services.remediation_engine import RemediationEngine
 from app.services.tier_n_cascade_engine import tier_n_cascade_engine
 from app.services.tier_n_cascade_pdf_exporter import generate_tier_n_cascade_pdf
-
 
 # 4 Distinct Multi-Tier Corporate Supplier Contracts
 SUPPLIER_CONTRACTS = [
@@ -267,7 +267,7 @@ def run_week3_capstone():
         company_name="DocuNorm Sovereign Banking Group AG",
         output_dir=reports_dir,
     )
-    print(f"\n✅ OFFIZIELLER BAFA-JAHRESBERICHT GENERIERT:")
+    print("\n✅ OFFIZIELLER BAFA-JAHRESBERICHT GENERIERT:")
     print(f"   Pfad: {annual_bafa_pdf}")
     print(f"   Dateigröße: {annual_bafa_pdf.stat().st_size:,} Bytes (3 Seiten DIN 5008)")
 

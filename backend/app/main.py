@@ -143,6 +143,12 @@ async def get_sovereign_telemetry() -> dict[str, Any]:
     summary="Comprehensive Infrastructure Health Check",
     status_code=status.HTTP_200_OK,
 )
+@app.get(
+    "/api/v1/health",
+    tags=["System"],
+    summary="Comprehensive Infrastructure Health Check (API v1 Alias)",
+    status_code=status.HTTP_200_OK,
+)
 async def health_check(
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> dict[str, Any]:
