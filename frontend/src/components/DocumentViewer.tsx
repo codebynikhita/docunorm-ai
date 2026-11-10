@@ -411,12 +411,12 @@ export function DocumentViewer({
           </div>
 
           {/* REGULATORY AUDIT MODULES GROUP */}
-          {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector) && (
-            <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm shrink-0">
+          {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector || onOpenLkSGAudit || onOpenNegotiationBattlecard || onOpenZugferd) && (
+            <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm overflow-x-auto max-w-[46vw] scrollbar-none">
               {onOpenDoraExit && (
                 <button
                   onClick={onOpenDoraExit}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-[var(--accent-cyan)] hover:bg-[var(--surface-dark)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-[var(--accent-cyan)] hover:bg-[var(--surface-dark)] shrink-0 whitespace-nowrap"
                   title="DORA Art. 30(2) & BaFin Exit Strategy Regulatory Audit"
                 >
                   <ShieldAlert className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
@@ -429,7 +429,7 @@ export function DocumentViewer({
               {onOpenDoraSubcontractor && (
                 <button
                   onClick={onOpenDoraSubcontractor}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-purple-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-purple-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
                   title="DORA Art. 30(3) Sub-Outsourcing & 4th-Party Cascading Risk Inspector"
                 >
                   <Network className="w-3.5 h-3.5 text-purple-400" />
@@ -442,7 +442,7 @@ export function DocumentViewer({
               {onOpenAuditRights && (
                 <button
                   onClick={onOpenAuditRights}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
                   title="KWG § 25b & DORA Art. 30(3)(e) Supervisory Audit Rights & DIN 5008 BaFin Notice Letter"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -455,7 +455,7 @@ export function DocumentViewer({
               {onOpenTableInspector && (
                 <button
                   onClick={onOpenTableInspector}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-[var(--accent-tangerine)] hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-[var(--accent-tangerine)] hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
                   title={lang === "DE" ? "SLA-Tabellen & Pönalen-Inspektor (DORA Art. 30)" : "SLA Table & Penalty Matrix Inspector (DORA Art. 30)"}
                 >
                   <TableIcon className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
@@ -468,7 +468,7 @@ export function DocumentViewer({
               {onOpenLkSGAudit && (
                 <button
                   onClick={onOpenLkSGAudit}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-600 dark:text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
                   title={lang === "DE" ? "LkSG Lieferketten-Sorgfaltspflichten & BAFA-Prüfung" : "LkSG Supply Chain Due Diligence & BAFA Audit"}
                 >
                   <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -481,7 +481,7 @@ export function DocumentViewer({
               {onOpenNegotiationBattlecard && (
                 <button
                   onClick={onOpenNegotiationBattlecard}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-red-600 dark:text-red-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-red-600 dark:text-red-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
                   title={lang === "DE" ? "Aufsichtsrechtliche Verhandlungs-Battlecard & Schrems II TIA" : "Procurement Negotiation Battlecard & Schrems II TIA"}
                 >
                   <Flame className="w-3.5 h-3.5 text-red-600 dark:text-red-400 animate-pulse" />
@@ -494,7 +494,7 @@ export function DocumentViewer({
               {onOpenZugferd && (
                 <button
                   onClick={onOpenZugferd}
-                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
                   title={lang === "DE" ? "ZUGFeRD 2.3 XML / Factur-X Rechnungsprüfer (EN 16931)" : "ZUGFeRD 2.3 XML / Factur-X E-Invoice Inspector (EN 16931)"}
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
