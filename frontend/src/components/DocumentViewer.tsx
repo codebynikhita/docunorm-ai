@@ -26,6 +26,7 @@ import {
   Table as TableIcon,
   Scale,
   Flame,
+  FileSpreadsheet,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
@@ -68,6 +69,7 @@ interface DocumentViewerProps {
   onOpenTableInspector?: () => void;
   onOpenLkSGAudit?: () => void;
   onOpenNegotiationBattlecard?: () => void;
+  onOpenZugferd?: () => void;
 }
 
 export function DocumentViewer({
@@ -89,6 +91,7 @@ export function DocumentViewer({
   onOpenTableInspector,
   onOpenLkSGAudit,
   onOpenNegotiationBattlecard,
+  onOpenZugferd,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -484,6 +487,19 @@ export function DocumentViewer({
                   <Flame className="w-3.5 h-3.5 text-red-600 dark:text-red-400 animate-pulse" />
                   <span className="hidden xl:inline">
                     {lang === "DE" ? "Battlecard & TIA" : "Battlecard & TIA"}
+                  </span>
+                </button>
+              )}
+
+              {onOpenZugferd && (
+                <button
+                  onClick={onOpenZugferd}
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-emerald-500 dark:text-emerald-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)]"
+                  title={lang === "DE" ? "ZUGFeRD 2.3 XML / Factur-X Rechnungsprüfer (EN 16931)" : "ZUGFeRD 2.3 XML / Factur-X E-Invoice Inspector (EN 16931)"}
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                  <span className="hidden xl:inline">
+                    {lang === "DE" ? "ZUGFeRD E-Rechnung" : "ZUGFeRD Invoice"}
                   </span>
                 </button>
               )}

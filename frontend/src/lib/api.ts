@@ -1168,6 +1168,139 @@ export async function downloadBafaAnnualReportPdf(companyName?: string, reportin
   document.body.removeChild(a);
 }
 
+// ---------------------------------------------------------------------------
+// ZUGFeRD 2.3 & Factur-X / EN 16931 E-Invoicing Interfaces & API Calls
+// ---------------------------------------------------------------------------
+
+export type ZugferdProfileType = "MINIMUM" | "BASIC_WL" | "BASIC" | "EN16931" | "EXTENDED" | "XRECHNUNG";
+
+export interface ZugferdPostalAddress {
+  postcode?: string | null;
+  line_one?: string | null;
+  line_two?: string | null;
+  city_name?: string | null;
+  country_id: string;
+  country_sub_division_name?: string | null;
+}
+
+export interface ZugferdParty {
+  name: string;
+  commercial_registration_id?: string | null;
+  vat_id?: string | null;
+  tax_number?: string | null;
+  contact_name?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  postal_address?: ZugferdPostalAddress | null;
+}
+
+export interface ZugferdLineItem {
+  line_id: string;
+  item_name: string;
+  item_description?: string | null;
+  seller_item_id?: string | null;
+  buyer_item_id?: string | null;
+  billed_quantity: number;
+  unit_code: string;
+  net_price_eur: number;
+  line_total_eur: number;
+  vat_category_code: string;
+  vat_rate_percent: number;
+}
+
+export interface ZugferdTaxSubtotal {
+  tax_category_code: string;
+  tax_rate_percent: number;
+  taxable_amount_eur: number;
+  tax_amount_eur: number;
+  exemption_reason?: string | null;
+}
+
+export interface ZugferdMonetarySummation {
+  line_total_amount_eur: number;
+  charge_total_amount_eur: number;
+  allowance_total_amount_eur: number;
+  tax_basis_total_amount_eur: number;
+  tax_total_amount_eur: number;
+  grand_total_amount_eur: number;
+  prepaid_amount_eur: number;
+  due_payable_amount_eur: number;
+}
+
+export interface ZugferdValidationIssue {
+  code: string;
+  severity: "ERROR" | "WARNING";
+  rule_id: string;
+  description: string;
+  statutory_reference: string;
+}
+
+export interface ZugferdValidationReport {
+  is_en16931_compliant: boolean;
+  detected_profile: ZugferdProfileType;
+  profile_urn: string;
+  syntax_format: "UN/CEFACT CII" | "UBL 2.1 INVOICE" | "UNKNOWN";
+  has_math_discrepancy: boolean;
+  issues: ZugferdValidationIssue[];
+  passed_rules_count: number;
+  total_rules_evaluated: number;
+  validation_summary_de: string;
+}
+
+export interface ZugferdInvoiceExtraction {
+  document_id?: string | null;
+  filename: string;
+  is_hybrid_pdf_a3: boolean;
+  xml_filename?: string | null;
+  raw_xml_content?: string | null;
+  extracted_at: string;
+  profile: ZugferdProfileType;
+  profile_urn: string;
+  invoice_number: string;
+  invoice_type_code: string;
+  invoice_type_name_de: string;
+  issue_date?: string | null;
+  currency_code: string;
+  seller: ZugferdParty;
+  buyer: ZugferdParty;
+  buyer_reference?: string | null;
+  order_reference?: string | null;
+  contract_reference?: string | null;
+  payment_terms_description?: string | null;
+  payment_due_date?: string | null;
+  iban?: string | null;
+  bic?: string | null;
+  payment_means_code?: string | null;
+  line_items: ZugferdLineItem[];
+  tax_subtotals: ZugferdTaxSubtotal[];
+  monetary_summation: ZugferdMonetarySummation;
+  validation_report: ZugferdValidationReport;
+}
+
+export async function getZugferdInvoice(documentId: string): Promise<ZugferdInvoiceExtraction> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/zugferd-extract`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load ZUGFeRD invoice extraction (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function validateZugferdXml(xmlContent: string, filename: string = "invoice.xml"): Promise<ZugferdInvoiceExtraction> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/zugferd/validate-xml?filename=${encodeURIComponent(filename)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+    },
+    body: xmlContent,
+  });
+  if (!res.ok) {
+    throw new Error(`ZUGFeRD XML Validation failed (${res.status})`);
+  }
+  return res.json();
+}
+
 
 
 

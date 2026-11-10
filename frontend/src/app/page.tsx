@@ -394,6 +394,7 @@ export default function Home() {
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
                 onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
                 onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
+                onOpenZugferd={() => setIsZugferdModalOpen(true)}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -446,6 +447,7 @@ export default function Home() {
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
                 onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
                 onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
+                onOpenZugferd={() => setIsZugferdModalOpen(true)}
               />
             </main>
           )}
