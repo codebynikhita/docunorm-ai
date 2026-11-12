@@ -19,6 +19,8 @@ from app.schemas.zugferd_invoice import (
     ZugferdValidationIssue,
     ZugferdValidationReport,
 )
+from app.services.leitweg_validator import leitweg_validator
+from app.services.vat_auditor import vat_auditor
 
 
 class ZugferdExtractorService:
@@ -314,7 +316,9 @@ class ZugferdExtractorService:
             monetary_sum=monetary_sum,
         )
 
-        return ZugferdInvoiceExtraction(
+        leitweg_res = leitweg_validator.validate(buyer_reference) if buyer_reference else None
+
+        extraction = ZugferdInvoiceExtraction(
             document_id=document_id,
             filename=filename,
             is_hybrid_pdf_a3=is_hybrid_pdf_a3,
@@ -342,7 +346,10 @@ class ZugferdExtractorService:
             tax_subtotals=tax_subtotals,
             monetary_summation=monetary_sum,
             validation_report=validation_report,
+            leitweg_validation=leitweg_res,
         )
+        extraction.vat_audit = vat_auditor.audit_invoice(extraction)
+        return extraction
 
     @classmethod
     def _parse_ubl_invoice(
@@ -489,7 +496,9 @@ class ZugferdExtractorService:
             monetary_sum=monetary_sum,
         )
 
-        return ZugferdInvoiceExtraction(
+        leitweg_res = leitweg_validator.validate(buyer_reference) if buyer_reference else None
+
+        extraction = ZugferdInvoiceExtraction(
             document_id=document_id,
             filename=filename,
             is_hybrid_pdf_a3=is_hybrid_pdf_a3,
@@ -515,7 +524,10 @@ class ZugferdExtractorService:
             tax_subtotals=tax_subtotals,
             monetary_summation=monetary_sum,
             validation_report=validation_report,
+            leitweg_validation=leitweg_res,
         )
+        extraction.vat_audit = vat_auditor.audit_invoice(extraction)
+        return extraction
 
     @classmethod
     def _parse_cii_party(cls, party_node: ET.Element | None) -> ZugferdParty:
@@ -739,9 +751,25 @@ class ZugferdExtractorService:
                 )
             )
 
-        # Rule 6 (BR-DE-01 / B2G): Leitweg-ID / Buyer Reference check
+        # Rule 6 (BR-DE-01 / BR-DE-15 B2G): Leitweg-ID / Buyer Reference & ISO 7064 MOD-97-10 check
         if buyer_reference and len(buyer_reference.strip()) > 0:
-            passed_rules += 1
+            cleaned_ref = buyer_reference.strip()
+            lw_res = leitweg_validator.validate(cleaned_ref)
+            looks_like_leitweg = bool(re.match(r"^\d{2,12}-", cleaned_ref))
+            if lw_res.is_valid:
+                passed_rules += 1
+            elif profile == ZugferdProfile.XRECHNUNG or looks_like_leitweg:
+                issues.append(
+                    ZugferdValidationIssue(
+                        code="BR-DE-15",
+                        severity="ERROR",
+                        rule_id="XRECHNUNG-BR-DE-15",
+                        description=f"Leitweg-ID (BT-10) '{cleaned_ref}' verletzt Format- oder Prüfziffernprüfung (ISO 7064 MOD-97-10): {'; '.join(lw_res.errors)}",
+                        statutory_reference="§ 4 E-Rech-VO · KoSIT XRechnung BR-DE-15",
+                    )
+                )
+            else:
+                passed_rules += 1
         else:
             severity = "ERROR" if profile == ZugferdProfile.XRECHNUNG else "WARNING"
             issues.append(

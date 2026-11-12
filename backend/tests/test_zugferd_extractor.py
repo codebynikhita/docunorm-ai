@@ -54,7 +54,7 @@ SAMPLE_CII_EN16931 = """<?xml version="1.0" encoding="UTF-8"?>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
         <ram:ApplicableHeaderTradeAgreement>
-            <ram:BuyerReference>04011000-998877-55</ram:BuyerReference>
+            <ram:BuyerReference>04011000-998877-15</ram:BuyerReference>
             <ram:SellerTradeParty>
                 <ram:Name>Sovereign Solutions AG</ram:Name>
                 <ram:PostalTradeAddress>
@@ -111,7 +111,7 @@ SAMPLE_UBL_INVOICE = """<?xml version="1.0" encoding="UTF-8"?>
     <cbc:IssueDate>2026-11-09</cbc:IssueDate>
     <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-    <cbc:BuyerReference>04011000-112233-44</cbc:BuyerReference>
+    <cbc:BuyerReference>04011000-112233-13</cbc:BuyerReference>
     <cac:AccountingSupplierParty>
         <cac:Party>
             <cac:PartyName>
@@ -192,7 +192,7 @@ def test_cii_cross_industry_invoice_parsing():
     assert extraction.profile == ZugferdProfile.EN16931
     assert extraction.invoice_type_code == ZugferdInvoiceType.COMMERCIAL_INVOICE
     assert extraction.currency_code == "EUR"
-    assert extraction.buyer_reference == "04011000-998877-55"
+    assert extraction.buyer_reference == "04011000-998877-15"
 
     # Seller & Buyer
     assert extraction.seller.name == "Sovereign Solutions AG"
@@ -224,7 +224,7 @@ def test_ubl_xrechnung_parsing():
 
     assert extraction.invoice_number == "XR-2026-9901"
     assert extraction.profile == ZugferdProfile.XRECHNUNG
-    assert extraction.buyer_reference == "04011000-112233-44"
+    assert extraction.buyer_reference == "04011000-112233-13"
     assert extraction.seller.name == "Tech Innovations GmbH"
     assert extraction.seller.vat_id == "DE123456789"
     assert extraction.buyer.name == "Stadtverwaltung Karlsruhe"

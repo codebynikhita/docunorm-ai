@@ -1,7 +1,7 @@
 {
-  "model_id": "docunorm-sovereign-dora-1793629604",
+  "model_id": "docunorm-sovereign-dora-1794296672",
   "base_model": "models/gemini-1.5-flash-001",
-  "created_at": "2026-11-02T19:56:44.097322",
+  "created_at": "2026-11-10T13:14:32.789076",
   "training_dataset": "dora_bafin_train.jsonl",
   "training_samples": 40,
   "mean_tokens": 283.8,

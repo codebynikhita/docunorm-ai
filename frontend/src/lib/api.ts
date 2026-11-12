@@ -1247,6 +1247,46 @@ export interface ZugferdValidationReport {
   validation_summary_de: string;
 }
 
+export interface LeitwegValidationResult {
+  raw_id: string;
+  is_valid: boolean;
+  format_valid: boolean;
+  checksum_valid: boolean;
+  coarse_address?: string | null;
+  fine_address?: string | null;
+  check_digit?: string | null;
+  expected_check_digit?: string | null;
+  federal_entity_type: string;
+  bundesland_or_authority: string;
+  submission_portal: string;
+  statutory_basis: string;
+  errors: string[];
+}
+
+export interface VatFinding {
+  code: string;
+  severity: "CRITICAL" | "WARNING" | "INFO";
+  category: string;
+  description_de: string;
+  description_en: string;
+  statutory_reference: string;
+  expected_value?: string | null;
+  found_value?: string | null;
+}
+
+export interface VatAuditReport {
+  is_ustg_compliant: boolean;
+  is_small_value_invoice: boolean;
+  reverse_charge_detected: boolean;
+  intra_community_supply_detected: boolean;
+  recalculated_tax_total_eur: number;
+  declared_tax_total_eur: number;
+  tax_discrepancy_eur: number;
+  mandatory_fields_score_percent: number;
+  findings: VatFinding[];
+  audit_summary_de: string;
+}
+
 export interface ZugferdInvoiceExtraction {
   document_id?: string | null;
   filename: string;
@@ -1275,6 +1315,37 @@ export interface ZugferdInvoiceExtraction {
   tax_subtotals: ZugferdTaxSubtotal[];
   monetary_summation: ZugferdMonetarySummation;
   validation_report: ZugferdValidationReport;
+  leitweg_validation?: LeitwegValidationResult | null;
+  vat_audit?: VatAuditReport | null;
+}
+
+export async function validateLeitwegId(leitwegId: string): Promise<LeitwegValidationResult> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/zugferd/validate-leitweg?id=${encodeURIComponent(leitwegId)}`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Leitweg-ID validation failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadZugferdCertificatePdf(documentId: string, invoiceNumber?: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-zugferd-certificate-pdf`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export ZUGFeRD GoBD Certificate PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const safeInv = (invoiceNumber || documentId.slice(0, 8)).replace(/[^a-zA-Z0-9_-]/g, "_");
+  a.download = `ZUGFERD_${safeInv}_GOBD_ZERTIFIKAT.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 }
 
 export async function getZugferdInvoice(documentId: string): Promise<ZugferdInvoiceExtraction> {

@@ -2,14 +2,20 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
 from app.models.document import Document
 from app.schemas.zugferd_invoice import (
+    LeitwegValidationResult,
+    VatAuditReport,
     ZugferdInvoiceExtraction,
 )
+from app.services.leitweg_validator import leitweg_validator
+from app.services.vat_auditor import vat_auditor
 from app.services.zugferd_extractor import zugferd_extractor_service
+from app.services.zugferd_pdf_exporter import generate_zugferd_reconciliation_pdf
 
 router = APIRouter(prefix="", tags=["ZUGFeRD & E-Invoicing (EN 16931)"])
 
@@ -94,7 +100,7 @@ SAMPLE_AUTHENTIC_FACTURX_XML = """<?xml version="1.0" encoding="UTF-8"?>
             </ram:SpecifiedLineTradeSettlement>
         </ram:IncludedSupplyChainTradeLineItem>
         <ram:ApplicableHeaderTradeAgreement>
-            <ram:BuyerReference>04011000-12345-67</ram:BuyerReference>
+            <ram:BuyerReference>04011000-12345-03</ram:BuyerReference>
             <ram:SellerTradeParty>
                 <ram:Name>DocuNorm Sovereign Systems AG</ram:Name>
                 <ram:DefinedTradeContact>
@@ -263,4 +269,127 @@ async def validate_raw_xml(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Fehler bei der ZUGFeRD XML-Verarbeitung: {e}",
+        ) from e
+
+
+@router.get(
+    "/zugferd/validate-leitweg",
+    summary="Validate German Federal Leitweg-ID (ISO 7064 MOD-97-10) & Routing Portal",
+    response_model=LeitwegValidationResult,
+    status_code=status.HTTP_200_OK,
+)
+@router.get(
+    "/zugferd/validate-leitweg/{leitweg_id}",
+    summary="Validate German Federal Leitweg-ID Path Parameter (ISO 7064 MOD-97-10)",
+    response_model=LeitwegValidationResult,
+    status_code=status.HTTP_200_OK,
+)
+async def validate_leitweg_endpoint(
+    leitweg_id: str | None = None,
+    id_query: str | None = Query(default=None, alias="id"),
+) -> LeitwegValidationResult:
+    """
+    Validates a German XRechnung Leitweg-ID (coarse-fine-checkdigit) against
+    ISO 7064 MOD-97-10 checksums and resolves the statutory federal/state submission portal.
+    """
+    target = leitweg_id if leitweg_id is not None else id_query
+    return leitweg_validator.validate(target)
+
+
+@router.post(
+    "/documents/{document_id}/vat-audit",
+    summary="Execute § 14 UStG & Reverse-Charge (§ 13b) VAT Deep Audit on Document",
+    response_model=VatAuditReport,
+    status_code=status.HTTP_200_OK,
+)
+@router.get(
+    "/documents/{document_id}/vat-audit",
+    summary="Get § 14 UStG & Reverse-Charge VAT Audit Report",
+    response_model=VatAuditReport,
+    status_code=status.HTTP_200_OK,
+)
+async def audit_document_vat(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+    force_sample: bool = Query(default=False),
+) -> VatAuditReport:
+    """
+    Audits the extracted e-invoice against German Value Added Tax Act (§ 14 UStG,
+    § 33 UStDV small-value rules, § 13b Reverse Charge, and § 6a Intra-Community Supply).
+    """
+    extraction = await extract_zugferd_from_document(document_id=document_id, db=db, force_sample=force_sample)
+    return vat_auditor.audit_invoice(extraction)
+
+
+@router.post(
+    "/zugferd/audit-vat-xml",
+    summary="Audit Raw ZUGFeRD / XRechnung XML Against § 14 UStG",
+    response_model=VatAuditReport,
+    status_code=status.HTTP_200_OK,
+)
+async def audit_raw_xml_vat(
+    xml_content: str = Body(..., media_type="text/plain"),
+    filename: str = Query(default="uploaded_invoice.xml"),
+) -> VatAuditReport:
+    """Parses raw e-invoice XML and executes the full German § 14 UStG VAT discrepancy engine."""
+    try:
+        extraction = zugferd_extractor_service.parse_xml_invoice(raw_xml=xml_content, filename=filename)
+        return vat_auditor.audit_invoice(extraction)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Fehler bei der UStG XML-Steuerprüfung: {e}",
+        ) from e
+
+
+@router.get(
+    "/documents/{document_id}/export-zugferd-certificate-pdf",
+    summary="Export 2-Page DIN 5008 E-Invoice & GoBD Reconciliation Certificate PDF",
+    status_code=status.HTTP_200_OK,
+)
+@router.post(
+    "/documents/{document_id}/export-zugferd-certificate-pdf",
+    summary="Generate & Download DIN 5008 E-Invoice & GoBD Certificate PDF",
+    status_code=status.HTTP_200_OK,
+)
+async def export_zugferd_certificate_pdf(
+    document_id: UUID,
+    db: Annotated[AsyncSession, Depends(get_session)],
+    force_sample: bool = Query(default=False),
+) -> FileResponse:
+    """
+    Generates and streams an authoritative 2-page DIN 5008 GoBD archival certificate PDF
+    containing Leitweg-ID verification, EN 16931 rules, § 14 UStG audit, and SHA-256 seal.
+    """
+    extraction = await extract_zugferd_from_document(document_id=document_id, db=db, force_sample=force_sample)
+    pdf_path = generate_zugferd_reconciliation_pdf(extraction)
+    return FileResponse(
+        path=str(pdf_path),
+        media_type="application/pdf",
+        filename=pdf_path.name,
+    )
+
+
+@router.post(
+    "/zugferd/export-certificate-pdf",
+    summary="Generate DIN 5008 GoBD Certificate PDF from Raw ZUGFeRD XML",
+    status_code=status.HTTP_200_OK,
+)
+async def export_certificate_pdf_from_xml(
+    xml_content: str = Body(..., media_type="text/plain"),
+    filename: str = Query(default="uploaded_invoice.xml"),
+) -> FileResponse:
+    """Parses raw XML and streams a 2-page DIN 5008 GoBD compliance certificate PDF."""
+    try:
+        extraction = zugferd_extractor_service.parse_xml_invoice(raw_xml=xml_content, filename=filename)
+        pdf_path = generate_zugferd_reconciliation_pdf(extraction)
+        return FileResponse(
+            path=str(pdf_path),
+            media_type="application/pdf",
+            filename=pdf_path.name,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Fehler bei der GoBD-Zertifikatserstellung: {e}",
         ) from e

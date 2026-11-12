@@ -107,6 +107,46 @@ class ZugferdValidationReport(BaseModel):
     validation_summary_de: str
 
 
+class LeitwegValidationResult(BaseModel):
+    raw_id: str
+    is_valid: bool
+    format_valid: bool
+    checksum_valid: bool
+    coarse_address: str | None = None      # Grobadressierung (max 12 digits)
+    fine_address: str | None = None        # Feinadressierung (optional max 30 alphanum)
+    check_digit: str | None = None         # 2-digit ISO 7064 MOD-97-10 checksum
+    expected_check_digit: str | None = None
+    federal_entity_type: str = "UNBEKANNT"  # Bund / Bundesland / Kommune
+    bundesland_or_authority: str = "Nicht zugeordnet"
+    submission_portal: str = "Unbekannt"
+    statutory_basis: str = "§ 4 E-Rech-VO · KoSIT XRechnung Standard"
+    errors: list[str] = Field(default_factory=list)
+
+
+class VatFinding(BaseModel):
+    code: str
+    severity: Literal["CRITICAL", "WARNING", "INFO"]
+    category: str  # e.g. "REVERSE_CHARGE", "RATE_DISCREPANCY", "USTG_14_MANDATORY", "INTRA_COMMUNITY"
+    description_de: str
+    description_en: str
+    statutory_reference: str
+    expected_value: str | None = None
+    found_value: str | None = None
+
+
+class VatAuditReport(BaseModel):
+    is_ustg_compliant: bool
+    is_small_value_invoice: bool = Field(default=False, description="Kleinbetragsrechnung <= 250 EUR (§ 33 UStDV)")
+    reverse_charge_detected: bool = Field(default=False, description="Steuerschuldnerschaft des Leistungsempfängers (§ 13b UStG)")
+    intra_community_supply_detected: bool = Field(default=False, description="Innergemeinschaftliche Lieferung (§ 6a UStG)")
+    recalculated_tax_total_eur: float
+    declared_tax_total_eur: float
+    tax_discrepancy_eur: float
+    mandatory_fields_score_percent: float
+    findings: list[VatFinding] = Field(default_factory=list)
+    audit_summary_de: str
+
+
 class ZugferdInvoiceExtraction(BaseModel):
     document_id: UUID | None = None
     filename: str
@@ -147,3 +187,7 @@ class ZugferdInvoiceExtraction(BaseModel):
 
     # EN 16931 Validation
     validation_report: ZugferdValidationReport
+
+    # Day 23 & Day 24 Enrichments
+    leitweg_validation: LeitwegValidationResult | None = None
+    vat_audit: VatAuditReport | None = None

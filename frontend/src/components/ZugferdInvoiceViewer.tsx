@@ -8,16 +8,20 @@ import {
   Code2,
   Copy,
   CreditCard,
+  Download,
   FileSpreadsheet,
   FileText,
   Landmark,
   Layers,
+  Receipt,
   RefreshCw,
+  Route,
   Scale,
   ShieldCheck,
   XCircle,
 } from "lucide-react";
 import {
+  downloadZugferdCertificatePdf,
   getZugferdInvoice,
   ZugferdInvoiceExtraction,
 } from "@/lib/api";
@@ -36,8 +40,9 @@ export function ZugferdInvoiceViewer({
   const [data, setData] = useState<ZugferdInvoiceExtraction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"items" | "totals" | "validation" | "xml">("items");
+  const [activeTab, setActiveTab] = useState<"items" | "totals" | "vat" | "validation" | "xml">("items");
   const [copied, setCopied] = useState<boolean>(false);
+  const [exportingPdf, setExportingPdf] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -70,6 +75,18 @@ export function ZugferdInvoiceViewer({
       navigator.clipboard.writeText(data.raw_xml_content);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleDownloadCertificate = async () => {
+    if (!data) return;
+    try {
+      setExportingPdf(true);
+      await downloadZugferdCertificatePdf(documentId, data.invoice_number);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "PDF Export fehlgeschlagen.");
+    } finally {
+      setExportingPdf(false);
     }
   };
 
@@ -129,6 +146,15 @@ export function ZugferdInvoiceViewer({
                   Mathematisch exakt
                 </span>
               )}
+
+              <button
+                onClick={handleDownloadCertificate}
+                disabled={exportingPdf}
+                className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white shadow-sm transition-colors"
+              >
+                <Download className="w-3.5 h-3.5 mr-1.5" />
+                {exportingPdf ? "Erzeuge PDF..." : "GoBD Prüfzertifikat PDF"}
+              </button>
             </div>
           )}
 
@@ -263,11 +289,35 @@ export function ZugferdInvoiceViewer({
                   <span className="text-slate-500 font-sans">Keine USt-IdNr deklariert</span>
                 )}
                 {data.buyer_reference && (
-                  <span className="bg-blue-500/15 border border-blue-500/30 text-blue-300 px-2 py-0.5 rounded">
+                  <span
+                    className={`px-2 py-0.5 rounded border ${
+                      data.leitweg_validation?.is_valid
+                        ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                        : "bg-blue-500/15 border-blue-500/30 text-blue-300"
+                    }`}
+                  >
                     Leitweg-ID: {data.buyer_reference}
+                    {data.leitweg_validation && (
+                      <span className="ml-1.5 font-sans text-[10px] opacity-90">
+                        {data.leitweg_validation.checksum_valid ? "· MOD-97-10 OK" : "· Prüfziffer ungültig"}
+                      </span>
+                    )}
                   </span>
                 )}
               </div>
+              {data.leitweg_validation && (
+                <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-start space-x-2 text-[11px] text-slate-400">
+                  <Route className="w-3.5 h-3.5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <span className="text-slate-200 font-medium">
+                      {data.leitweg_validation.federal_entity_type}: {data.leitweg_validation.bundesland_or_authority}
+                    </span>
+                    <div className="text-slate-400 truncate max-w-md">
+                      Portal: {data.leitweg_validation.submission_portal}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -295,6 +345,21 @@ export function ZugferdInvoiceViewer({
             >
               <CreditCard className="w-3.5 h-3.5" />
               <span>Steuer- &amp; Summenaufstellung</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("vat")}
+              className={`flex items-center space-x-2 px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
+                activeTab === "vat"
+                  ? "border-emerald-400 text-emerald-400 bg-emerald-500/5"
+                  : "border-transparent text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <Receipt className="w-3.5 h-3.5" />
+              <span>
+                UStG § 14 &amp; Reverse-Charge
+                {data.vat_audit ? ` (${data.vat_audit.mandatory_fields_score_percent.toFixed(0)}%)` : ""}
+              </span>
             </button>
 
             <button
@@ -476,6 +541,111 @@ export function ZugferdInvoiceViewer({
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === "vat" && (
+              <div className="space-y-4">
+                {data.vat_audit ? (
+                  <>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                      <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60">
+                        <div className="text-[11px] text-slate-400">§ 14 UStG Status</div>
+                        <div
+                          className={`text-sm font-bold mt-1 ${
+                            data.vat_audit.is_ustg_compliant ? "text-emerald-400" : "text-rose-400"
+                          }`}
+                        >
+                          {data.vat_audit.is_ustg_compliant ? "Konform" : "Diskrepanz erkannt"}
+                        </div>
+                      </div>
+                      <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60">
+                        <div className="text-[11px] text-slate-400">Pflichtangaben-Score</div>
+                        <div className="text-sm font-bold font-mono text-white mt-1">
+                          {data.vat_audit.mandatory_fields_score_percent.toFixed(0)}%
+                        </div>
+                      </div>
+                      <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60">
+                        <div className="text-[11px] text-slate-400">Nachgerechnete USt</div>
+                        <div className="text-sm font-bold font-mono text-cyan-300 mt-1">
+                          {data.vat_audit.recalculated_tax_total_eur.toFixed(2)} {data.currency_code}
+                        </div>
+                      </div>
+                      <div className="p-3.5 rounded-xl border border-slate-800 bg-slate-900/60">
+                        <div className="text-[11px] text-slate-400">Steuerdifferenz</div>
+                        <div
+                          className={`text-sm font-bold font-mono mt-1 ${
+                            data.vat_audit.tax_discrepancy_eur > 0.02 ? "text-rose-400" : "text-emerald-400"
+                          }`}
+                        >
+                          {data.vat_audit.tax_discrepancy_eur.toFixed(2)} {data.currency_code}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {data.vat_audit.is_small_value_invoice && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
+                          Kleinbetragsrechnung ≤ 250 EUR (§ 33 UStDV)
+                        </span>
+                      )}
+                      {data.vat_audit.reverse_charge_detected && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/15 border border-amber-500/30 text-amber-300">
+                          Reverse Charge (§ 13b UStG · AE)
+                        </span>
+                      )}
+                      {data.vat_audit.intra_community_supply_detected && (
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">
+                          Innergemeinschaftliche Lieferung (§ 6a UStG · K)
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/60 text-xs text-slate-300">
+                      {data.vat_audit.audit_summary_de}
+                    </div>
+
+                    <div className="space-y-2">
+                      {data.vat_audit.findings.length === 0 ? (
+                        <div className="p-6 text-center rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-300 text-xs">
+                          Alle UStG-Pflichtangaben (§ 14 Abs. 4 UStG) sowie Steuersätze (§ 12 UStG) sind vollständig und rechnerisch einwandfrei.
+                        </div>
+                      ) : (
+                        data.vat_audit.findings.map((finding, idx) => (
+                          <div
+                            key={idx}
+                            className={`p-4 rounded-xl border text-xs flex items-start space-x-3 ${
+                              finding.severity === "CRITICAL"
+                                ? "bg-rose-500/10 border-rose-500/30 text-rose-200"
+                                : finding.severity === "WARNING"
+                                  ? "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                                  : "bg-slate-800/70 border-slate-700 text-slate-300"
+                            }`}
+                          >
+                            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-center space-x-2 font-mono">
+                                <span className="font-bold">{finding.code}</span>
+                                <span className="text-slate-500">·</span>
+                                <span>{finding.statutory_reference}</span>
+                              </div>
+                              <div>{finding.description_de}</div>
+                              {(finding.expected_value || finding.found_value) && (
+                                <div className="text-[11px] font-mono text-slate-400">
+                                  Erwartet: {finding.expected_value || "-"} · Gefunden: {finding.found_value || "-"}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-6 text-center text-xs text-slate-400">
+                    Keine UStG-Prüfdaten für dieses Dokument verfügbar.
+                  </div>
+                )}
               </div>
             )}
 
