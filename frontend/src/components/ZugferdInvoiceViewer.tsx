@@ -23,6 +23,8 @@ import {
 import {
   downloadZugferdCertificatePdf,
   getZugferdInvoice,
+  LeitwegValidationResult,
+  validateLeitwegId,
   ZugferdInvoiceExtraction,
 } from "@/lib/api";
 
@@ -43,6 +45,9 @@ export function ZugferdInvoiceViewer({
   const [activeTab, setActiveTab] = useState<"items" | "totals" | "vat" | "validation" | "xml">("items");
   const [copied, setCopied] = useState<boolean>(false);
   const [exportingPdf, setExportingPdf] = useState<boolean>(false);
+  const [leitwegInput, setLeitwegInput] = useState<string>("");
+  const [leitwegTestResult, setLeitwegTestResult] = useState<LeitwegValidationResult | null>(null);
+  const [testingLeitweg, setTestingLeitweg] = useState<boolean>(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -87,6 +92,21 @@ export function ZugferdInvoiceViewer({
       setError(err instanceof Error ? err.message : "PDF Export fehlgeschlagen.");
     } finally {
       setExportingPdf(false);
+    }
+  };
+
+  const handleCheckCustomLeitweg = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leitwegInput.trim()) return;
+    try {
+      setTestingLeitweg(true);
+      const res = await validateLeitwegId(leitwegInput.trim());
+      setLeitwegTestResult(res);
+    } catch (err) {
+      setLeitwegTestResult(null);
+      setError(err instanceof Error ? err.message : "Leitweg-ID Prüfung fehlgeschlagen.");
+    } finally {
+      setTestingLeitweg(false);
     }
   };
 
@@ -144,6 +164,19 @@ export function ZugferdInvoiceViewer({
                 <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
                   <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                   Mathematisch exakt
+                </span>
+              )}
+
+              {data.vat_audit && (
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
+                    data.vat_audit.is_ustg_compliant
+                      ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                      : "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                  }`}
+                >
+                  <Receipt className="w-3.5 h-3.5 mr-1" />
+                  {data.vat_audit.is_ustg_compliant ? "§ 14 UStG OK" : "§ 14 UStG Prüffall"}
                 </span>
               )}
 
@@ -231,11 +264,26 @@ export function ZugferdInvoiceViewer({
 
             <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800">
               <span className="text-xs font-medium text-slate-400">Käuferreferenz / Leitweg-ID</span>
-              <div className="text-base font-semibold text-amber-300 font-mono mt-0.5 truncate" title={data.buyer_reference || "Nicht angegeben"}>
+              <div
+                className={`text-base font-semibold font-mono mt-0.5 truncate ${
+                  data.leitweg_validation
+                    ? data.leitweg_validation.is_valid
+                      ? "text-emerald-300"
+                      : "text-rose-300"
+                    : "text-amber-300"
+                }`}
+                title={data.buyer_reference || "Nicht angegeben"}
+              >
                 {data.buyer_reference || "— (Keine Leitweg-ID)"}
               </div>
-              <div className="text-[11px] text-slate-500 mt-1">
-                {data.buyer_reference ? "B2G E-Rech-VO konform" : "B2B Standard"}
+              <div className="text-[11px] text-slate-400 mt-1 truncate">
+                {data.leitweg_validation
+                  ? data.leitweg_validation.is_valid
+                    ? `MOD-97-10 OK · ${data.leitweg_validation.bundesland_or_authority}`
+                    : "Prüfziffer ungültig (MOD-97-10)"
+                  : data.buyer_reference
+                    ? "Käuferreferenz hinterlegt"
+                    : "B2B Standard"}
               </div>
             </div>
           </div>
@@ -308,21 +356,53 @@ export function ZugferdInvoiceViewer({
               {data.leitweg_validation && (
                 <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-start space-x-2 text-[11px] text-slate-400">
                   <Route className="w-3.5 h-3.5 text-cyan-400 mt-0.5 flex-shrink-0" />
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <span className="text-slate-200 font-medium">
                       {data.leitweg_validation.federal_entity_type}: {data.leitweg_validation.bundesland_or_authority}
                     </span>
-                    <div className="text-slate-400 truncate max-w-md">
+                    <div className="text-slate-400 truncate">
                       Portal: {data.leitweg_validation.submission_portal}
                     </div>
                   </div>
+                </div>
+              )}
+
+              <form onSubmit={handleCheckCustomLeitweg} className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={leitwegInput}
+                  onChange={(e) => setLeitwegInput(e.target.value)}
+                  placeholder="Leitweg-ID testen (z.B. 991-12345-64)"
+                  className="flex-1 bg-slate-950 border border-slate-700/80 rounded-md px-2.5 py-1 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+                />
+                <button
+                  type="submit"
+                  disabled={testingLeitweg || !leitwegInput.trim()}
+                  className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-cyan-300 border border-slate-700 transition-colors"
+                >
+                  {testingLeitweg ? "Prüfe..." : "MOD-97-10 Check"}
+                </button>
+              </form>
+              {leitwegTestResult && (
+                <div
+                  className={`mt-2 p-2 rounded-md border text-[11px] ${
+                    leitwegTestResult.is_valid
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                      : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                  }`}
+                >
+                  <span className="font-mono font-semibold">{leitwegTestResult.raw_id || "—"}</span>
+                  {" · "}
+                  {leitwegTestResult.is_valid
+                    ? `${leitwegTestResult.bundesland_or_authority} (${leitwegTestResult.submission_portal})`
+                    : leitwegTestResult.errors.join(" ")}
                 </div>
               )}
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center space-x-1 px-6 pt-3 border-b border-slate-800 bg-slate-900/40">
+          <div className="flex flex-wrap items-center gap-1 px-6 pt-3 border-b border-slate-800 bg-slate-900/40">
             <button
               onClick={() => setActiveTab("items")}
               className={`flex items-center space-x-2 px-4 py-2 text-xs font-medium border-b-2 transition-colors ${
