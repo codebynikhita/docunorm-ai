@@ -178,7 +178,7 @@ SAMPLE_XRECHNUNG_UBL = """<?xml version="1.0" encoding="UTF-8"?>
     <cbc:DueDate>2026-12-09</cbc:DueDate>
     <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-    <cbc:BuyerReference>991-12345-64</cbc:BuyerReference>
+    <cbc:BuyerReference>991-12345-73</cbc:BuyerReference>
     <cac:AccountingSupplierParty>
         <cac:Party>
             <cac:PartyName>
@@ -554,7 +554,7 @@ SAMPLE_PROFILES: list[ZugferdSampleProfile] = [
         xml_filename="xrechnung.xml",
         raw_xml=SAMPLE_XRECHNUNG_UBL,
         simulated_discrepancy=False,
-        statutory_focus="§ 4 E-Rech-VO · XRechnung 3.0 · Bund ZRE Leitweg-ID 991-12345-64",
+        statutory_focus="§ 4 E-Rech-VO · XRechnung 3.0 · Bund ZRE Leitweg-ID 991-12345-73",
     ),
     ZugferdSampleProfile(
         profile_id="xrechnung-cii",

@@ -45,12 +45,14 @@ interface ZugferdInvoiceViewerProps {
   documentId: string;
   filename: string;
   onClose?: () => void;
+  onOpenBatch?: () => void;
 }
 
 export function ZugferdInvoiceViewer({
   documentId,
   filename,
   onClose,
+  onOpenBatch,
 }: ZugferdInvoiceViewerProps) {
   const [data, setData] = useState<ZugferdInvoiceExtraction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -317,6 +319,18 @@ export function ZugferdInvoiceViewer({
                 <Download className="w-3.5 h-3.5 mr-1.5" />
                 {exportingPdf ? "Erzeuge PDF..." : "GoBD Prüfzertifikat PDF"}
               </button>
+
+              {/* Day 27 Batch & ERP Bridge Switcher */}
+              {onOpenBatch && (
+                <button
+                  onClick={onOpenBatch}
+                  className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 shadow-sm transition-colors"
+                  title="Zur Stapelverarbeitung & DATEV / SAP ERP Export wechseln"
+                >
+                  <Layers className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
+                  <span className="hidden md:inline">Stapel &amp; ERP</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -1039,7 +1053,7 @@ export function ZugferdInvoiceViewer({
                           type="text"
                           value={leitwegInput}
                           onChange={(e) => setLeitwegInput(e.target.value)}
-                          placeholder="Leitweg-ID prüfen (z.B. 04011000-12345-03 oder 991-12345-64)"
+                          placeholder="Leitweg-ID prüfen (z.B. 04011000-12345-03 oder 991-12345-73)"
                           className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
                         />
                         <button

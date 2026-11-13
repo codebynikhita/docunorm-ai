@@ -49,6 +49,7 @@ export default function Home() {
   const [isIngestModalOpen, setIsIngestModalOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isZugferdModalOpen, setIsZugferdModalOpen] = useState(false);
+  const [zugferdInitialMode, setZugferdInitialMode] = useState<"single" | "batch">("single");
   const [isDoraExitModalOpen, setIsDoraExitModalOpen] = useState(false);
   const [isDoraSubcontractorModalOpen, setIsDoraSubcontractorModalOpen] = useState(false);
   const [isAuditRightsModalOpen, setIsAuditRightsModalOpen] = useState(false);
@@ -247,6 +248,16 @@ export default function Home() {
     });
   };
 
+  const handleOpenZugferdSingle = () => {
+    setZugferdInitialMode("single");
+    setIsZugferdModalOpen(true);
+  };
+
+  const handleOpenZugferdBatch = () => {
+    setZugferdInitialMode("batch");
+    setIsZugferdModalOpen(true);
+  };
+
   return (
     <div
       data-theme={theme}
@@ -261,7 +272,7 @@ export default function Home() {
         layoutMode={layoutMode}
         onLayoutChange={(lm) => setLayoutMode(lm)}
         onOpenCertificate={() => setIsCertificateOpen(true)}
-        onOpenZugferd={() => setIsZugferdModalOpen(true)}
+        onOpenZugferd={handleOpenZugferdSingle}
         user={user}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
@@ -327,7 +338,7 @@ export default function Home() {
               } else if (tab === "lksg") {
                 setIsLkSGAuditOpen(true);
               } else if (tab === "zugferd") {
-                setIsZugferdModalOpen(true);
+                handleOpenZugferdSingle();
               } else if (tab === "audit_log") {
                 setIsCertificateOpen(true);
               } else if (tab === "documents") {
@@ -394,7 +405,8 @@ export default function Home() {
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
                 onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
                 onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
-                onOpenZugferd={() => setIsZugferdModalOpen(true)}
+                onOpenZugferd={handleOpenZugferdSingle}
+                onOpenZugferdBatch={handleOpenZugferdBatch}
               />
 
               {/* Floating Glass Auditor HUD */}
@@ -447,7 +459,8 @@ export default function Home() {
                 onOpenTableInspector={() => setIsTableInspectorOpen(true)}
                 onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
                 onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
-                onOpenZugferd={() => setIsZugferdModalOpen(true)}
+                onOpenZugferd={handleOpenZugferdSingle}
+                onOpenZugferdBatch={handleOpenZugferdBatch}
               />
             </main>
           )}
@@ -491,6 +504,7 @@ export default function Home() {
         documentName={documentName}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
+        initialMode={zugferdInitialMode}
       />
 
       {/* EU DORA Art. 30(2) & BaFin Exit Strategy Regulatory Inspector Modal */}
@@ -664,7 +678,8 @@ export default function Home() {
         onOpenLkSGAudit={() => setIsLkSGAuditOpen(true)}
         onOpenNegotiationBattlecard={() => setIsNegotiationBattlecardOpen(true)}
         onOpenPortfolioCockpit={() => setIsPortfolioCockpitOpen(true)}
-        onOpenZugferd={() => setIsZugferdModalOpen(true)}
+        onOpenZugferd={handleOpenZugferdSingle}
+        onOpenZugferdBatch={handleOpenZugferdBatch}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}

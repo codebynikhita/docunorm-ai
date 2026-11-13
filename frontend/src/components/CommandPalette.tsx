@@ -19,6 +19,7 @@ import {
   Scale,
   Flame,
   Landmark,
+  Layers,
   X,
 } from "lucide-react";
 import { Language } from "@/lib/i18n";
@@ -49,6 +50,7 @@ interface CommandPaletteProps {
   onOpenNegotiationBattlecard?: () => void;
   onOpenPortfolioCockpit?: () => void;
   onOpenZugferd: () => void;
+  onOpenZugferdBatch?: () => void;
   onOpenCertificate: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
@@ -70,6 +72,7 @@ export function CommandPalette({
   onOpenNegotiationBattlecard,
   onOpenPortfolioCockpit,
   onOpenZugferd,
+  onOpenZugferdBatch,
   onOpenCertificate,
   availableDocuments = [],
   onSelectDocument,
@@ -219,6 +222,22 @@ export function CommandPalette({
       shortcut: "Z U",
       action: () => {
         onOpenZugferd();
+        onClose();
+      },
+    },
+    {
+      id: "reg-zugferd-batch",
+      title_de: "ZUGFeRD Stapelverarbeitung & DATEV / SAP ERP Export",
+      title_en: "ZUGFeRD Batch Ingestion & DATEV / SAP ERP Bridge",
+      category: "regulatory",
+      icon: Layers,
+      shortcut: "Z B",
+      action: () => {
+        if (onOpenZugferdBatch) {
+          onOpenZugferdBatch();
+        } else {
+          onOpenZugferd();
+        }
         onClose();
       },
     },

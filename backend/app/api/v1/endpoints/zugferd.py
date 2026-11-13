@@ -1,12 +1,28 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
 from app.models.document import Document
+from app.schemas.erp_export import (
+    BatchIngestionSummary,
+    ChartOfAccounts,
+    DatevExportConfig,
+    SapS4HanaExportConfig,
+)
 from app.schemas.zugferd_invoice import (
     LeitwegValidationResult,
     VatAuditReport,
@@ -14,6 +30,7 @@ from app.schemas.zugferd_invoice import (
     ZugferdSampleProfile,
     ZugferdVisualReconciliation,
 )
+from app.services.erp_export_bridge import erp_export_bridge
 from app.services.leitweg_validator import leitweg_validator
 from app.services.vat_auditor import vat_auditor
 from app.services.zugferd_extractor import zugferd_extractor_service
@@ -519,3 +536,141 @@ async def reconcile_raw_visual_xml(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Fehler beim visuellen Rechnungsabgleich: {e}",
         ) from e
+
+
+@router.get(
+    "/zugferd/sample-batch",
+    summary="Generate Authentic Multi-Invoice Batch with DATEV & SAP S/4HANA Bridge",
+    response_model=BatchIngestionSummary,
+    status_code=status.HTTP_200_OK,
+)
+async def get_sample_batch(
+    chart_of_accounts: Annotated[ChartOfAccounts, Query(description="DATEV Kontenrahmen (SKR03 / SKR04)")] = ChartOfAccounts.SKR03,
+    beraternummer: Annotated[int, Query(description="DATEV Beraternummer")] = 1001,
+    mandantennummer: Annotated[int, Query(description="DATEV Mandantennummer")] = 70001,
+    company_code: Annotated[str, Query(description="SAP Company Code (Buchungskreis)")] = "1000",
+) -> BatchIngestionSummary:
+    """
+    Returns an instant authentic 5-invoice batch incorporating B2B Factur-X, B2G XRechnung UBL,
+    B2G XRechnung CII, § 13b Reverse-Charge, and a simulated discrepancy fixture with full
+    DATEV Format 700 CSV and SAP S/4HANA Journal Entry JSON payloads.
+    """
+    profiles = get_sample_profiles()
+    invoices = [(f"{p.profile_id}.xml", p.raw_xml) for p in profiles]
+
+    datev_cfg = DatevExportConfig(
+        chart_of_accounts=chart_of_accounts,
+        beraternummer=beraternummer,
+        mandantennummer=mandantennummer,
+    )
+    sap_cfg = SapS4HanaExportConfig(
+        company_code=company_code,
+    )
+
+    return erp_export_bridge.process_batch(
+        invoices=invoices,
+        datev_config=datev_cfg,
+        sap_config=sap_cfg,
+    )
+
+
+@router.post(
+    "/zugferd/batch-ingest",
+    summary="High-Throughput Batch Ingestion for E-Invoices (.zip or multi-files)",
+    response_model=BatchIngestionSummary,
+    status_code=status.HTTP_200_OK,
+)
+async def batch_ingest_invoices(
+    file: Annotated[UploadFile, File(description="ZIP archive of invoices or single XML/PDF")],
+    chart_of_accounts: Annotated[ChartOfAccounts, Query()] = ChartOfAccounts.SKR03,
+    beraternummer: Annotated[int, Query()] = 1001,
+    mandantennummer: Annotated[int, Query()] = 70001,
+    company_code: Annotated[str, Query()] = "1000",
+) -> BatchIngestionSummary:
+    """
+    Ingests an archive or file batch of hybrid PDF/A-3 and raw XML e-invoices,
+    executes EN 16931 and UStG audits, resolves chart-of-accounts mapping, and produces
+    DATEV Format 700 and SAP S/4HANA export payloads.
+    """
+    file_bytes = await file.read()
+    datev_cfg = DatevExportConfig(
+        chart_of_accounts=chart_of_accounts,
+        beraternummer=beraternummer,
+        mandantennummer=mandantennummer,
+    )
+    sap_cfg = SapS4HanaExportConfig(
+        company_code=company_code,
+    )
+
+    fname_lower = (file.filename or "").lower()
+    if fname_lower.endswith(".zip") or file_bytes.startswith(b"PK\x03\x04"):
+        return erp_export_bridge.process_zip_archive(
+            zip_bytes=file_bytes,
+            datev_config=datev_cfg,
+            sap_config=sap_cfg,
+        )
+    else:
+        invoices = [(file.filename or "invoice.xml", file_bytes)]
+        return erp_export_bridge.process_batch(
+            invoices=invoices,
+            datev_config=datev_cfg,
+            sap_config=sap_cfg,
+        )
+
+
+@router.get(
+    "/zugferd/export-datev-csv",
+    summary="Download DATEV Format 700 Buchungsstapel (EXTF) CSV File",
+    status_code=status.HTTP_200_OK,
+)
+async def download_datev_csv(
+    chart_of_accounts: Annotated[ChartOfAccounts, Query()] = ChartOfAccounts.SKR03,
+    beraternummer: Annotated[int, Query()] = 1001,
+    mandantennummer: Annotated[int, Query()] = 70001,
+) -> Response:
+    """Generates and downloads the official DATEV Buchungsstapel CSV file."""
+    profiles = get_sample_profiles()
+    invoices = [(f"{p.profile_id}.xml", p.raw_xml) for p in profiles]
+    datev_cfg = DatevExportConfig(
+        chart_of_accounts=chart_of_accounts,
+        beraternummer=beraternummer,
+        mandantennummer=mandantennummer,
+    )
+    summary = erp_export_bridge.process_batch(invoices=invoices, datev_config=datev_cfg)
+
+    # Encode with UTF-8 BOM so German Microsoft Excel and DATEV open Umlauts cleanly
+    csv_bytes = b"\xef\xbb\xbf" + summary.datev_csv_content.encode("utf-8")
+    return Response(
+        content=csv_bytes,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="EXTF_Buchungsstapel_{chart_of_accounts.value}_{mandantennummer}.csv"',
+        },
+    )
+
+
+@router.get(
+    "/zugferd/export-sap-json",
+    summary="Download SAP S/4HANA Journal Entry Payload JSON File",
+    status_code=status.HTTP_200_OK,
+)
+async def download_sap_json(
+    company_code: Annotated[str, Query()] = "1000",
+    fiscal_year: Annotated[int, Query()] = 2026,
+) -> Response:
+    """Generates and downloads the SAP S/4HANA Cloud Finance JournalEntry JSON payload."""
+    profiles = get_sample_profiles()
+    invoices = [(f"{p.profile_id}.xml", p.raw_xml) for p in profiles]
+    sap_cfg = SapS4HanaExportConfig(
+        company_code=company_code,
+        fiscal_year=fiscal_year,
+    )
+    summary = erp_export_bridge.process_batch(invoices=invoices, sap_config=sap_cfg)
+    json_bytes = summary.sap_json_content.encode("utf-8")
+    return Response(
+        content=json_bytes,
+        media_type="application/json; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="SAP_S4HANA_JournalEntries_{company_code}_{fiscal_year}.json"',
+        },
+    )

@@ -27,6 +27,7 @@ import {
   Scale,
   Flame,
   FileSpreadsheet,
+  Layers,
 } from "lucide-react";
 
 import { Language, translations } from "@/lib/i18n";
@@ -70,6 +71,7 @@ interface DocumentViewerProps {
   onOpenLkSGAudit?: () => void;
   onOpenNegotiationBattlecard?: () => void;
   onOpenZugferd?: () => void;
+  onOpenZugferdBatch?: () => void;
 }
 
 export function DocumentViewer({
@@ -92,6 +94,7 @@ export function DocumentViewer({
   onOpenLkSGAudit,
   onOpenNegotiationBattlecard,
   onOpenZugferd,
+  onOpenZugferdBatch,
 }: DocumentViewerProps) {
   const t = translations[lang];
   const [zoom, setZoom] = useState(75);
@@ -500,6 +503,19 @@ export function DocumentViewer({
                   <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                   <span className="hidden xl:inline">
                     {lang === "DE" ? "ZUGFeRD E-Rechnung" : "ZUGFeRD Invoice"}
+                  </span>
+                </button>
+              )}
+
+              {onOpenZugferdBatch && (
+                <button
+                  onClick={onOpenZugferdBatch}
+                  className="px-2 py-1 rounded font-bold cursor-pointer transition-all flex items-center gap-1 text-cyan-500 dark:text-cyan-400 hover:bg-[var(--surface-dark)] border-l border-[var(--surface-border)] shrink-0 whitespace-nowrap"
+                  title={lang === "DE" ? "ZUGFeRD Stapelverarbeitung & DATEV / SAP ERP Export" : "ZUGFeRD Batch Ingestion & DATEV / SAP ERP Export"}
+                >
+                  <Layers className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
+                  <span className="hidden xl:inline">
+                    {lang === "DE" ? "DATEV & SAP Export" : "DATEV / SAP Batch"}
                   </span>
                 </button>
               )}

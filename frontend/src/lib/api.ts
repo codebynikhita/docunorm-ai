@@ -1442,6 +1442,180 @@ export async function reconcileRawVisualXml(xmlContent: string, visualText: stri
   return res.json();
 }
 
+// ---------------------------------------------------------------------------
+// Day 27: High-Throughput Batch Ingestion & ERP Export Pipeline (DATEV / SAP)
+// ---------------------------------------------------------------------------
+
+export type ChartOfAccounts = "SKR03" | "SKR04" | "IKR";
+
+export interface DatevBookingRow {
+  umsatz_eur: number;
+  soll_haben_kz: "S" | "H";
+  waehrung: string;
+  konto: string;
+  gegenkonto: string;
+  bu_schluessel: string;
+  belegdatum: string;
+  belegfeld_1: string;
+  belegfeld_2: string;
+  buchungstext: string;
+  beleglink: string;
+  festschreibung: number;
+}
+
+export interface SapS4HanaJournalEntryItem {
+  item_number: number;
+  account_type: "K" | "S" | "T";
+  account: string;
+  amount_eur: number;
+  debit_credit_code: "S" | "H";
+  tax_code: string;
+  tax_base_amount_eur?: number | null;
+  cost_center?: string | null;
+  text: string;
+}
+
+export interface SapS4HanaJournalEntry {
+  company_code: string;
+  fiscal_year: number;
+  accounting_document_type: string;
+  document_date: string;
+  posting_date: string;
+  document_reference_id: string;
+  document_header_text: string;
+  transaction_currency: string;
+  items: SapS4HanaJournalEntryItem[];
+}
+
+export interface BatchInvoiceProcessingItem {
+  invoice_index: number;
+  document_id?: string | null;
+  filename: string;
+  invoice_number: string;
+  issue_date?: string | null;
+  due_date?: string | null;
+  seller_name: string;
+  seller_vat_id?: string | null;
+  buyer_name: string;
+  profile: string;
+  currency: string;
+  net_amount_eur: number;
+  tax_amount_eur: number;
+  grand_total_eur: number;
+  is_en16931_compliant: boolean;
+  is_ustg_compliant: boolean;
+  leitweg_id?: string | null;
+  leitweg_valid?: boolean | null;
+  status: "COMPLIANT" | "WARNING" | "REJECTED";
+  kreditor_konto: string;
+  aufwand_konto: string;
+  bu_schluessel: string;
+  datev_booking_row: DatevBookingRow;
+  sap_journal_entry: SapS4HanaJournalEntry;
+  validation_issues_count: number;
+  vat_findings_count: number;
+}
+
+export interface BatchIngestionSummary {
+  batch_id: string;
+  processed_at: string;
+  total_invoices_processed: number;
+  compliant_invoices_count: number;
+  warning_invoices_count: number;
+  rejected_invoices_count: number;
+  total_net_amount_eur: number;
+  total_tax_amount_eur: number;
+  total_grand_amount_eur: number;
+  chart_of_accounts: ChartOfAccounts;
+  items: BatchInvoiceProcessingItem[];
+  datev_csv_content: string;
+  sap_json_content: string;
+}
+
+export async function getSampleBatchSummary(
+  chart: ChartOfAccounts = "SKR03",
+  beraternummer: number = 1001,
+  mandantennummer: number = 70001,
+  companyCode: string = "1000",
+): Promise<BatchIngestionSummary> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/sample-batch?chart_of_accounts=${chart}&beraternummer=${beraternummer}&mandantennummer=${mandantennummer}&company_code=${encodeURIComponent(companyCode)}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to load sample batch summary (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function batchIngestInvoices(
+  file: File,
+  chart: ChartOfAccounts = "SKR03",
+  beraternummer: number = 1001,
+  mandantennummer: number = 70001,
+  companyCode: string = "1000",
+): Promise<BatchIngestionSummary> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/batch-ingest?chart_of_accounts=${chart}&beraternummer=${beraternummer}&mandantennummer=${mandantennummer}&company_code=${encodeURIComponent(companyCode)}`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Batch ingestion failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadDatevCsv(
+  chart: ChartOfAccounts = "SKR03",
+  beraternummer: number = 1001,
+  mandantennummer: number = 70001,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/export-datev-csv?chart_of_accounts=${chart}&beraternummer=${beraternummer}&mandantennummer=${mandantennummer}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to download DATEV CSV (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `EXTF_Buchungsstapel_${chart}_${mandantennummer}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function downloadSapJson(
+  companyCode: string = "1000",
+  fiscalYear: number = 2026,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/export-sap-json?company_code=${encodeURIComponent(companyCode)}&fiscal_year=${fiscalYear}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to download SAP S/4HANA JSON (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SAP_S4HANA_JournalEntries_${companyCode}_${fiscalYear}.json`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 
 
 
