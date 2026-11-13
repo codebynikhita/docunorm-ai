@@ -1287,6 +1287,41 @@ export interface VatAuditReport {
   audit_summary_de: string;
 }
 
+export interface ZugferdVisualFieldReconciliation {
+  field_key: string;
+  field_name_de: string;
+  xml_value: string;
+  pdf_visual_value?: string | null;
+  is_match: boolean;
+  discrepancy_type: "EXACT_MATCH" | "SEMANTIC_MATCH" | "VALUE_MISMATCH" | "MISSING_IN_VISUAL" | "MISSING_IN_XML";
+  details_de: string;
+}
+
+export interface ZugferdVisualReconciliation {
+  document_id?: string | null;
+  filename: string;
+  has_visual_layer: boolean;
+  is_reconciled: boolean;
+  total_fields_checked: number;
+  matched_fields_count: number;
+  discrepancy_count: number;
+  reconciliation_score_percent: number;
+  summary_de: string;
+  fields: ZugferdVisualFieldReconciliation[];
+}
+
+export interface ZugferdSampleProfile {
+  profile_id: string;
+  name: string;
+  profile_type: ZugferdProfileType;
+  description_de: string;
+  description_en: string;
+  xml_filename: string;
+  raw_xml: string;
+  simulated_discrepancy: boolean;
+  statutory_focus: string;
+}
+
 export interface ZugferdInvoiceExtraction {
   document_id?: string | null;
   filename: string;
@@ -1368,6 +1403,41 @@ export async function validateZugferdXml(xmlContent: string, filename: string = 
   });
   if (!res.ok) {
     throw new Error(`ZUGFeRD XML Validation failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getZugferdSampleProfiles(): Promise<ZugferdSampleProfile[]> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/zugferd/sample-profiles`, {
+    method: "GET",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load ZUGFeRD sample profiles (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function reconcileZugferdVisualXml(documentId: string, visualText?: string): Promise<ZugferdVisualReconciliation> {
+  const query = visualText ? `?visual_text=${encodeURIComponent(visualText)}` : "";
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/reconcile-visual-xml${query}`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to reconcile visual PDF vs XML (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function reconcileRawVisualXml(xmlContent: string, visualText: string): Promise<ZugferdVisualReconciliation> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/zugferd/reconcile-visual-raw?visual_text=${encodeURIComponent(visualText)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+    },
+    body: xmlContent,
+  });
+  if (!res.ok) {
+    throw new Error(`Raw visual reconciliation failed (${res.status})`);
   }
   return res.json();
 }

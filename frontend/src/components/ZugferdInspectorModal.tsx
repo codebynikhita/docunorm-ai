@@ -39,8 +39,8 @@ export function ZugferdInspectorModal({
   const isDe = lang === "DE";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="w-full max-w-5xl bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh] animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3">
+      <div className="w-full max-w-[96vw] bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[94vh] animate-in zoom-in-95 duration-200">
         {/* Document Selector Header Bar */}
         {availableDocuments && availableDocuments.length > 0 && (
           <div className="px-6 py-2.5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between text-xs">

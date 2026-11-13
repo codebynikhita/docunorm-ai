@@ -191,3 +191,38 @@ class ZugferdInvoiceExtraction(BaseModel):
     # Day 23 & Day 24 Enrichments
     leitweg_validation: LeitwegValidationResult | None = None
     vat_audit: VatAuditReport | None = None
+
+
+class ZugferdVisualFieldReconciliation(BaseModel):
+    field_key: str  # e.g. "invoice_number", "grand_total", "tax_total", "iban", "seller_vat_id", "buyer_reference"
+    field_name_de: str
+    xml_value: str
+    pdf_visual_value: str | None = None
+    is_match: bool
+    discrepancy_type: Literal["EXACT_MATCH", "SEMANTIC_MATCH", "VALUE_MISMATCH", "MISSING_IN_VISUAL", "MISSING_IN_XML"]
+    details_de: str
+
+
+class ZugferdVisualReconciliation(BaseModel):
+    document_id: UUID | None = None
+    filename: str
+    has_visual_layer: bool
+    is_reconciled: bool
+    total_fields_checked: int
+    matched_fields_count: int
+    discrepancy_count: int
+    reconciliation_score_percent: float
+    summary_de: str
+    fields: list[ZugferdVisualFieldReconciliation] = Field(default_factory=list)
+
+
+class ZugferdSampleProfile(BaseModel):
+    profile_id: str
+    name: str
+    profile_type: ZugferdProfile
+    description_de: str
+    description_en: str
+    xml_filename: str
+    raw_xml: str
+    simulated_discrepancy: bool = False
+    statutory_focus: str
