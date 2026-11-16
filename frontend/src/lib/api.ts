@@ -1616,6 +1616,116 @@ export async function downloadSapJson(
   document.body.removeChild(a);
 }
 
+export interface CapstoneDiscrepancyDetail {
+  index: number;
+  invoice_number: string;
+  filename: string;
+  rule_violated: string;
+  statutory_standard: string;
+  risk_level: "HOCH" | "KRITISCH";
+  rejection_reason: string;
+  remedial_action: string;
+}
+
+export interface Week4CapstoneSummary {
+  batch_id: string;
+  processed_at: string;
+  total_invoices: number;
+  compliant_count: number;
+  warning_count: number;
+  rejected_count: number;
+  compliance_rate_percent: number;
+  total_net_eur: number;
+  total_tax_eur: number;
+  total_grand_eur: number;
+  execution_time_ms: number;
+  throughput_invoices_per_sec: number;
+  chart_of_accounts: ChartOfAccounts;
+  category_distribution: Record<string, number>;
+  gobd_sha256_batch_hash: string;
+  discrepancies: CapstoneDiscrepancyDetail[];
+  items: BatchInvoiceProcessingItem[];
+  datev_csv_content: string;
+  sap_json_content: string;
+}
+
+export async function getCapstoneSummary(
+  chart: ChartOfAccounts = "SKR03",
+  beraternummer: number = 1001,
+  mandantennummer: number = 70001,
+  companyCode: string = "1000",
+): Promise<Week4CapstoneSummary> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/capstone/summary?chart_of_accounts=${chart}&beraternummer=${beraternummer}&mandantennummer=${mandantennummer}&company_code=${encodeURIComponent(companyCode)}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to load Capstone benchmark summary (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadCapstoneReportPdf(chart: ChartOfAccounts = "SKR03"): Promise<void> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/capstone/export-report-pdf?chart_of_accounts=${chart}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to download Capstone PDF report (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ZUGFERD_CAPSTONE_AUDIT_REPORT_2027.pdf";
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function downloadCapstoneDatevCsv(
+  chart: ChartOfAccounts = "SKR03",
+  beraternummer: number = 1001,
+  mandantennummer: number = 70001,
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/capstone/export-datev-csv?chart_of_accounts=${chart}&beraternummer=${beraternummer}&mandantennummer=${mandantennummer}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to download Capstone DATEV CSV (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `DATEV_EXTF_100_INVOICES_${chart}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function downloadCapstoneSapJson(companyCode: string = "1000"): Promise<void> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/zugferd/capstone/export-sap-json?company_code=${encodeURIComponent(companyCode)}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to download Capstone SAP JSON (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `SAP_S4HANA_100_INVOICES_${companyCode}.json`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 
 
 

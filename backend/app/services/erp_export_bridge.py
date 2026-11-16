@@ -1,5 +1,6 @@
 import io
 import json
+import re
 import zipfile
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
@@ -14,7 +15,11 @@ from app.schemas.erp_export import (
     SapS4HanaJournalEntry,
     SapS4HanaJournalEntryItem,
 )
-from app.schemas.zugferd_invoice import VatCategoryCode, ZugferdInvoiceExtraction
+from app.schemas.zugferd_invoice import (
+    VatCategoryCode,
+    ZugferdInvoiceExtraction,
+    ZugferdProfile,
+)
 from app.services.zugferd_extractor import zugferd_extractor_service
 
 
@@ -314,12 +319,19 @@ class ErpExportBridgeService:
                 # Determine compliance status
                 is_en_ok = vr.is_en16931_compliant
                 is_vat_ok = vat.is_ustg_compliant if vat else True
-                is_lw_ok = True if (lw is None or lw.is_valid) else False
+
+                # Leitweg-ID validation is only required for B2G (XRechnung) or when explicitly formatted as a Leitweg-ID
+                is_b2g = extraction.profile == ZugferdProfile.XRECHNUNG
+                looks_like_lw = bool(extraction.buyer_reference and re.match(r"^\d{2,12}-", extraction.buyer_reference.strip()))
+                if is_b2g or looks_like_lw:
+                    is_lw_ok = lw.is_valid if lw else False
+                else:
+                    is_lw_ok = True
 
                 if is_en_ok and is_vat_ok and is_lw_ok:
                     status = "COMPLIANT"
                     compliant_count += 1
-                elif not is_en_ok or (vat and not vat.is_ustg_compliant and vat.tax_discrepancy_eur > 0.05):
+                elif not is_en_ok or not is_lw_ok or (vat and not vat.is_ustg_compliant and vat.tax_discrepancy_eur > 0.05):
                     status = "REJECTED"
                     rejected_count += 1
                 else:

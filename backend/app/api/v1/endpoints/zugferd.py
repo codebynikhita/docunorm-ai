@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_session
 from app.models.document import Document
+from app.schemas.capstone import Week4CapstoneSummary
 from app.schemas.erp_export import (
     BatchIngestionSummary,
     ChartOfAccounts,
@@ -30,6 +31,8 @@ from app.schemas.zugferd_invoice import (
     ZugferdSampleProfile,
     ZugferdVisualReconciliation,
 )
+from app.services.capstone_audit_engine import capstone_audit_engine
+from app.services.capstone_pdf_exporter import generate_capstone_audit_report_pdf
 from app.services.erp_export_bridge import erp_export_bridge
 from app.services.leitweg_validator import leitweg_validator
 from app.services.vat_auditor import vat_auditor
@@ -672,5 +675,93 @@ async def download_sap_json(
         media_type="application/json; charset=utf-8",
         headers={
             "Content-Disposition": f'attachment; filename="SAP_S4HANA_JournalEntries_{company_code}_{fiscal_year}.json"',
+        },
+    )
+
+
+@router.get(
+    "/zugferd/capstone/summary",
+    summary="Get Week 4 Capstone Benchmark Audit Summary (100 German B2B/B2G Invoices)",
+    response_model=Week4CapstoneSummary,
+    status_code=status.HTTP_200_OK,
+)
+async def get_capstone_summary(
+    chart_of_accounts: Annotated[ChartOfAccounts, Query()] = ChartOfAccounts.SKR03,
+    beraternummer: Annotated[int, Query()] = 1001,
+    mandantennummer: Annotated[int, Query()] = 70001,
+    company_code: Annotated[str, Query()] = "1000",
+) -> Week4CapstoneSummary:
+    """
+    Executes and returns the Week 4 Capstone Enterprise Benchmark Audit across 100 authentic
+    and synthetic German B2B and B2G e-invoices with forensic discrepancy analysis.
+    """
+    return capstone_audit_engine.execute_capstone_audit(
+        chart=chart_of_accounts,
+        beraternummer=beraternummer,
+        mandantennummer=mandantennummer,
+        company_code=company_code,
+    )
+
+
+@router.get(
+    "/zugferd/capstone/export-report-pdf",
+    summary="Download Certified DIN 5008 Master Capstone Audit Report PDF (3 Pages)",
+    status_code=status.HTTP_200_OK,
+)
+async def download_capstone_report_pdf(
+    chart_of_accounts: Annotated[ChartOfAccounts, Query()] = ChartOfAccounts.SKR03,
+) -> FileResponse:
+    """Generates and downloads the certified 3-page DIN 5008 Master Capstone Audit Report PDF."""
+    summary = capstone_audit_engine.execute_capstone_audit(chart=chart_of_accounts)
+    pdf_path = generate_capstone_audit_report_pdf(summary)
+    return FileResponse(
+        path=str(pdf_path),
+        media_type="application/pdf",
+        filename="ZUGFERD_CAPSTONE_AUDIT_REPORT_2027.pdf",
+    )
+
+
+@router.get(
+    "/zugferd/capstone/export-datev-csv",
+    summary="Download Full 100-Invoice DATEV Format 700 Buchungsstapel (EXTF) CSV",
+    status_code=status.HTTP_200_OK,
+)
+async def download_capstone_datev_csv(
+    chart_of_accounts: Annotated[ChartOfAccounts, Query()] = ChartOfAccounts.SKR03,
+    beraternummer: Annotated[int, Query()] = 1001,
+    mandantennummer: Annotated[int, Query()] = 70001,
+) -> Response:
+    """Generates and downloads the full 100-invoice DATEV Format 700 Buchungsstapel CSV file."""
+    summary = capstone_audit_engine.execute_capstone_audit(
+        chart=chart_of_accounts,
+        beraternummer=beraternummer,
+        mandantennummer=mandantennummer,
+    )
+    csv_bytes = b"\xef\xbb\xbf" + summary.datev_csv_content.encode("utf-8")
+    return Response(
+        content=csv_bytes,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="DATEV_EXTF_100_INVOICES_{chart_of_accounts.value}.csv"',
+        },
+    )
+
+
+@router.get(
+    "/zugferd/capstone/export-sap-json",
+    summary="Download Full 100-Invoice SAP S/4HANA Journal Entry JSON Payload",
+    status_code=status.HTTP_200_OK,
+)
+async def download_capstone_sap_json(
+    company_code: Annotated[str, Query()] = "1000",
+) -> Response:
+    """Generates and downloads the full 100-invoice SAP S/4HANA Cloud Finance JournalEntry JSON payload."""
+    summary = capstone_audit_engine.execute_capstone_audit(company_code=company_code)
+    json_bytes = summary.sap_json_content.encode("utf-8")
+    return Response(
+        content=json_bytes,
+        media_type="application/json; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="SAP_S4HANA_100_INVOICES_{company_code}.json"',
         },
     )
