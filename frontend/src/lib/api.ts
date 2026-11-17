@@ -1726,6 +1726,49 @@ export async function downloadCapstoneSapJson(companyCode: string = "1000"): Pro
   document.body.removeChild(a);
 }
 
+// --- Day 29: Heavy OCR Fallback & Diagnostic Telemetry ---
+
+export interface OCRBlockDetail {
+  block_index: number;
+  text: string;
+  confidence: number;
+  bbox: [number, number, number, number];
+  is_lexicon_corrected: boolean;
+  corrections: string[];
+}
+
+export interface PageOCROutput {
+  page_number: number;
+  page_type: "VECTOR_TEXT" | "OCR_SCANNED" | "HYBRID";
+  character_count: number;
+  ocr_engine_applied: string;
+  confidence: number;
+  blocks: OCRBlockDetail[];
+  repaired_tokens_count: number;
+}
+
+export interface DocumentOCRInspectionResult {
+  document_id: string;
+  total_pages: number;
+  vector_pages_count: number;
+  scanned_pages_count: number;
+  ocr_applied_pages_count: number;
+  pages: PageOCROutput[];
+  inspection_duration_ms: number;
+}
+
+export async function inspectDocumentOcr(documentId: string): Promise<DocumentOCRInspectionResult> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/ocr-inspect`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || `OCR inspection failed with status ${res.status}`);
+  }
+  return res.json();
+}
+
+
 
 
 

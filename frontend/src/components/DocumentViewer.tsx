@@ -39,7 +39,13 @@ import {
   classifyClause,
   ClauseMetadata,
 } from "@/lib/translator";
-import { getDocumentChunks, getTranslatedDocumentChunks, getDocumentTaskProgress } from "@/lib/api";
+import {
+  getDocumentChunks,
+  getTranslatedDocumentChunks,
+  getDocumentTaskProgress,
+  inspectDocumentOcr,
+  DocumentOCRInspectionResult,
+} from "@/lib/api";
 import { ClauseRiskHeatmapBar } from "./ClauseRiskHeatmapBar";
 import { RealTimeStreamHud } from "./RealTimeStreamHud";
 
@@ -113,6 +119,7 @@ export function DocumentViewer({
     progress: number;
     stage: string;
   } | null>(null);
+  const [ocrResult, setOcrResult] = useState<DocumentOCRInspectionResult | null>(null);
 
   const [canvasDimensions, setCanvasDimensions] = useState<{ width: number; height: number }>({
     width: 600,
@@ -217,6 +224,27 @@ export function DocumentViewer({
       setAllChunks(chunks || []);
     }
     loadChunks();
+  }, [documentId]);
+
+  // Day 29: Heavy OCR Telemetry & Non-Searchable Inspection
+  useEffect(() => {
+    if (!documentId) {
+      setOcrResult(null);
+      return;
+    }
+    let isCancelled = false;
+    inspectDocumentOcr(documentId)
+      .then((res) => {
+        if (!isCancelled) setOcrResult(res);
+      })
+      .catch((err) => {
+        // Fallback or ignore if document is still indexing
+        console.debug("OCR diagnostic check skipped:", err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [documentId]);
 
   // Reset dismissed state whenever highlight changes
@@ -412,6 +440,35 @@ export function DocumentViewer({
               </span>
             </button>
           </div>
+
+          {/* Day 29: OCR Sovereign Fallback Status Pill */}
+          {ocrResult && (
+            <div
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono border shadow-sm shrink-0 ${
+                ocrResult.scanned_pages_count > 0
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-500 font-bold"
+                  : "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-medium"
+              }`}
+              title={
+                ocrResult.scanned_pages_count > 0
+                  ? `Souveränes OCR Fallback Aktiv: ${ocrResult.scanned_pages_count} von ${ocrResult.total_pages} Seiten ohne nativen Vektor-Text. Automatische Texterkennung & DIN/GoBD Bounding-Box Alignment aktiv (${ocrResult.inspection_duration_ms}ms).`
+                  : `Nativer Vektor-PDF: Alle ${ocrResult.total_pages} Seiten mit vollständigem Textfluss indiziert (${ocrResult.inspection_duration_ms}ms).`
+              }
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  ocrResult.scanned_pages_count > 0
+                    ? "bg-amber-500 animate-pulse"
+                    : "bg-emerald-500"
+                }`}
+              />
+              <span className="hidden sm:inline">
+                {ocrResult.scanned_pages_count > 0
+                  ? `OCR Fallback (${ocrResult.scanned_pages_count}p)`
+                  : "Vektor-PDF"}
+              </span>
+            </div>
+          )}
 
           {/* REGULATORY AUDIT MODULES GROUP */}
           {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector || onOpenLkSGAudit || onOpenNegotiationBattlecard || onOpenZugferd) && (
