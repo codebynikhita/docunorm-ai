@@ -23,8 +23,9 @@ import { AuditReportExporterModal } from "@/components/AuditReportExporterModal"
 import { LkSGAuditPanel } from "@/components/LkSGAuditPanel";
 import { NegotiationBattlecardModal } from "@/components/NegotiationBattlecardModal";
 import { PortfolioGovernanceCockpit } from "@/components/PortfolioGovernanceCockpit";
+import { TenantSelectorModal } from "@/components/TenantSelectorModal";
 import { Language } from "@/lib/i18n";
-import { uploadDocument, listDocuments, UserProfile, DocumentItem } from "@/lib/api";
+import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
 
 export default function Home() {
@@ -59,6 +60,8 @@ export default function Home() {
   const [isLkSGAuditOpen, setIsLkSGAuditOpen] = useState(false);
   const [isNegotiationBattlecardOpen, setIsNegotiationBattlecardOpen] = useState(false);
   const [isPortfolioCockpitOpen, setIsPortfolioCockpitOpen] = useState(false);
+  const [isTenantModalOpen, setIsTenantModalOpen] = useState(false);
+  const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [isFloatingAuditorOpen, setIsFloatingAuditorOpen] = useState(true);
@@ -99,6 +102,10 @@ export default function Home() {
       setUser(null);
       setLayoutMode("portal");
     }
+
+    getCurrentTenantContext()
+      .then((t) => setActiveTenant(t))
+      .catch((err) => console.debug("Initial tenant load skipped:", err));
   }, []);
 
   const handleToggleLang = (newLang: Language) => {
@@ -279,6 +286,8 @@ export default function Home() {
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenTenantSelector={() => setIsTenantModalOpen(true)}
+        activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
       {/* Upload Error Banner if present */}
@@ -683,6 +692,26 @@ export default function Home() {
         onOpenCertificate={() => setIsCertificateOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
+      />
+
+      {/* Enterprise Multi-Tenant Partitioning & RLS Modal (GDPR Art. 32 / BaFin KWG § 25b) */}
+      <TenantSelectorModal
+        isOpen={isTenantModalOpen}
+        onClose={() => setIsTenantModalOpen(false)}
+        onTenantSwitched={(tenant) => {
+          setActiveTenant(tenant);
+          // Refresh documents for the new tenant partition
+          listDocuments().then((docs) => {
+            setAvailableDocuments(docs);
+            if (docs.length > 0) {
+              setDocumentId(docs[0].id);
+              setDocumentName(docs[0].filename);
+            } else {
+              setDocumentId(null);
+              setDocumentName("");
+            }
+          });
+        }}
       />
     </div>
   );

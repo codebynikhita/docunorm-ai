@@ -1768,6 +1768,82 @@ export async function inspectDocumentOcr(documentId: string): Promise<DocumentOC
   return res.json();
 }
 
+// --- Day 30: Enterprise Multi-Tenancy & PostgreSQL RLS Isolation ---
+
+export interface TenantItem {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+  updated_at: string;
+  document_count: number;
+  chunk_count: number;
+}
+
+export interface TenantIsolationAuditReport {
+  tenant_id: string;
+  tenant_name: string;
+  tenant_slug: string;
+  rls_mode: string;
+  total_documents_visible: number;
+  total_chunks_visible: number;
+  cross_tenant_leakage_detected: boolean;
+  audit_timestamp: string;
+  compliance_certification: string;
+  registered_tenants: Array<{ id: string; name: string; slug: string; docs: number }>;
+}
+
+export function getActiveTenantSlug(): string {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("docunorm_active_tenant") || "siemens-ag";
+  }
+  return "siemens-ag";
+}
+
+export function setActiveTenantSlug(slug: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("docunorm_active_tenant", slug);
+  }
+}
+
+export async function listEnterpriseTenants(): Promise<TenantItem[]> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/tenants`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to list enterprise tenants (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getCurrentTenantContext(): Promise<TenantItem> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/tenants/current`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch current tenant context (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function runTenantIsolationAudit(tenantSlug?: string): Promise<TenantIsolationAuditReport> {
+  const slug = tenantSlug || getActiveTenantSlug();
+  const res = await fetch(`${API_BASE_URL}/api/v1/tenants/isolation-audit`, {
+    headers: {
+      "X-Tenant-ID": slug,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Tenant isolation audit failed (${res.status})`);
+  }
+  return res.json();
+}
+
+
 
 
 

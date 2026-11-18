@@ -40,6 +40,8 @@ interface HeaderProps {
   isSidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;
   onOpenCommandPalette?: () => void;
+  onOpenTenantSelector?: () => void;
+  activeTenantName?: string;
 }
 
 export function Header({
@@ -57,6 +59,8 @@ export function Header({
   isSidebarCollapsed = false,
   onToggleSidebar,
   onOpenCommandPalette,
+  onOpenTenantSelector,
+  activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
 
@@ -187,6 +191,19 @@ export function Header({
 
       {/* 3. Right: Sovereign Telemetry Status, User Profile, Certificate Export, Theme & Language */}
       <div className="flex items-center gap-2 shrink-0">
+        {/* Day 30: Enterprise Multi-Tenant Partition Selector Trigger */}
+        {onOpenTenantSelector && (
+          <button
+            onClick={onOpenTenantSelector}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-amber-500/30 hover:border-amber-500/70 text-amber-500 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold"
+            title="Mandanten-Isolation & RLS Partitioning (GDPR Art. 32 / BaFin KWG § 25b)"
+          >
+            <Building2 className="w-3 h-3 text-amber-500" />
+            <span className="hidden md:inline">{activeTenantName || "Mandant: Siemens AG"}</span>
+            <span className="md:hidden">Mandant</span>
+          </button>
+        )}
+
         {/* High-Craft Sovereign Infrastructure Indicator (Option A) */}
         <div className="relative group hidden sm:block">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-[var(--surface-border)] hover:border-emerald-500/40 text-[10px] font-mono cursor-pointer transition-all shadow-sm">

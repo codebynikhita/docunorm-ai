@@ -12,7 +12,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.api import api_router
 from app.core.config import get_settings
-from app.core.db import get_session, init_db
+from app.core.db import async_session_factory, get_session, init_db
+from app.core.tenant import (
+    ALLIANZ_TENANT_ID,
+    BMW_TENANT_ID,
+    DEUTSCHE_BANK_TENANT_ID,
+    SIEMENS_TENANT_ID,
+    get_current_tenant_id,
+    reset_current_tenant_id,
+    set_current_tenant_id,
+)
+from app.services.tenant_service import tenant_service
 
 settings = get_settings()
 
@@ -28,6 +38,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         init_db()
         print("✅ [Startup] Database schema verified.")
+        async with async_session_factory() as session:
+            await tenant_service.seed_canonical_tenants(session)
+        print("✅ [Startup] Multi-tenant client partitions seeded (Siemens, DB, Allianz, BMW).")
     except Exception as e:
         print(f"⚠️ [Startup] Database initialization notice (running in memory/stateless mode): {e}")
 
@@ -78,21 +91,52 @@ async def add_us_enterprise_telemetry(request: Request, call_next) -> Response:
     """
     US Silicon Valley Tier-1 Telemetry & Tracing Middleware:
     - Injects unique X-Request-ID (UUID4) for distributed tracing.
+    - Resolves request-scoped X-Tenant-ID header for PostgreSQL RLS isolation.
     - Measures high-precision execution latency in milliseconds.
     - Certifies German sovereign cloud residency (Frankfurt eu-central-1) & Zero-Hallucination guarantees.
     """
     request_id = str(uuid.uuid4())
     start_time = time.perf_counter()
 
-    response: Response = await call_next(request)
+    # Extract and resolve Tenant Context
+    raw_tenant = request.headers.get("x-tenant-id") or request.headers.get("X-Tenant-ID")
+    resolved_tenant_id = None
+    if raw_tenant:
+        clean = raw_tenant.lower().strip()
+        if clean in ("siemens", "siemens-ag", "siemens-ag-demo"):
+            resolved_tenant_id = SIEMENS_TENANT_ID
+        elif clean in ("db", "deutsche-bank", "deutsche-bank-ag"):
+            resolved_tenant_id = DEUTSCHE_BANK_TENANT_ID
+        elif clean in ("allianz", "allianz-se"):
+            resolved_tenant_id = ALLIANZ_TENANT_ID
+        elif clean in ("bmw", "bmw-group"):
+            resolved_tenant_id = BMW_TENANT_ID
+        else:
+            try:
+                resolved_tenant_id = uuid.UUID(raw_tenant)
+            except (ValueError, TypeError):
+                resolved_tenant_id = None
+
+    tenant_token = None
+    if resolved_tenant_id:
+        tenant_token = set_current_tenant_id(resolved_tenant_id)
+
+    try:
+        response: Response = await call_next(request)
+    finally:
+        if tenant_token:
+            reset_current_tenant_id(tenant_token)
 
     duration_ms = (time.perf_counter() - start_time) * 1000.0
 
+    active_tenant = get_current_tenant_id()
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Response-Time-Ms"] = f"{duration_ms:.2f}"
     response.headers["X-Sovereign-Region"] = "eu-central-1-fra (Germany)"
     response.headers["X-Auditor-Engine"] = "DocuNorm-Gemini-2.0-Flash-Sovereign"
     response.headers["X-BaFin-Compliance-Seal"] = "DORA-Art30-KWG25b-Verified"
+    response.headers["X-Tenant-ID"] = str(active_tenant)
+    response.headers["X-Multi-Tenant-Policy"] = "Row-Level-Security-Isolated"
 
     return response
 

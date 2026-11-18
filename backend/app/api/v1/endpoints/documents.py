@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.db import get_session
+from app.core.tenant import apply_rls_session_context, get_current_tenant_id
 from app.models.audit import AuditLog
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.tenant import Tenant
@@ -100,36 +101,49 @@ pdf_parser = PDFParserService()
 
 async def get_or_create_default_tenant_and_user(
     db: AsyncSession,
+    target_tenant_id: UUID | None = None,
 ) -> tuple[Tenant, User]:
     """
-    Ensures a default enterprise tenant and auditor user exist for development/demo.
-    In multi-tenant production, this context comes from the validated JWT token.
+    Resolves the active enterprise client tenant and compliance officer user.
+    Respects request-scoped multi-tenant context (X-Tenant-ID / ContextVar)
+    and applies PostgreSQL Row-Level Security (RLS) session context.
     """
-    # 1. Check or create default demo tenant (Siemens AG Demo)
-    stmt = select(Tenant).where(Tenant.slug == "siemens-ag-demo")
+    resolved_tenant_id = target_tenant_id or get_current_tenant_id()
+
+    # 1. Check if tenant with this ID exists
+    stmt = select(Tenant).where(Tenant.id == resolved_tenant_id)
     result = await db.execute(stmt)
     tenant = result.scalar_one_or_none()
 
     if not tenant:
+        # Fallback check by slug (for backward compatibility with 'siemens-ag-demo')
+        slug_stmt = select(Tenant).where(Tenant.slug.in_(["siemens-ag", "siemens-ag-demo"]))
+        tenant = (await db.execute(slug_stmt)).scalar_one_or_none()
+
+    if not tenant:
+        # Provision canonical Siemens tenant
         tenant = Tenant(
-            id=uuid4(),
+            id=resolved_tenant_id,
             name="Siemens AG (Compliance Demo)",
             slug="siemens-ag-demo",
         )
         db.add(tenant)
         await db.flush()
 
-    # 2. Check or create default auditor user
-    user_stmt = select(User).where(User.email == "auditor@siemens-demo.de")
+    # Apply PostgreSQL RLS session setting if running on Postgres
+    await apply_rls_session_context(db, tenant.id)
+
+    # 2. Check or create auditor user for this tenant
+    user_stmt = select(User).where(User.tenant_id == tenant.id)
     user_result = await db.execute(user_stmt)
-    user = user_result.scalar_one_or_none()
+    user = user_result.scalars().first()
 
     if not user:
         user = User(
             id=uuid4(),
             tenant_id=tenant.id,
-            email="auditor@siemens-demo.de",
-            full_name="Nikhita Reddy (Lead Auditor)",
+            email=f"auditor@{tenant.slug}.de",
+            full_name=f"Compliance Officer ({tenant.name.split()[0]})",
             hashed_password="mock_hashed_secret_for_dev_mode",
             role=UserRole.AUDITOR,
             is_active=True,
