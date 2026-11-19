@@ -378,7 +378,7 @@ export function DocumentViewer({
                   const doc = availableDocuments.find((d) => d.id === e.target.value);
                   if (doc && onSelectDocument) onSelectDocument(doc);
                 }}
-                className="bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] text-xs rounded-md px-2 py-1.5 pr-6 appearance-none focus:outline-none focus:border-[var(--accent-tangerine)] cursor-pointer font-mono font-medium w-36 sm:w-48 md:w-56 truncate shadow-sm"
+                className="bg-[var(--surface-card)] border border-[var(--surface-border)] text-[var(--foreground)] text-xs rounded-md px-2 py-1.5 pr-6 appearance-none focus:outline-none focus:border-[var(--accent-tangerine)] cursor-pointer font-mono font-medium w-36 sm:w-48 md:w-60 lg:w-64 max-w-[280px] truncate shadow-sm shrink-0"
               >
                 <option value="">{t.select_doc_placeholder}</option>
                 {availableDocuments.map((doc) => (
@@ -488,7 +488,7 @@ export function DocumentViewer({
 
           {/* REGULATORY AUDIT MODULES GROUP */}
           {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector || onOpenLkSGAudit || onOpenNegotiationBattlecard || onOpenZugferd) && (
-            <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm overflow-x-auto max-w-[46vw] scrollbar-none">
+            <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm overflow-x-auto max-w-[34vw] sm:max-w-[40vw] md:max-w-[46vw] shrink scrollbar-none">
               {onOpenDoraExit && (
                 <button
                   onClick={onOpenDoraExit}
@@ -878,27 +878,27 @@ export function DocumentViewer({
             {/* Executive Dossier Header (Bidirectional DE ⇄ EN) */}
             <div className="p-4 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] shadow-sm space-y-3 shrink-0">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center shrink-0">
-                    <Languages className="w-5 h-5 text-[var(--accent-tangerine)]" />
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center shrink-0">
+                    <Languages className="w-4 h-4 sm:w-5 sm:h-5 text-[var(--accent-tangerine)]" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-black tracking-wider uppercase text-[var(--foreground)]">
+                      <span className="text-xs font-mono font-black tracking-wider uppercase text-[var(--foreground)] truncate">
                         {detectedDocLang === "EN"
                           ? lang === "DE"
-                            ? "Beglaubigtes deutsches Revisionsdossier"
-                            : "Certified German Translation Dossier"
+                            ? "Deutsches Revisionsdossier"
+                            : "German Translation Dossier"
                           : lang === "DE"
-                            ? "Beglaubigtes englisches Revisionsdossier"
-                            : "Certified English Translation Dossier"}
+                            ? "Englisches Revisionsdossier"
+                            : "English Translation Dossier"}
                       </span>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold shrink-0 opacity-80">
                         {lang === "DE" ? "Seite" : "Page"} {currentPage} {lang === "DE" ? "von" : "of"} {totalPages}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <p className="text-[11px] font-mono opacity-60 truncate max-w-[280px]">
+                      <p className="text-[11px] font-mono opacity-60 truncate max-w-[180px] sm:max-w-[260px]">
                         {documentName}
                       </p>
                       <span className="text-[9.5px] font-mono font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 shrink-0">
@@ -908,8 +908,8 @@ export function DocumentViewer({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-md font-bold hidden xl:flex items-center gap-1.5 shadow-sm">
+                <div className="flex items-center gap-2 shrink-0 ml-auto">
+                  <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-1 rounded-md font-bold hidden 2xl:flex items-center gap-1.5 shadow-sm">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />{" "}
                     {detectedDocLang === "EN"
                       ? lang === "DE"
@@ -926,17 +926,13 @@ export function DocumentViewer({
                       }
                     }}
                     title="Download Certified Translation PDF with SHA-256 fingerprint"
-                    className="flex items-center gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono font-bold text-[11px] px-3 py-1.5 rounded-md shadow transition-all cursor-pointer uppercase tracking-wider"
+                    className="flex items-center gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono font-bold text-[10.5px] sm:text-[11px] px-2.5 sm:px-3 py-1.5 rounded-md shadow transition-all cursor-pointer uppercase tracking-wider shrink-0 whitespace-nowrap"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>
                       {detectedDocLang === "EN"
-                        ? lang === "DE"
-                          ? "Beglaubigtes PDF (DE)"
-                          : "Certified PDF (DE)"
-                        : lang === "DE"
-                          ? "Beglaubigtes PDF (EN)"
-                          : "Certified PDF (EN)"}
+                        ? "PDF (DE)"
+                        : "PDF (EN)"}
                     </span>
                   </button>
                   <button
@@ -946,7 +942,7 @@ export function DocumentViewer({
                       }
                     }}
                     title="Download Translation Dossier in Markdown format"
-                    className="flex items-center gap-1.5 bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--foreground)] border border-[var(--surface-border)] font-mono text-[11px] font-bold px-2.5 py-1.5 rounded-md transition-all cursor-pointer shadow-sm"
+                    className="flex items-center gap-1.5 bg-[var(--surface-dark)] hover:bg-[var(--surface-card)] text-[var(--foreground)] border border-[var(--surface-border)] font-mono text-[10.5px] sm:text-[11px] font-bold px-2.5 py-1.5 rounded-md transition-all cursor-pointer shadow-sm shrink-0"
                   >
                     <FileText className="w-3.5 h-3.5 text-[var(--accent-cyan)]" />
                     <span>MD</span>
@@ -984,30 +980,55 @@ export function DocumentViewer({
 
               {/* Language Orientation Toggle */}
               <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1 border-b border-[var(--surface-border)] text-[10px] font-mono">
-                <span className="text-[10.5px] opacity-60 font-bold uppercase tracking-wider flex items-center gap-1.5">
-                  <Languages className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
-                  {detectedDocLang === "EN" ? "Dual-Language Dossier" : "Beglaubigtes Revisionsdossier"}
+                <span className="text-[10.5px] opacity-60 font-bold uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                  <Languages className="w-3.5 h-3.5 text-[var(--accent-tangerine)] shrink-0" />
+                  <span className="hidden sm:inline">
+                    {detectedDocLang === "EN" ? "Dual-Language Dossier" : "Beglaubigtes Revisionsdossier"}
+                  </span>
+                  <span className="sm:hidden">
+                    {detectedDocLang === "EN" ? "Dossier" : "Revisionsdossier"}
+                  </span>
                 </span>
-                <div className="flex items-center gap-1 bg-[var(--surface-dark)] p-0.5 rounded-md border border-[var(--surface-border)]">
+                <div className="flex items-center gap-1 bg-[var(--surface-dark)] p-0.5 rounded-md border border-[var(--surface-border)] shrink-0">
                   <button
                     onClick={() => setDossierPrimaryView("translated")}
-                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all ${
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all whitespace-nowrap shrink-0 ${
                       dossierPrimaryView === "translated"
                         ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
                         : "opacity-60 hover:opacity-100 text-[var(--foreground)]"
                     }`}
                   >
-                    {detectedDocLang === "EN" ? "🇩🇪 German Translation (Primary)" : "🇬🇧 English Translation (Primary)"}
+                    {detectedDocLang === "EN" ? (
+                      <>
+                        <span className="hidden md:inline">🇩🇪 German (Primary)</span>
+                        <span className="md:hidden">🇩🇪 German</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden md:inline">🇬🇧 English (Primary)</span>
+                        <span className="md:hidden">🇬🇧 English</span>
+                      </>
+                    )}
                   </button>
                   <button
                     onClick={() => setDossierPrimaryView("original")}
-                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all ${
+                    className={`px-2 py-0.5 rounded font-bold cursor-pointer transition-all whitespace-nowrap shrink-0 ${
                       dossierPrimaryView === "original"
                         ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] shadow-sm"
                         : "opacity-60 hover:opacity-100 text-[var(--foreground)]"
                     }`}
                   >
-                    {detectedDocLang === "EN" ? "🇺🇸 English Original" : "🇩🇪 Deutscher Originaltext"}
+                    {detectedDocLang === "EN" ? (
+                      <>
+                        <span className="hidden md:inline">🇺🇸 English Original</span>
+                        <span className="md:hidden">🇺🇸 Original</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden md:inline">🇩🇪 German Original</span>
+                        <span className="md:hidden">🇩🇪 Original</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
