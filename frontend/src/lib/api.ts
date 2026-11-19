@@ -1843,6 +1843,124 @@ export async function runTenantIsolationAudit(tenantSlug?: string): Promise<Tena
   return res.json();
 }
 
+// --- Day 31: Cross-Encoder Re-Ranking & Two-Stage High-Precision Retrieval ---
+
+export interface RerankedPassage {
+  index: number;
+  text: string;
+  score: number;
+  initial_rank: number;
+  reranked_rank: number;
+  rank_delta: number;
+  legal_term_matches: string[];
+  explanation: string | null;
+}
+
+export interface RerankResponse {
+  query: string;
+  model_used: string;
+  total_candidates: number;
+  top_k: number;
+  execution_time_ms: number;
+  results: RerankedPassage[];
+}
+
+export interface RerankedChunkResult {
+  chunk_id: string;
+  document_id: string;
+  page_number: number;
+  bounding_box: [number, number, number, number] | null;
+  content: string;
+  initial_vector_score: number;
+  cross_encoder_score: number;
+  initial_rank: number;
+  final_rank: number;
+  rank_delta: number;
+  legal_term_matches: string[];
+}
+
+export interface DocumentRerankedSearchResponse {
+  query: string;
+  document_id: string;
+  stage1_candidates_fetched: number;
+  stage2_reranked_returned: number;
+  model_used: string;
+  execution_time_ms: number;
+  results: RerankedChunkResult[];
+}
+
+export interface CrossEncoderModelInfo {
+  model_id: string;
+  architecture: string;
+  is_native_torch_available: boolean;
+  sovereign_fallback_active: boolean;
+  supported_languages: string[];
+  specialized_taxonomies: string[];
+}
+
+export async function rerankPassages(
+  query: string,
+  documents: string[],
+  topK: number = 5,
+  boostLegalTerms: boolean = true,
+): Promise<RerankResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rerank`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify({
+      query,
+      documents,
+      top_k: topK,
+      boost_legal_terms: boostLegalTerms,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Passage re-ranking failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function rerankedSearchDocument(
+  documentId: string,
+  query: string,
+  candidatePoolSize: number = 25,
+  topK: number = 5,
+): Promise<DocumentRerankedSearchResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/reranked-search`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify({
+      query,
+      candidate_pool_size: candidatePoolSize,
+      top_k: topK,
+      boost_legal_terms: true,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Two-stage reranked search failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getRerankerModelInfo(): Promise<CrossEncoderModelInfo> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rerank/models`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load re-ranker model info (${res.status})`);
+  }
+  return res.json();
+}
+
+
 
 
 

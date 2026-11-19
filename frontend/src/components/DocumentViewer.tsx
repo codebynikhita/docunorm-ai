@@ -470,6 +470,15 @@ export function DocumentViewer({
             </div>
           )}
 
+          {/* Day 31: Cross-Encoder Re-Ranking Indicator Pill */}
+          <div
+            className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono border shadow-sm shrink-0 bg-purple-500/10 border-purple-500/20 text-purple-600 dark:text-purple-400 font-medium"
+            title="Two-Stage High-Precision Retrieval: 1st Stage Dense Vector Search + 2nd Stage Cross-Encoder Re-Ranking (bge-reranker-large with German Statutory Citation & Operative Clause Scoring)"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+            <span className="hidden sm:inline">2-Stage Re-Ranker: Aktiv</span>
+          </div>
+
           {/* REGULATORY AUDIT MODULES GROUP */}
           {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector || onOpenLkSGAudit || onOpenNegotiationBattlecard || onOpenZugferd) && (
             <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm overflow-x-auto max-w-[46vw] scrollbar-none">

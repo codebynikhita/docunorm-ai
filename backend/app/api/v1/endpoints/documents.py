@@ -2,6 +2,7 @@ import asyncio
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Annotated, Any
 from uuid import UUID, uuid4
@@ -48,6 +49,10 @@ from app.schemas.dora import DoraExitAuditReport
 from app.schemas.environmental import EnvironmentalAuditReport
 from app.schemas.lksg import BafaQuestionnaireResponse, LkSGAuditResponse
 from app.schemas.remediation import AmendmentProposal, DocumentRiskHeatmap
+from app.schemas.rerank import (
+    DocumentRerankedSearchResponse,
+    DocumentSearchRerankRequest,
+)
 from app.schemas.subcontractor import DoraSubcontractorAuditReport
 from app.schemas.table import (
     DocumentTablesResponse,
@@ -83,6 +88,7 @@ from app.services.lksg_analyzer import LkSGAnalyzerService
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
 from app.services.remediation_engine import RemediationEngine
+from app.services.reranker import reranker_service
 from app.services.storage import storage_service
 from app.services.subcontractor_engine import subcontractor_engine
 from app.services.table_extractor import TableExtractorService
@@ -627,6 +633,105 @@ async def search_document(
         document_id=document_id,
         total_results=len(matches),
         results=matches,
+    )
+
+
+@router.post(
+    "/{document_id}/reranked-search",
+    response_model=DocumentRerankedSearchResponse,
+    summary="Two-Stage High-Precision Retrieval with Cross-Encoder Re-Ranking (bge-reranker-large)",
+)
+async def reranked_search_document(
+    document_id: UUID,
+    payload: DocumentSearchRerankRequest,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> DocumentRerankedSearchResponse:
+    """
+    Two-Stage Retrieval Pipeline:
+    - Stage 1: Fast vector candidate retrieval (pgvector / sovereign SQLite) fetching top candidate_pool_size chunks.
+    - Stage 2: Heavy Cross-Encoder re-ranking with German statutory citation & operative clause scoring.
+    - Returns re-ranked chunks with initial vs final rank, rank delta, and calibrated cross-attention confidence.
+    """
+    start_time = time.perf_counter()
+    tenant, _ = await get_or_create_default_tenant_and_user(db)
+
+    # 1. Generate query vector
+    query_vector = embedding_service.generate_embedding(payload.query)
+
+    # 2. Fetch Stage-1 Candidate Pool
+    is_sqlite = True
+    try:
+        bind = db.get_bind()
+        if bind and bind.dialect.name != "sqlite":
+            is_sqlite = False
+    except Exception:
+        is_sqlite = True
+
+    candidates: list[tuple[DocumentChunk, float]] = []
+
+    if is_sqlite:
+        stmt = (
+            select(DocumentChunk)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+            )
+        )
+        result = await db.execute(stmt)
+        all_chunks = result.scalars().all()
+        scored_chunks = []
+        needs_flush = False
+        for c in all_chunks:
+            emb = c.embedding
+            if emb is None and c.content:
+                emb = embedding_service.generate_embedding(c.content)
+                c.embedding = emb
+                needs_flush = True
+            if emb:
+                try:
+                    sim = embedding_service.cosine_similarity(query_vector, emb)
+                    scored_chunks.append((c, sim))
+                except Exception:
+                    continue
+        if needs_flush:
+            await db.flush()
+        scored_chunks.sort(key=lambda x: x[1], reverse=True)
+        candidates = scored_chunks[: payload.candidate_pool_size]
+    else:
+        distance_expr = DocumentChunk.embedding.cosine_distance(query_vector).label("distance")
+        stmt = (
+            select(DocumentChunk, distance_expr)
+            .where(
+                DocumentChunk.document_id == document_id,
+                DocumentChunk.tenant_id == tenant.id,
+                DocumentChunk.embedding.is_not(None),
+            )
+            .order_by(distance_expr.asc())
+            .limit(payload.candidate_pool_size)
+        )
+        result = await db.execute(stmt)
+        for chunk, distance in result.all():
+            similarity = round(max(0.0, 1.0 - float(distance)), 4)
+            candidates.append((chunk, similarity))
+
+    # 3. Stage 2: Heavy Cross-Encoder Re-Ranking
+    reranked_results = reranker_service.rerank_document_chunks(
+        query=payload.query,
+        candidates=candidates,
+        top_k=payload.top_k,
+        boost_legal_terms=payload.boost_legal_terms,
+    )
+
+    duration_ms = (time.perf_counter() - start_time) * 1000.0
+
+    return DocumentRerankedSearchResponse(
+        query=payload.query,
+        document_id=document_id,
+        stage1_candidates_fetched=len(candidates),
+        stage2_reranked_returned=len(reranked_results),
+        model_used=reranker_service.MODEL_ID if reranker_service.native_model else "Sovereign-German-CrossAttention-Engine",
+        execution_time_ms=round(duration_ms, 2),
+        results=reranked_results,
     )
 
 
