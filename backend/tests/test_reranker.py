@@ -215,3 +215,15 @@ async def test_two_stage_document_reranked_search():
     assert "DORA Art. 30" in top_result["content"]
     assert top_result["final_rank"] == 1
     assert top_result["cross_encoder_score"] > 0.70
+
+    # Teardown test artifacts
+    async with async_session_factory() as session:
+        c1 = await session.get(DocumentChunk, chunk1.id)
+        c2 = await session.get(DocumentChunk, chunk2.id)
+        c3 = await session.get(DocumentChunk, chunk3.id)
+        d = await session.get(Document, doc_id)
+        u = await session.get(User, user.id)
+        for obj in [c1, c2, c3, d, u]:
+            if obj:
+                await session.delete(obj)
+        await session.commit()

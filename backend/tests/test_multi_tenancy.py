@@ -168,6 +168,13 @@ async def test_cross_tenant_document_isolation():
         assert doc_db.id in db_ids
         assert doc_siemens.id not in db_ids  # Siemens doc must NOT leak into DB
 
+        # Teardown test artifacts
+        await session.delete(doc_siemens)
+        await session.delete(doc_db)
+        await session.delete(u_siemens)
+        await session.delete(u_db)
+        await session.commit()
+
 
 @pytest.mark.asyncio
 async def test_cross_tenant_vector_search_isolation():
@@ -217,6 +224,11 @@ async def test_cross_tenant_vector_search_isolation():
         )
         cross_res = (await session.execute(cross_stmt)).scalars().all()
         assert len(cross_res) == 0  # BMW must see ZERO Allianz chunks
+
+        # Teardown test artifacts
+        await session.delete(chunk_allianz)
+        await session.delete(chunk_bmw)
+        await session.commit()
 
 
 def test_tenant_fastapi_endpoints():

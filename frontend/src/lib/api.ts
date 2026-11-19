@@ -1,5 +1,24 @@
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+export function getActiveTenantSlug(): string {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("docunorm_active_tenant") || "siemens-ag";
+  }
+  return "siemens-ag";
+}
+
+export function setActiveTenantSlug(slug: string): void {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("docunorm_active_tenant", slug);
+  }
+}
+
+export function getTenantHeaders(): Record<string, string> {
+  return {
+    "X-Tenant-ID": getActiveTenantSlug(),
+  };
+}
+
 export interface DocumentUploadResponse {
   message: string;
   is_duplicate: boolean;
@@ -19,6 +38,7 @@ export async function uploadDocument(file: File): Promise<DocumentUploadResponse
 
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/upload`, {
     method: "POST",
+    headers: getTenantHeaders(),
     body: formData,
   });
 
@@ -59,7 +79,9 @@ export interface DocumentChunkItem {
 
 export async function listDocuments(): Promise<DocumentItem[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/documents`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/documents`, {
+      headers: getTenantHeaders(),
+    });
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -109,6 +131,7 @@ export async function auditDocument(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...getTenantHeaders(),
     },
     body: JSON.stringify({ query, framework, history, lang }),
   });
@@ -125,7 +148,9 @@ export async function auditDocument(
 
 export async function getDocumentChunks(documentId: string): Promise<DocumentChunkItem[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/chunks`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/chunks`, {
+      headers: getTenantHeaders(),
+    });
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -135,7 +160,9 @@ export async function getDocumentChunks(documentId: string): Promise<DocumentChu
 
 export async function getTranslatedDocumentChunks(documentId: string): Promise<DocumentChunkItem[]> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/translated-chunks`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/translated-chunks`, {
+      headers: getTenantHeaders(),
+    });
     if (!res.ok) return [];
     return res.json();
   } catch {
@@ -153,7 +180,9 @@ export interface TaskProgressResponse {
 
 export async function getDocumentTaskProgress(documentId: string): Promise<TaskProgressResponse | null> {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/task-progress`);
+    const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/task-progress`, {
+      headers: getTenantHeaders(),
+    });
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -1791,19 +1820,6 @@ export interface TenantIsolationAuditReport {
   audit_timestamp: string;
   compliance_certification: string;
   registered_tenants: Array<{ id: string; name: string; slug: string; docs: number }>;
-}
-
-export function getActiveTenantSlug(): string {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("docunorm_active_tenant") || "siemens-ag";
-  }
-  return "siemens-ag";
-}
-
-export function setActiveTenantSlug(slug: string): void {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("docunorm_active_tenant", slug);
-  }
 }
 
 export async function listEnterpriseTenants(): Promise<TenantItem[]> {

@@ -40,6 +40,8 @@ import {
   ClauseMetadata,
 } from "@/lib/translator";
 import {
+  API_BASE_URL,
+  getActiveTenantSlug,
   getDocumentChunks,
   getTranslatedDocumentChunks,
   getDocumentTaskProgress,
@@ -296,8 +298,13 @@ export function DocumentViewer({
         const pdfjsLib = await import("pdfjs-dist");
         pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
-        const pdfUrl = `http://localhost:8000/api/v1/documents/${documentId}/file`;
-        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdfUrl = `${API_BASE_URL}/api/v1/documents/${documentId}/file`;
+        const loadingTask = pdfjsLib.getDocument({
+          url: pdfUrl,
+          httpHeaders: {
+            "X-Tenant-ID": getActiveTenantSlug(),
+          },
+        });
         const pdf = await loadingTask.promise;
 
         if (!isCancelled) {
