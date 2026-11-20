@@ -327,7 +327,7 @@ export default function Home() {
         />
       ) : (
         /* Authenticated Application Shell with Sidebar + Main Viewport */
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden min-w-0">
           {/* Zone 1: Mini Compliance Navigation Sidebar */}
           <Sidebar
             lang={lang}
@@ -379,7 +379,7 @@ export default function Home() {
             />
           ) : layoutMode === "executive" ? (
             /* Template 2: Executive Compliance Cockpit */
-            <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
+            <main className="flex-1 flex overflow-hidden bg-[var(--background)] min-w-0">
               <ExecutiveDashboard
                 lang={lang}
                 documentId={documentId}
@@ -394,7 +394,7 @@ export default function Home() {
             </main>
           ) : layoutMode === "focus" ? (
             /* Template 3: Full-Screen Document Focus Canvas with Floating Auditor */
-            <main className="flex-1 flex relative overflow-hidden bg-[var(--background)]">
+            <main className="flex-1 flex relative overflow-hidden bg-[var(--background)] min-w-0">
               <DocumentViewer
                 lang={lang}
                 documentId={documentId}
@@ -448,7 +448,7 @@ export default function Home() {
             </main>
           ) : (
             /* Template 1: Classic Split Dual-Workbench */
-            <main className="flex-1 flex overflow-hidden bg-[var(--background)]">
+            <main className="flex-1 flex overflow-hidden bg-[var(--background)] min-w-0">
               <DocumentViewer
                 lang={lang}
                 documentId={documentId}

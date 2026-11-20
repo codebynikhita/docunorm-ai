@@ -75,7 +75,7 @@ export function ClauseRiskHeatmapBar({
   }[heatmap.risk_rating] || "bg-slate-500/15 text-slate-700 dark:text-slate-400 border-slate-500/40";
 
   return (
-    <div className="w-full bg-[var(--surface-dark)] border-b border-[var(--surface-border)] px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 text-xs font-mono shadow-sm min-w-0">
+    <div className="w-full bg-[var(--surface-dark)] border-b border-[var(--surface-border)] px-3 sm:px-4 py-2 flex items-center justify-between gap-2 sm:gap-3 text-xs font-mono shadow-sm min-w-0 overflow-hidden">
       {/* Left: Overall Risk Score & Rating Badge */}
       <div className="flex items-center gap-2 shrink-0 min-w-0">
         <div className="flex items-center gap-1.5 text-rose-500 font-bold shrink-0">

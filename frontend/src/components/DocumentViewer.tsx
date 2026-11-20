@@ -360,7 +360,7 @@ export function DocumentViewer({
   const currentPageChunks = allChunks.filter((c) => c.page_number === currentPage);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[var(--background)]">
+    <div className="flex-1 flex flex-col h-full bg-[var(--background)] min-w-0 overflow-hidden w-full">
       {/* Top Toolbar */}
       <div className="h-14 border-b border-[var(--surface-border)] bg-[var(--surface-dark)] px-3 sm:px-4 flex items-center justify-between gap-2 select-none overflow-hidden">
         {/* Left: Document Selector, View Modes & Regulatory Suite */}
@@ -488,7 +488,7 @@ export function DocumentViewer({
 
           {/* REGULATORY AUDIT MODULES GROUP */}
           {(onOpenDoraExit || onOpenDoraSubcontractor || onOpenAuditRights || onOpenTableInspector || onOpenLkSGAudit || onOpenNegotiationBattlecard || onOpenZugferd) && (
-            <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm overflow-x-auto max-w-[34vw] sm:max-w-[40vw] md:max-w-[46vw] shrink scrollbar-none">
+            <div className="flex items-center bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-md p-0.5 text-[10px] font-mono shadow-sm overflow-x-auto max-w-[260px] sm:max-w-[340px] md:max-w-[440px] lg:max-w-[540px] shrink min-w-0 scrollbar-none">
               {onOpenDoraExit && (
                 <button
                   onClick={onOpenDoraExit}
@@ -597,7 +597,7 @@ export function DocumentViewer({
         </div>
 
         {/* Right: Upload & Page Navigation (Fixed, Never Collides) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0 pl-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0 pl-1 ml-auto">
           <input
             type="file"
             ref={fileInputRef}
@@ -732,14 +732,14 @@ export function DocumentViewer({
       )}
 
       {/* Main Viewport: Canvas / Dual-View / English Dossier */}
-      <div className="flex-1 overflow-hidden flex">
+      <div className="flex-1 overflow-hidden flex min-w-0 w-full">
         {/* 1. PDF Canvas View (Kept mounted in DOM to preserve rendered canvas state) */}
         <div
           className={`overflow-auto p-2 sm:p-4 cyber-canvas relative flex flex-col items-center min-w-0 ${
             docViewMode === "english"
               ? "hidden"
               : docViewMode === "dual"
-              ? "w-1/2 min-w-0 border-r border-[var(--surface-border)]"
+              ? "w-1/2 flex-1 min-w-0 border-r border-[var(--surface-border)]"
               : "flex-1 min-w-0"
           }`}
         >
@@ -840,7 +840,7 @@ export function DocumentViewer({
         {(docViewMode === "dual" || docViewMode === "english") && (
           <div
             className={`${
-              docViewMode === "english" ? "w-full min-w-0" : "w-1/2 min-w-0"
+              docViewMode === "english" ? "flex-1 min-w-0" : "w-1/2 flex-1 min-w-0"
             } overflow-auto p-3 sm:p-4 bg-[var(--surface-dark)] flex flex-col space-y-3 min-w-0`}
           >
             {!documentId ? (
