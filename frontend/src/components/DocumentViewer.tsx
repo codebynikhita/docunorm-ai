@@ -735,12 +735,12 @@ export function DocumentViewer({
       <div className="flex-1 overflow-hidden flex">
         {/* 1. PDF Canvas View (Kept mounted in DOM to preserve rendered canvas state) */}
         <div
-          className={`overflow-auto p-4 md:p-6 cyber-canvas relative flex flex-col items-center min-w-0 ${
+          className={`overflow-auto p-2 sm:p-4 cyber-canvas relative flex flex-col items-center min-w-0 ${
             docViewMode === "english"
               ? "hidden"
               : docViewMode === "dual"
-              ? "flex-1 border-r border-[var(--surface-border)]"
-              : "flex-1"
+              ? "w-1/2 min-w-0 border-r border-[var(--surface-border)]"
+              : "flex-1 min-w-0"
           }`}
         >
           {!documentId ? (
@@ -806,7 +806,7 @@ export function DocumentViewer({
           ) : (
             <div
               style={{ width: `${canvasDimensions.width}px`, minHeight: `${canvasDimensions.height}px` }}
-              className="relative bg-white rounded-lg shadow-2xl transition-all duration-150 flex items-center justify-center overflow-hidden border border-[var(--surface-border)] m-auto shrink-0"
+              className="relative bg-white rounded-lg shadow-2xl transition-all duration-150 flex items-center justify-center overflow-hidden border border-[var(--surface-border)] m-auto max-w-full"
             >
               {rendering && (
                 <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-10">
@@ -840,8 +840,8 @@ export function DocumentViewer({
         {(docViewMode === "dual" || docViewMode === "english") && (
           <div
             className={`${
-              docViewMode === "english" ? "flex-1 min-w-0" : "flex-1 min-w-0"
-            } overflow-auto p-4 md:p-6 bg-[var(--surface-dark)] flex flex-col space-y-4`}
+              docViewMode === "english" ? "w-full min-w-0" : "w-1/2 min-w-0"
+            } overflow-auto p-3 sm:p-4 bg-[var(--surface-dark)] flex flex-col space-y-3 min-w-0`}
           >
             {!documentId ? (
               <div className="w-full max-w-[520px] border border-[var(--surface-border)] rounded-2xl flex flex-col p-8 text-center text-[var(--foreground)] bg-[var(--surface-card)] shadow-2xl my-auto mx-auto">
@@ -1187,14 +1187,14 @@ export function DocumentViewer({
                     );
                   })
               ) : (
-                <div className="p-8 text-center text-xs text-[var(--foreground)] opacity-60 font-mono space-y-2 bg-[var(--surface-card)] rounded-xl border border-[var(--surface-border)]">
-                  <BookOpen className="w-6 h-6 mx-auto text-[var(--accent-tangerine)] opacity-60" />
-                  <p className="font-bold">
+                <div className="p-6 text-center text-xs text-[var(--foreground)] opacity-70 font-mono space-y-2 bg-[var(--surface-card)] rounded-xl border border-[var(--surface-border)] shadow-sm min-w-0">
+                  <BookOpen className="w-6 h-6 mx-auto text-[var(--accent-tangerine)] opacity-80" />
+                  <p className="font-bold text-xs">
                     {detectedDocLang === "EN"
                       ? "Generating German Translation Dossier..."
                       : "Generating English Translation Dossier..."}
                   </p>
-                  <p className="text-[11px]">
+                  <p className="text-[11px] leading-relaxed max-w-sm mx-auto">
                     {detectedDocLang === "EN"
                       ? "Select or upload an English document to view synchronized paragraph-by-paragraph German translations."
                       : "Select or upload a German document to view synchronized paragraph-by-paragraph English translations."}

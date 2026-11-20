@@ -100,7 +100,7 @@ export function Header({
       </div>
 
       {/* 2. Middle: Navigation & Layout Switcher */}
-      <div className="flex items-center gap-1 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 font-mono text-[11px] shadow-sm shrink-0">
+      <div className="flex items-center gap-1 bg-[var(--surface-card)] border border-[var(--surface-border)] rounded-lg p-1 font-mono text-[11px] shadow-sm shrink min-w-0">
         <button
           onClick={() => onLayoutChange("portal")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded transition-all font-bold cursor-pointer ${
@@ -111,7 +111,7 @@ export function Header({
           title="Public Portal & Institutional Overview"
         >
           <Building2 className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden xl:inline">{lang === "DE" ? "Übersicht" : "Overview"}</span>
+          <span className="hidden 2xl:inline">{lang === "DE" ? "Übersicht" : "Overview"}</span>
         </button>
 
         <button
@@ -130,7 +130,7 @@ export function Header({
           title={user ? "Split Dual-View: Original PDF + English Translation Dossier" : "Sign In required to open Dual-Workbench"}
         >
           <Columns3 className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden xl:inline">{t.nav_workbench}</span>
+          <span className="hidden 2xl:inline">{t.nav_workbench}</span>
           {!user && <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />}
         </button>
 
@@ -151,7 +151,7 @@ export function Header({
           title={user ? "Standalone AI Compliance Auditor (Harvey / ChatGPT Studio)" : "Sign In required to open AI Auditor Studio"}
         >
           <Bot className="w-3.5 h-3.5 stroke-[2.5] text-[var(--accent-tangerine)]" />
-          <span className="hidden xl:inline">{t.nav_auditor}</span>
+          <span className="hidden 2xl:inline">{t.nav_auditor}</span>
           {!user && <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />}
         </button>
 
@@ -171,7 +171,7 @@ export function Header({
           title={user ? "Executive Compliance Cockpit & Metrics" : "Sign In required to open Executive Cockpit"}
         >
           <LayoutGrid className="w-3.5 h-3.5 stroke-[2.5]" />
-          <span className="hidden xl:inline">{t.nav_cockpit}</span>
+          <span className="hidden 2xl:inline">{t.nav_cockpit}</span>
           {!user && <Lock className="w-2.5 h-2.5 opacity-50 ml-0.5" />}
         </button>
 
@@ -183,29 +183,29 @@ export function Header({
             title="Spotlight Search & Quick Actions (⌘K / Ctrl+K)"
           >
             <Search className="w-3 h-3 text-purple-400" />
-            <span className="hidden xl:inline">{lang === "DE" ? "Suche" : "Search"}</span>
+            <span className="hidden 2xl:inline">{lang === "DE" ? "Suche" : "Search"}</span>
             <kbd className="text-[10px] bg-slate-800 text-slate-300 px-1 py-0.2 rounded border border-slate-700">⌘K</kbd>
           </button>
         )}
       </div>
 
       {/* 3. Right: Sovereign Telemetry Status, User Profile, Certificate Export, Theme & Language */}
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         {/* Day 30: Enterprise Multi-Tenant Partition Selector Trigger */}
         {onOpenTenantSelector && (
           <button
             onClick={onOpenTenantSelector}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-amber-500/30 hover:border-amber-500/70 text-amber-500 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold"
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-amber-500/30 hover:border-amber-500/70 text-amber-500 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
             title="Mandanten-Isolation & RLS Partitioning (GDPR Art. 32 / BaFin KWG § 25b)"
           >
             <Building2 className="w-3 h-3 text-amber-500" />
-            <span className="hidden md:inline">{activeTenantName || "Mandant: Siemens AG"}</span>
-            <span className="md:hidden">Mandant</span>
+            <span className="hidden xl:inline">{activeTenantName || "Mandant: Siemens AG"}</span>
+            <span className="xl:hidden">Mandant</span>
           </button>
         )}
 
         {/* High-Craft Sovereign Infrastructure Indicator (Option A) */}
-        <div className="relative group hidden sm:block">
+        <div className="relative group hidden 2xl:block">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-[var(--surface-border)] hover:border-emerald-500/40 text-[10px] font-mono cursor-pointer transition-all shadow-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -250,16 +250,16 @@ export function Header({
 
         {/* User Authentication Status */}
         {user ? (
-          <div className="flex items-center gap-2 bg-[var(--surface-card)] border border-[var(--surface-border)] px-2.5 py-1 rounded-lg text-xs font-mono shadow-sm">
+          <div className="flex items-center gap-1.5 sm:gap-2 bg-[var(--surface-card)] border border-[var(--surface-border)] px-2 sm:px-2.5 py-1 rounded-lg text-xs font-mono shadow-sm shrink-0">
             <div className="flex items-center gap-1.5">
               <div className="w-5 h-5 rounded-full bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/30 flex items-center justify-center text-[var(--accent-tangerine)] font-bold text-[10px]">
                 {user.full_name.charAt(0)}
               </div>
-              <span className="font-bold text-[var(--foreground)] truncate max-w-[110px] hidden sm:inline">
+              <span className="font-bold text-[var(--foreground)] truncate max-w-[80px] sm:max-w-[110px] hidden md:inline">
                 {user.full_name}
               </span>
             </div>
-            <span className="text-[9px] px-1.5 py-0.2 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] uppercase text-[var(--accent-tangerine)] font-bold hidden md:inline">
+            <span className="text-[9px] px-1.5 py-0.2 rounded bg-[var(--surface-dark)] border border-[var(--surface-border)] uppercase text-[var(--accent-tangerine)] font-bold hidden 2xl:inline">
               {user.role}
             </span>
             <button
@@ -273,7 +273,7 @@ export function Header({
         ) : (
           <button
             onClick={() => onLayoutChange("login")}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-mono font-bold text-[11px] shadow-sm cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-md transition-all font-mono font-bold text-[11px] shadow-sm cursor-pointer shrink-0 ${
               layoutMode === "login"
                 ? "bg-[var(--accent-tangerine)] text-[var(--accent-contrast)]"
                 : "bg-[var(--surface-card)] hover:bg-[var(--surface-dark)] border border-[var(--accent-tangerine)]/50 text-[var(--foreground)]"
@@ -288,11 +288,11 @@ export function Header({
         {layoutMode !== "portal" && layoutMode !== "login" && (
           <button
             onClick={onOpenCertificate}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 text-[var(--accent-contrast)] font-mono font-black text-[11px] transition-all shadow-sm cursor-pointer uppercase tracking-wider shrink-0"
             title="Official BaFin / DIN 66399 Compliance Certificate"
           >
             <Award className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span className="hidden lg:inline">{t.btn_certificate}</span>
+            <span className="hidden xl:inline">{t.btn_certificate}</span>
           </button>
         )}
 
