@@ -35,6 +35,7 @@ from app.schemas.battlecard import (
     SlaSimulationRequest,
     SlaSimulationResponse,
 )
+from app.schemas.cache import AuditCacheTelemetry
 from app.schemas.capa import SupplierCapaPlan
 from app.schemas.document import (
     AuditCitation,
@@ -90,6 +91,7 @@ from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
 from app.services.remediation_engine import RemediationEngine
 from app.services.reranker import reranker_service
+from app.services.semantic_cache import semantic_cache
 from app.services.storage import storage_service
 from app.services.streaming_auditor import stream_audit_response
 from app.services.subcontractor_engine import subcontractor_engine
@@ -756,6 +758,46 @@ async def audit_document(
     """
     tenant, user = await get_or_create_default_tenant_and_user(db)
 
+    # Day 33: Redis Dynamic Semantic Cache Check (Exact Hash + Cosine >= 0.90)
+    cached_res = await semantic_cache.get(
+        tenant_id=tenant.id,
+        document_id=document_id,
+        query=payload.query,
+        framework=payload.framework,
+        lang=payload.lang,
+    )
+    if cached_res.hit and cached_res.response_data:
+        cached_citations = [
+            AuditCitation(**c) for c in cached_res.response_data.get("citations", [])
+        ]
+        audit_entry = AuditLog(
+            id=uuid4(),
+            tenant_id=tenant.id,
+            user_id=user.id,
+            action="DOCUMENT_AUDITED_CACHE_HIT",
+            resource_type="DOCUMENT",
+            resource_id=str(document_id),
+            details={
+                "query": payload.query,
+                "framework": payload.framework,
+                "cache_type": cached_res.cache_type,
+                "similarity_score": cached_res.similarity_score,
+                "saved_latency_ms": cached_res.saved_latency_ms,
+            },
+        )
+        db.add(audit_entry)
+        await db.commit()
+
+        return AuditResponse(
+            document_id=document_id,
+            query=payload.query,
+            framework=cached_res.response_data.get("framework", payload.framework),
+            status=cached_res.response_data.get("status", "COMPLIANT"),
+            finding_summary=cached_res.response_data.get("finding_summary", ""),
+            citations=cached_citations,
+            cache_telemetry=cached_res.telemetry,
+        )
+
     # 0. Self-healing: if document has 0 chunks, parse and ingest on-the-fly
     count_stmt = select(DocumentChunk).where(DocumentChunk.document_id == document_id)
     existing_chunks = (await db.execute(count_stmt)).scalars().all()
@@ -861,6 +903,7 @@ async def audit_document(
             status="INCONCLUSIVE",
             finding_summary="No relevant clauses found in the document for the specified query.",
             citations=[],
+            cache_telemetry=AuditCacheTelemetry(cached=False),
         )
 
     # 2. Prepare chunk mapping for auditor citations
@@ -951,6 +994,23 @@ async def audit_document(
     db.add(audit_entry)
     await db.commit()
 
+    # Store into Redis Dynamic Semantic Cache (Day 33)
+    response_payload = {
+        "finding_summary": finding_summary,
+        "framework": payload.framework,
+        "status": "COMPLIANT",
+        "citations": [c.model_dump() for c in citations],
+    }
+    await semantic_cache.set(
+        tenant_id=tenant.id,
+        document_id=document_id,
+        query=payload.query,
+        framework=payload.framework,
+        lang=payload.lang,
+        response_data=response_payload,
+        query_vector=query_vector,
+    )
+
     return AuditResponse(
         document_id=document_id,
         query=payload.query,
@@ -958,6 +1018,7 @@ async def audit_document(
         status="COMPLIANT",
         finding_summary=finding_summary,
         citations=citations,
+        cache_telemetry=AuditCacheTelemetry(cached=False),
     )
 
 

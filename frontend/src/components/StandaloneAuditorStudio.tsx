@@ -31,8 +31,16 @@ import {
   Square,
   Zap,
   Loader2,
+  Database,
 } from "lucide-react";
-import { auditDocument, streamDocumentAudit, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
+import {
+  auditDocument,
+  streamDocumentAudit,
+  invalidateDocumentCache,
+  AuditApiResponse,
+  AuditCitationResponse,
+  AuditCacheTelemetry,
+} from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
 import { translateGermanToEnglish, translateEnglishToGerman, isEnglishText } from "@/lib/translator";
 import { renderMarkdownFormattedText } from "@/components/AuditorPanel";
@@ -58,6 +66,7 @@ interface ThreadInquiry {
     text: string;
     citations?: AuditCitationResponse[];
     timestamp: string;
+    cache_telemetry?: AuditCacheTelemetry;
   }>;
 }
 
@@ -144,7 +153,20 @@ export function StandaloneAuditorStudio({
   const [streamingCitations, setStreamingCitations] = useState<AuditCitationResponse[]>([]);
   const [streamTokenCount, setStreamTokenCount] = useState(0);
   const [streamStatus, setStreamStatus] = useState<string | null>(null);
+  const [streamCacheHit, setStreamCacheHit] = useState<AuditCacheTelemetry | null>(null);
+  const [cachePurgedToast, setCachePurgedToast] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const handlePurgeCache = async () => {
+    if (!documentId) return;
+    try {
+      await invalidateDocumentCache(documentId);
+      setCachePurgedToast(true);
+      setTimeout(() => setCachePurgedToast(false), 2000);
+    } catch (e) {
+      console.error("Failed to purge document cache:", e);
+    }
+  };
 
   // Initial Threads - Clean state without fake pre-populated answers
   const [threads, setThreads] = useState<ThreadInquiry[]>([
@@ -320,7 +342,19 @@ export function StandaloneAuditorStudio({
         lang,
         {
           onStatus: (st) => {
-            if (st.stage === "vector_search") {
+            if (st.stage === "cache_hit") {
+              setStreamCacheHit({
+                cached: true,
+                cache_type: (st.cache_type as any) || "semantic",
+                similarity_score: st.similarity_score,
+                saved_latency_ms: st.saved_latency_ms,
+              });
+              setStreamStatus(
+                lang === "DE"
+                  ? `⚡ Redis-Cache Treffer (${st.cache_type === "exact" ? "Exakt" : "Semantisch"})...`
+                  : `⚡ Redis Cache Hit (${st.cache_type === "exact" ? "Exact" : "Semantic"})...`
+              );
+            } else if (st.stage === "vector_search") {
               setStreamStatus(
                 lang === "DE"
                   ? "pgvector Kosinus-Prüfung der Wissensdatenbank..."
@@ -348,6 +382,15 @@ export function StandaloneAuditorStudio({
                 ? result.citations
                 : accumulatedCitations;
 
+            const cachedInfo = result.cached
+              ? {
+                  cached: true,
+                  cache_type: (result.cache_type as any) || "exact",
+                  similarity_score: result.similarity_score,
+                  saved_latency_ms: result.saved_latency_ms,
+                }
+              : streamCacheHit || undefined;
+
             if (finalSummary.trim()) {
               const auditorMsg = {
                 id: `msg-auditor-${(activeThread?.messages || []).length + 2}`,
@@ -355,6 +398,7 @@ export function StandaloneAuditorStudio({
                 text: finalSummary,
                 citations: finalCits,
                 timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+                cache_telemetry: cachedInfo,
               };
 
               setThreads((prev) =>
@@ -375,6 +419,7 @@ export function StandaloneAuditorStudio({
             setStreamingCitations([]);
             setStreamTokenCount(0);
             setStreamStatus(null);
+            setStreamCacheHit(null);
             abortControllerRef.current = null;
           },
           onAbort: () => {
@@ -658,6 +703,27 @@ export function StandaloneAuditorStudio({
                 )}
               </div>
             )}
+
+            {documentId && (
+              <button
+                onClick={handlePurgeCache}
+                title={
+                  cachePurgedToast
+                    ? (lang === "DE" ? "Cache erfolgreich geleert!" : "Cache purged successfully!")
+                    : (lang === "DE" ? "Semantischen Redis-Cache für Dokument leeren" : "Purge Semantic Cache for Document")
+                }
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border font-mono text-xs font-bold transition-all shadow-sm cursor-pointer whitespace-nowrap shrink-0 ${
+                  cachePurgedToast
+                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                    : "bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border-purple-500/30"
+                }`}
+              >
+                <Database className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-[11px] hidden sm:inline">
+                  {cachePurgedToast ? (lang === "DE" ? "Geleert" : "Purged") : "Cache"}
+                </span>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -825,10 +891,26 @@ export function StandaloneAuditorStudio({
                             <CheckCircle className="w-3.5 h-3.5" />
                             <span>{framework} {lang === "DE" ? "Aufsichtsbericht" : "Forensic Audit"}</span>
                           </span>
-                          <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] flex items-center gap-1">
-                            <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
-                            Gemini 2.0 Flash
-                          </span>
+                          {msg.cache_telemetry?.cached ? (
+                            <span
+                              className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 font-bold text-purple-400 flex items-center gap-1 shadow-sm"
+                              title={
+                                lang === "DE"
+                                  ? "Aus dem semantischen Redis-Cache geladen (LLM-Aufruf dedupliziert)"
+                                  : "Served from Redis Semantic Cache (LLM call deduplicated)"
+                              }
+                            >
+                              <Database className="w-2.5 h-2.5 text-purple-400" />
+                              <span>
+                                ⚡ Cache {msg.cache_telemetry.cache_type === "exact" ? "Exakt" : `${Math.round((msg.cache_telemetry.similarity_score || 1) * 100)}% Semantisch`} • {Math.round(msg.cache_telemetry.saved_latency_ms || 1250)}ms
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] flex items-center gap-1">
+                              <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
+                              Gemini 2.0 Flash
+                            </span>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -946,10 +1028,17 @@ export function StandaloneAuditorStudio({
                       </span>
                       <span>{framework} {lang === "DE" ? "Live-Prüfung" : "Live Auditing"}</span>
                     </span>
-                    <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-emerald-500/30 font-bold text-emerald-400 flex items-center gap-1 shadow-sm">
-                      <Zap className="w-2.5 h-2.5 text-emerald-400 animate-bounce" />
-                      ⚡ SSE Live • {streamTokenCount} Tokens
-                    </span>
+                    {streamCacheHit ? (
+                      <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 font-bold text-purple-400 flex items-center gap-1 shadow-sm">
+                        <Database className="w-2.5 h-2.5 text-purple-400" />
+                        ⚡ Cache Hit • {Math.round(streamCacheHit.saved_latency_ms || 1250)}ms
+                      </span>
+                    ) : (
+                      <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-emerald-500/30 font-bold text-emerald-400 flex items-center gap-1 shadow-sm">
+                        <Zap className="w-2.5 h-2.5 text-emerald-400 animate-bounce" />
+                        ⚡ SSE Live • {streamTokenCount} Tokens
+                      </span>
+                    )}
                   </div>
 
                   <button

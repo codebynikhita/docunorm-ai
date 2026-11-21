@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 from app.models.document import DocumentStatus
+from app.schemas.cache import AuditCacheTelemetry
 
 
 class DocumentRead(BaseModel):
@@ -107,3 +108,4 @@ class AuditResponse(BaseModel):
     status: str  # "COMPLIANT", "FLAGGED", "INCONCLUSIVE"
     finding_summary: str
     citations: list[AuditCitation]
+    cache_telemetry: AuditCacheTelemetry | None = None

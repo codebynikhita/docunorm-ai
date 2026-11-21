@@ -21,6 +21,7 @@ from app.services.auditor import (
 from app.services.embedding import embedding_service
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
+from app.services.semantic_cache import semantic_cache
 
 pdf_parser = PDFParserService()
 
@@ -46,6 +47,52 @@ async def stream_audit_response(
       - 'done': full response aggregation, token count, and performance telemetry
       - 'aborted': early cancellation notification
     """
+    # Day 33: Redis Dynamic Semantic Cache Check (Exact Hash + Cosine >= 0.90)
+    cached_res = await semantic_cache.get(
+        tenant_id=tenant_id,
+        document_id=document_id,
+        query=query,
+        framework=framework,
+        lang=lang,
+    )
+    if cached_res.hit and cached_res.response_data:
+        full_text = cached_res.response_data.get("finding_summary", "")
+        citations = cached_res.response_data.get("citations", [])
+
+        yield f"event: status\ndata: {json.dumps({'stage': 'cache_hit', 'cache_type': cached_res.cache_type, 'similarity_score': cached_res.similarity_score, 'saved_latency_ms': cached_res.saved_latency_ms})}\n\n"
+
+        words = re.findall(r"\S+|\s+", full_text)
+        for w in words:
+            if request and await request.is_disconnected():
+                yield f"event: aborted\ndata: {json.dumps({'reason': 'client_disconnected', 'tokens_emitted': 0})}\n\n"
+                return
+            yield f"event: token\ndata: {json.dumps({'token': w})}\n\n"
+            await asyncio.sleep(0.005)
+
+        if citations:
+            yield f"event: citations\ndata: {json.dumps({'citations': citations})}\n\n"
+
+        yield f"event: done\ndata: {json.dumps({'full_text': full_text, 'tokens_count': len(words), 'cached': True, 'cache_type': cached_res.cache_type, 'similarity_score': cached_res.similarity_score, 'saved_latency_ms': cached_res.saved_latency_ms})}\n\n"
+
+        audit_entry = AuditLog(
+            id=uuid4(),
+            tenant_id=tenant_id,
+            user_id=user_id,
+            action="DOCUMENT_AUDITED_STREAM_CACHE_HIT",
+            resource_type="DOCUMENT",
+            resource_id=str(document_id),
+            details={
+                "query": query,
+                "framework": framework,
+                "tokens_count": len(words),
+                "cache_type": cached_res.cache_type,
+                "similarity_score": cached_res.similarity_score,
+            },
+        )
+        db.add(audit_entry)
+        await db.commit()
+        return
+
     # 0. Self-healing: if document has 0 chunks, parse and ingest on-the-fly
     count_stmt = select(DocumentChunk).where(DocumentChunk.document_id == document_id)
     existing_chunks = (await db.execute(count_stmt)).scalars().all()
@@ -314,7 +361,28 @@ async def stream_audit_response(
     }
     yield f"event: done\ndata: {json.dumps(done_payload)}\n\n"
 
-    # 5. Log immutable GDPR audit record
+    # 5. Store into Redis Dynamic Semantic Cache if generation completed cleanly
+    if not is_aborted and accumulated_text.strip():
+        try:
+            response_payload = {
+                "finding_summary": accumulated_text,
+                "framework": framework,
+                "status": "COMPLIANT" if "[SOURCE_" in accumulated_text else "FLAGGED",
+                "citations": citations,
+            }
+            await semantic_cache.set(
+                tenant_id=tenant_id,
+                document_id=document_id,
+                query=query,
+                framework=framework,
+                lang=lang,
+                response_data=response_payload,
+                query_vector=query_vector,
+            )
+        except Exception as cache_err:
+            print(f"Warning: Failed to cache streaming audit response: {cache_err}")
+
+    # 6. Log immutable GDPR audit record
     try:
         audit_entry = AuditLog(
             id=uuid4(),

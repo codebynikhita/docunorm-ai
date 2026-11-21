@@ -111,6 +111,37 @@ export interface AuditHistoryItem {
   text: string;
 }
 
+export interface AuditCacheTelemetry {
+  cached: boolean;
+  cache_type?: "exact" | "semantic" | null;
+  similarity_score?: number | null;
+  saved_latency_ms?: number | null;
+  timestamp?: string | null;
+}
+
+export interface CacheStatsResponse {
+  status: string;
+  storage_backend: string;
+  total_queries: number;
+  hits: number;
+  exact_hits: number;
+  semantic_hits: number;
+  misses: number;
+  hit_ratio: number;
+  estimated_tokens_saved: number;
+  estimated_latency_saved_ms: number;
+  active_cached_entries: number;
+  similarity_threshold: number;
+  ttl_seconds: number;
+}
+
+export interface CacheInvalidateResponse {
+  status: string;
+  document_id: string | null;
+  tenant_id: string | null;
+  entries_purged: number;
+}
+
 export interface AuditApiResponse {
   document_id: string;
   query: string;
@@ -118,13 +149,30 @@ export interface AuditApiResponse {
   status: string;
   finding_summary: string;
   citations: AuditCitationResponse[];
+  cache_telemetry?: AuditCacheTelemetry;
 }
 
 export interface StreamAuditCallbacks {
-  onStatus?: (status: { stage: string; chunks_count?: number; framework?: string }) => void;
+  onStatus?: (status: {
+    stage: string;
+    chunks_count?: number;
+    framework?: string;
+    cache_type?: string;
+    similarity_score?: number;
+    saved_latency_ms?: number;
+  }) => void;
   onToken?: (token: string) => void;
   onCitations?: (citations: AuditCitationResponse[]) => void;
-  onDone?: (result: { full_text: string; citations: AuditCitationResponse[]; tokens_count: number; aborted?: boolean }) => void;
+  onDone?: (result: {
+    full_text: string;
+    citations: AuditCitationResponse[];
+    tokens_count: number;
+    aborted?: boolean;
+    cached?: boolean;
+    cache_type?: string;
+    similarity_score?: number;
+    saved_latency_ms?: number;
+  }) => void;
   onError?: (error: Error) => void;
   onAbort?: () => void;
 }
@@ -237,6 +285,42 @@ export async function auditDocument(
     throw new Error(errorData.detail || `Audit failed with status ${res.status}`);
   }
 
+  return res.json();
+}
+
+export async function getCacheStats(): Promise<CacheStatsResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/cache/stats`, {
+    headers: getTenantHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to fetch semantic cache metrics");
+  }
+  return res.json();
+}
+
+export async function invalidateCache(documentId?: string): Promise<CacheInvalidateResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/cache/invalidate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getTenantHeaders(),
+    },
+    body: JSON.stringify({ document_id: documentId || null }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to invalidate semantic cache");
+  }
+  return res.json();
+}
+
+export async function invalidateDocumentCache(documentId: string): Promise<CacheInvalidateResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/cache/documents/${documentId}`, {
+    method: "DELETE",
+    headers: getTenantHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to invalidate document cache");
+  }
   return res.json();
 }
 

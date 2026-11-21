@@ -15,8 +15,16 @@ import {
   Trash2,
   Square,
   Zap,
+  Database,
 } from "lucide-react";
-import { auditDocument, streamDocumentAudit, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
+import {
+  auditDocument,
+  streamDocumentAudit,
+  invalidateDocumentCache,
+  AuditApiResponse,
+  AuditCitationResponse,
+  AuditCacheTelemetry,
+} from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
 import { translateGermanToEnglish, translateEnglishToGerman, isEnglishText } from "@/lib/translator";
 
@@ -35,6 +43,7 @@ interface AuditMessage {
   finding_summary: string;
   citations: AuditCitationResponse[];
   timestamp: string;
+  cache_telemetry?: AuditCacheTelemetry;
 }
 
 interface AuditPanelProps {
@@ -180,6 +189,8 @@ export function AuditPanel({
   const [streamingCitations, setStreamingCitations] = useState<AuditCitationResponse[]>([]);
   const [streamTokenCount, setStreamTokenCount] = useState(0);
   const [streamStatus, setStreamStatus] = useState<string | null>(null);
+  const [streamCacheHit, setStreamCacheHit] = useState<AuditCacheTelemetry | null>(null);
+  const [cachePurgedToast, setCachePurgedToast] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -199,6 +210,17 @@ export function AuditPanel({
 
   const handleDeleteMessage = (msgId: string) => {
     setMessages((prev) => prev.filter((m) => m.id !== msgId));
+  };
+
+  const handlePurgeCache = async () => {
+    if (!documentId) return;
+    try {
+      await invalidateDocumentCache(documentId);
+      setCachePurgedToast(true);
+      setTimeout(() => setCachePurgedToast(false), 2000);
+    } catch (e) {
+      console.error("Failed to purge document cache:", e);
+    }
   };
 
   const handleAbort = () => {
@@ -222,6 +244,7 @@ export function AuditPanel({
     setLoading(true);
     setIsStreaming(true);
     setAuditError(null);
+    setStreamCacheHit(null);
     const userQuestion = searchQuery.trim();
     setQuery("");
     setStreamingQuestion(userQuestion);
@@ -258,7 +281,19 @@ export function AuditPanel({
         lang,
         {
           onStatus: (st) => {
-            if (st.stage === "vector_search") {
+            if (st.stage === "cache_hit") {
+              setStreamCacheHit({
+                cached: true,
+                cache_type: (st.cache_type as any) || "semantic",
+                similarity_score: st.similarity_score,
+                saved_latency_ms: st.saved_latency_ms,
+              });
+              setStreamStatus(
+                lang === "DE"
+                  ? `⚡ Redis-Cache Treffer (${st.cache_type === "exact" ? "Exakt" : "Semantisch"})...`
+                  : `⚡ Redis Cache Hit (${st.cache_type === "exact" ? "Exact" : "Semantic"})...`
+              );
+            } else if (st.stage === "vector_search") {
               setStreamStatus(
                 lang === "DE"
                   ? "pgvector Kosinus-Prüfung der Wissensdatenbank..."
@@ -286,6 +321,15 @@ export function AuditPanel({
                 ? result.citations
                 : accumulatedCitations;
 
+            const cachedInfo = result.cached
+              ? {
+                  cached: true,
+                  cache_type: (result.cache_type as any) || "exact",
+                  similarity_score: result.similarity_score,
+                  saved_latency_ms: result.saved_latency_ms,
+                }
+              : streamCacheHit || undefined;
+
             if (finalSummary.trim()) {
               const newMessage: AuditMessage = {
                 id: `msg-${messages.length + 1}`,
@@ -297,6 +341,7 @@ export function AuditPanel({
                   hour: "2-digit",
                   minute: "2-digit",
                 }),
+                cache_telemetry: cachedInfo,
               };
               setMessages((prev) => [...prev, newMessage]);
             }
@@ -308,6 +353,7 @@ export function AuditPanel({
             setStreamingCitations([]);
             setStreamTokenCount(0);
             setStreamStatus(null);
+            setStreamCacheHit(null);
             abortControllerRef.current = null;
           },
           onAbort: () => {
@@ -336,6 +382,7 @@ export function AuditPanel({
             setStreamingCitations([]);
             setStreamTokenCount(0);
             setStreamStatus(null);
+            setStreamCacheHit(null);
             abortControllerRef.current = null;
           },
           onError: (err) => {
@@ -391,6 +438,24 @@ export function AuditPanel({
             <span className="text-[9px] font-mono bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/30 font-bold flex items-center gap-1">
               <Languages className="w-3 h-3" /> DE/EN
             </span>
+            {documentId && (
+              <button
+                onClick={handlePurgeCache}
+                title={
+                  cachePurgedToast
+                    ? (lang === "DE" ? "Cache erfolgreich geleert!" : "Cache purged successfully!")
+                    : (lang === "DE" ? "Semantischen Redis-Cache leeren" : "Purge Semantic Cache")
+                }
+                className={`h-5 px-1.5 rounded flex items-center gap-1 font-mono text-[9px] font-bold cursor-pointer transition-all ${
+                  cachePurgedToast
+                    ? "bg-emerald-500/25 text-emerald-300 border border-emerald-500/40"
+                    : "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/30 opacity-80 hover:opacity-100"
+                }`}
+              >
+                <Database className="w-2.5 h-2.5 text-purple-400" />
+                <span>{cachePurgedToast ? "✓" : "Cache"}</span>
+              </button>
+            )}
             {messages.length > 0 && (
               <button
                 onClick={() => setMessages([])}
@@ -514,10 +579,26 @@ export function AuditPanel({
                       <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-mono">
                         <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> {msg.framework} Verified
                       </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] flex items-center gap-1">
-                        <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
-                        Gemini 2.0 Flash
-                      </span>
+                      {msg.cache_telemetry?.cached ? (
+                        <span
+                          className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 font-bold text-purple-400 flex items-center gap-1 shadow-sm"
+                          title={
+                            lang === "DE"
+                              ? "Aus dem semantischen Redis-Cache geladen (LLM-Aufruf dedupliziert)"
+                              : "Served from Redis Semantic Cache (LLM call deduplicated)"
+                          }
+                        >
+                          <Database className="w-2.5 h-2.5 text-purple-400" />
+                          <span>
+                            ⚡ Cache {msg.cache_telemetry.cache_type === "exact" ? "Exakt" : `${Math.round((msg.cache_telemetry.similarity_score || 1) * 100)}% Semantisch`} • {Math.round(msg.cache_telemetry.saved_latency_ms || 1250)}ms
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-[var(--surface-dark)] border border-[var(--surface-border)] font-bold text-[var(--accent-cyan)] flex items-center gap-1">
+                          <Sparkles className="w-2.5 h-2.5 text-[var(--accent-lime)]" />
+                          Gemini 2.0 Flash
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-1.5">
@@ -625,10 +706,17 @@ export function AuditPanel({
                       </span>
                       {mode} Auditing
                     </span>
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-emerald-500/30 font-bold text-emerald-400 flex items-center gap-1 shadow-sm">
-                      <Zap className="w-2.5 h-2.5 text-emerald-400 animate-bounce" />
-                      ⚡ SSE Live • {streamTokenCount} Tokens
-                    </span>
+                    {streamCacheHit ? (
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 font-bold text-purple-400 flex items-center gap-1 shadow-sm">
+                        <Database className="w-2.5 h-2.5 text-purple-400" />
+                        ⚡ Cache Hit • {Math.round(streamCacheHit.saved_latency_ms || 1250)}ms
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-emerald-500/30 font-bold text-emerald-400 flex items-center gap-1 shadow-sm">
+                        <Zap className="w-2.5 h-2.5 text-emerald-400 animate-bounce" />
+                        ⚡ SSE Live • {streamTokenCount} Tokens
+                      </span>
+                    )}
                   </div>
 
                   <button

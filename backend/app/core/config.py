@@ -33,6 +33,22 @@ class Settings(BaseSettings):
     # Redis Cache & Task Broker
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str | None = None
+    REDIS_DB: int = 0
+    SEMANTIC_CACHE_ENABLED: bool = True
+    SEMANTIC_CACHE_THRESHOLD: float = 0.90
+    SEMANTIC_CACHE_TTL: int = 86400  # 24 hours
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def redis_url(self) -> str:
+        """
+        Redis connection URI.
+        Format: redis://[:password@]host:port/db
+        """
+        if self.REDIS_PASSWORD:
+            return f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
 
     # Backend API Networking
     BACKEND_HOST: str = "0.0.0.0"
