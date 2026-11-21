@@ -28,8 +28,11 @@ import {
   PanelRightClose,
   PanelRight,
   X,
+  Square,
+  Zap,
+  Loader2,
 } from "lucide-react";
-import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
+import { auditDocument, streamDocumentAudit, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
 import { translateGermanToEnglish, translateEnglishToGerman, isEnglishText } from "@/lib/translator";
 import { renderMarkdownFormattedText } from "@/components/AuditorPanel";
@@ -135,6 +138,14 @@ export function StandaloneAuditorStudio({
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [isEvidenceOpen, setIsEvidenceOpen] = useState(true);
 
+  // Real-time SSE streaming state (Day 32)
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingText, setStreamingText] = useState("");
+  const [streamingCitations, setStreamingCitations] = useState<AuditCitationResponse[]>([]);
+  const [streamTokenCount, setStreamTokenCount] = useState(0);
+  const [streamStatus, setStreamStatus] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   // Initial Threads - Clean state without fake pre-populated answers
   const [threads, setThreads] = useState<ThreadInquiry[]>([
     {
@@ -161,7 +172,7 @@ export function StandaloneAuditorStudio({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeThread?.messages, loading]);
+  }, [activeThread?.messages, loading, isStreaming, streamingText]);
 
   const handleCreateNewThread = () => {
     const newId = `thread-${Date.now()}`;
@@ -233,9 +244,16 @@ export function StandaloneAuditorStudio({
     );
   };
 
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  };
+
   const handleSendQuery = async (customPrompt?: string) => {
     const promptToSend = (customPrompt || query).trim();
-    if (!promptToSend) return;
+    if (!promptToSend || isStreaming) return;
 
     // Strict Zero-Hallucination Guard: Require a selected PDF before executing compliance audit
     if (!documentId) {
@@ -256,6 +274,11 @@ export function StandaloneAuditorStudio({
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
+    const historyPayload = (activeThread?.messages || []).map((m) => ({
+      role: m.sender as "user" | "auditor",
+      text: m.text,
+    }));
+
     // Append to active thread
     setThreads((prev) =>
       prev.map((t) =>
@@ -271,41 +294,141 @@ export function StandaloneAuditorStudio({
 
     setQuery("");
     setLoading(true);
+    setIsStreaming(true);
+    setStreamingText("");
+    setStreamingCitations([]);
+    setStreamTokenCount(0);
+    setStreamStatus(
+      lang === "DE"
+        ? "pgvector Kosinus-Prüfung der Wissensdatenbank..."
+        : "pgvector Cosine Search in progress..."
+    );
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    let accumulatedText = "";
+    let accumulatedCitations: AuditCitationResponse[] = [];
+    let tokenCounter = 0;
 
     try {
-      const historyPayload = (activeThread?.messages || []).map((m) => ({
-        role: m.sender as "user" | "auditor",
-        text: m.text,
-      }));
+      await streamDocumentAudit(
+        documentId,
+        promptToSend,
+        framework,
+        historyPayload,
+        lang,
+        {
+          onStatus: (st) => {
+            if (st.stage === "vector_search") {
+              setStreamStatus(
+                lang === "DE"
+                  ? "pgvector Kosinus-Prüfung der Wissensdatenbank..."
+                  : "pgvector Cosine Search in progress..."
+              );
+            } else if (st.stage === "generating") {
+              setStreamStatus(null);
+            }
+          },
+          onToken: (tok) => {
+            accumulatedText += tok;
+            tokenCounter += 1;
+            setStreamingText(accumulatedText);
+            setStreamTokenCount(tokenCounter);
+            setStreamStatus(null);
+          },
+          onCitations: (cits) => {
+            accumulatedCitations = cits;
+            setStreamingCitations(cits);
+          },
+          onDone: (result) => {
+            const finalSummary = result.full_text || accumulatedText;
+            const finalCits =
+              result.citations && result.citations.length > 0
+                ? result.citations
+                : accumulatedCitations;
 
-      const res = await auditDocument(documentId, promptToSend, framework, historyPayload, lang);
-      const resultText = res.finding_summary;
-      const citationsList = res.citations || [];
+            if (finalSummary.trim()) {
+              const auditorMsg = {
+                id: `msg-auditor-${(activeThread?.messages || []).length + 2}`,
+                sender: "auditor" as const,
+                text: finalSummary,
+                citations: finalCits,
+                timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              };
 
-      const auditorMsg = {
-        id: `msg-auditor-${(activeThread?.messages || []).length + 2}`,
-        sender: "auditor" as const,
-        text: resultText,
-        citations: citationsList,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
+              setThreads((prev) =>
+                prev.map((t) =>
+                  t.id === activeThreadId
+                    ? { ...t, messages: [...(t.messages || []), auditorMsg] }
+                    : t
+                )
+              );
 
-      setThreads((prev) =>
-        prev.map((t) =>
-          t.id === activeThreadId
-            ? { ...t, messages: [...(t.messages || []), auditorMsg] }
-            : t
-        )
+              if (finalCits.length > 0) {
+                setSelectedCitation(finalCits[0]);
+              }
+            }
+
+            setIsStreaming(false);
+            setStreamingText("");
+            setStreamingCitations([]);
+            setStreamTokenCount(0);
+            setStreamStatus(null);
+            abortControllerRef.current = null;
+          },
+          onAbort: () => {
+            if (accumulatedText.trim()) {
+              const auditorMsg = {
+                id: `msg-auditor-${(activeThread?.messages || []).length + 2}`,
+                sender: "auditor" as const,
+                text:
+                  accumulatedText +
+                  (lang === "DE"
+                    ? "\n\n*(Übertragung durch Benutzer abgebrochen)*"
+                    : "\n\n*(Stream aborted by user)*"),
+                citations: accumulatedCitations,
+                timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              };
+
+              setThreads((prev) =>
+                prev.map((t) =>
+                  t.id === activeThreadId
+                    ? { ...t, messages: [...(t.messages || []), auditorMsg] }
+                    : t
+                )
+              );
+            }
+
+            setIsStreaming(false);
+            setStreamingText("");
+            setStreamingCitations([]);
+            setStreamTokenCount(0);
+            setStreamStatus(null);
+            abortControllerRef.current = null;
+          },
+          onError: (err) => {
+            console.error("Auditor stream error:", err);
+            setAuditWarning(err.message || "Failed to execute audit inquiry.");
+            setIsStreaming(false);
+            setStreamingText("");
+            setStreamingCitations([]);
+            setStreamTokenCount(0);
+            setStreamStatus(null);
+            abortControllerRef.current = null;
+          },
+        },
+        controller.signal
       );
-
-      if (citationsList.length > 0) {
-        setSelectedCitation(citationsList[0]);
-      }
     } catch (err: any) {
-      console.error("Auditor error:", err);
-      setAuditWarning(err.message || "Failed to execute audit inquiry.");
+      if (err.name !== "AbortError") {
+        console.error("Auditor error:", err);
+        setAuditWarning(err.message || "Failed to execute audit inquiry.");
+      }
     } finally {
       setLoading(false);
+      setIsStreaming(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -805,6 +928,83 @@ export function StandaloneAuditorStudio({
               );
             })
           )}
+
+          {/* Real-time SSE streaming auditor bubble (Day 32) */}
+          {isStreaming && (
+            <div className="flex gap-3 max-w-3xl mr-auto animate-in fade-in duration-200">
+              <div className="w-8 h-8 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] flex items-center justify-center text-[var(--accent-tangerine)] shrink-0 mt-1 shadow-sm">
+                <Bot className="w-4 h-4" />
+              </div>
+
+              <div className="rounded-2xl p-3.5 space-y-2.5 shadow-md bg-[var(--surface-card)] border border-[var(--accent-tangerine)]/50 border-l-4 border-l-[var(--accent-tangerine)] flex-1">
+                <div className="flex items-center justify-between pb-2 border-b border-[var(--surface-border)] text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-amber-400 flex items-center gap-1.5">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span>{framework} {lang === "DE" ? "Live-Prüfung" : "Live Auditing"}</span>
+                    </span>
+                    <span className="text-[9.5px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-emerald-500/30 font-bold text-emerald-400 flex items-center gap-1 shadow-sm">
+                      <Zap className="w-2.5 h-2.5 text-emerald-400 animate-bounce" />
+                      ⚡ SSE Live • {streamTokenCount} Tokens
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={handleAbort}
+                    className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/25 font-bold transition-all cursor-pointer shadow-sm"
+                    title={lang === "DE" ? "Prüfung abbrechen" : "Abort audit stream"}
+                  >
+                    <Square className="w-2.5 h-2.5 fill-current" />
+                    <span>{lang === "DE" ? "Stopp" : "Stop"}</span>
+                  </button>
+                </div>
+
+                {streamStatus && !streamingText && (
+                  <div className="flex items-center gap-2 text-xs font-mono text-[var(--foreground)] opacity-70 py-1">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--accent-tangerine)]" />
+                    <span>{streamStatus}</span>
+                  </div>
+                )}
+
+                {streamingText && (
+                  <div className="text-[13px] text-[var(--foreground)] leading-relaxed font-sans">
+                    {renderMarkdownFormattedText(streamingText)}
+                    <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-[var(--accent-tangerine)] animate-pulse align-middle" />
+                  </div>
+                )}
+
+                {/* Streaming citations */}
+                {streamingCitations.length > 0 && (
+                  <div className="pt-2.5 border-t border-[var(--surface-border)] space-y-1.5">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-50 font-bold block">
+                      {lang === "DE" ? "Gefundene Belegstellen:" : "Identified Citations:"}
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {streamingCitations.map((c, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setSelectedCitation(c);
+                            setIsEvidenceOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[10.5px] bg-[var(--accent-tangerine)]/15 border-[var(--accent-tangerine)]/40 text-[var(--accent-tangerine)] transition-all cursor-pointer shadow-sm"
+                        >
+                          <span>{c.source_tag}</span>
+                          <span className="opacity-70 text-[9.5px]">
+                            {lang === "DE" ? "S." : "P."} {c.page_number}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
 
@@ -838,14 +1038,29 @@ export function StandaloneAuditorStudio({
                     : "border-[var(--surface-border)] focus:border-[var(--accent-tangerine)]"
                 }`}
               />
-              <button
-                onClick={() => handleSendQuery()}
-                disabled={!query.trim() || loading}
-                className="absolute right-3 bottom-3 p-2 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-30 text-[var(--accent-contrast)] transition-all shadow-sm cursor-pointer"
-                title={documentId ? (lang === "DE" ? "Prüfung ausführen" : "Run Audit Inquiry") : (lang === "DE" ? "Bitte zuerst PDF auswählen" : "Please select PDF first")}
-              >
-                <Send className="w-4 h-4 stroke-[2.5]" />
-              </button>
+              {isStreaming ? (
+                <button
+                  onClick={handleAbort}
+                  className="absolute right-3 bottom-3 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-mono font-bold text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer animate-pulse"
+                  title={lang === "DE" ? "Prüfung abbrechen" : "Stop generation"}
+                >
+                  <Square className="w-3.5 h-3.5 fill-current" />
+                  <span>{lang === "DE" ? "Stopp" : "Stop"}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleSendQuery()}
+                  disabled={!query.trim() || loading}
+                  className="absolute right-3 bottom-3 p-2 rounded-lg bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-30 text-[var(--accent-contrast)] transition-all shadow-sm cursor-pointer"
+                  title={documentId ? (lang === "DE" ? "Prüfung ausführen" : "Run Audit Inquiry") : (lang === "DE" ? "Bitte zuerst PDF auswählen" : "Please select PDF first")}
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 stroke-[2.5]" />
+                  )}
+                </button>
+              )}
             </div>
             <p className="text-[10px] font-mono text-[var(--foreground)] opacity-50 text-center">
               {lang === "DE"

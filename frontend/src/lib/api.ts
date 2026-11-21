@@ -120,6 +120,102 @@ export interface AuditApiResponse {
   citations: AuditCitationResponse[];
 }
 
+export interface StreamAuditCallbacks {
+  onStatus?: (status: { stage: string; chunks_count?: number; framework?: string }) => void;
+  onToken?: (token: string) => void;
+  onCitations?: (citations: AuditCitationResponse[]) => void;
+  onDone?: (result: { full_text: string; citations: AuditCitationResponse[]; tokens_count: number; aborted?: boolean }) => void;
+  onError?: (error: Error) => void;
+  onAbort?: () => void;
+}
+
+export async function streamDocumentAudit(
+  documentId: string,
+  query: string,
+  framework: string = "DORA",
+  history?: AuditHistoryItem[],
+  lang: "DE" | "EN" = "DE",
+  callbacks?: StreamAuditCallbacks,
+  signal?: AbortSignal
+): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/audit-stream`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getTenantHeaders(),
+    },
+    body: JSON.stringify({ query, framework, history, lang }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    const err = new Error(errorData.detail || `Audit stream failed with status ${res.status}`);
+    callbacks?.onError?.(err);
+    throw err;
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) {
+    throw new Error("Response body is not readable");
+  }
+
+  const decoder = new TextDecoder("utf-8");
+  let buffer = "";
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split("\n\n");
+      buffer = blocks.pop() || "";
+
+      for (const block of blocks) {
+        if (!block.trim()) continue;
+
+        let eventType = "message";
+        let dataStr = "";
+
+        for (const line of block.split("\n")) {
+          if (line.startsWith("event: ")) {
+            eventType = line.slice(7).trim();
+          } else if (line.startsWith("data: ")) {
+            dataStr = line.slice(6).trim();
+          }
+        }
+
+        if (dataStr) {
+          try {
+            const data = JSON.parse(dataStr);
+            if (eventType === "status") {
+              callbacks?.onStatus?.(data);
+            } else if (eventType === "token") {
+              callbacks?.onToken?.(data.token || "");
+            } else if (eventType === "citations") {
+              callbacks?.onCitations?.(data.citations || []);
+            } else if (eventType === "done") {
+              callbacks?.onDone?.(data);
+            } else if (eventType === "aborted") {
+              callbacks?.onAbort?.();
+            }
+          } catch {
+            // ignore non-json chunk
+          }
+        }
+      }
+    }
+  } catch (err: any) {
+    if (err.name === "AbortError") {
+      callbacks?.onAbort?.();
+      return;
+    }
+    callbacks?.onError?.(err);
+    throw err;
+  }
+}
+
 export async function auditDocument(
   documentId: string,
   query: string,

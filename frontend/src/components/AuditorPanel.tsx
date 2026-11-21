@@ -13,8 +13,10 @@ import {
   Sparkles,
   Languages,
   Trash2,
+  Square,
+  Zap,
 } from "lucide-react";
-import { auditDocument, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
+import { auditDocument, streamDocumentAudit, AuditApiResponse, AuditCitationResponse } from "@/lib/api";
 import { Language, translations } from "@/lib/i18n";
 import { translateGermanToEnglish, translateEnglishToGerman, isEnglishText } from "@/lib/translator";
 
@@ -169,13 +171,24 @@ export function AuditPanel({
   const [messages, setMessages] = useState<AuditMessage[]>([]);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [translatedMap, setTranslatedMap] = useState<Record<string, boolean>>({});
+
+  // Real-time SSE streaming state (Day 32)
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingQuestion, setStreamingQuestion] = useState("");
+  const [streamingTimestamp, setStreamingTimestamp] = useState("");
+  const [streamingText, setStreamingText] = useState("");
+  const [streamingCitations, setStreamingCitations] = useState<AuditCitationResponse[]>([]);
+  const [streamTokenCount, setStreamTokenCount] = useState(0);
+  const [streamStatus, setStreamStatus] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, loading]);
+  }, [messages, loading, isStreaming, streamingText]);
 
   const toggleTranslate = (msgId: string) => {
     setTranslatedMap((prev) => ({
@@ -188,8 +201,15 @@ export function AuditPanel({
     setMessages((prev) => prev.filter((m) => m.id !== msgId));
   };
 
+  const handleAbort = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  };
+
   const executeAudit = async (searchQuery: string) => {
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim() || isStreaming) return;
     if (!documentId) {
       setAuditError(
         lang === "DE"
@@ -200,30 +220,148 @@ export function AuditPanel({
     }
 
     setLoading(true);
+    setIsStreaming(true);
     setAuditError(null);
     const userQuestion = searchQuery.trim();
     setQuery("");
+    setStreamingQuestion(userQuestion);
+    setStreamingTimestamp(
+      new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+    setStreamingText("");
+    setStreamingCitations([]);
+    setStreamTokenCount(0);
+    setStreamStatus(
+      lang === "DE"
+        ? "Vektor-Suche & DORA-Regelprüfung..."
+        : "pgvector Cosine Search in progress..."
+    );
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    let accumulatedText = "";
+    let accumulatedCitations: AuditCitationResponse[] = [];
+    let tokenCounter = 0;
 
     try {
       const historyPayload = messages.flatMap((m) => [
         { role: "user" as const, text: m.question },
         { role: "auditor" as const, text: m.finding_summary },
       ]);
-      const result = await auditDocument(documentId, userQuestion, mode, historyPayload, lang);
-      const newMessage: AuditMessage = {
-        id: `msg-${messages.length + 1}`,
-        question: userQuestion,
-        framework: result.framework,
-        finding_summary: result.finding_summary,
-        citations: result.citations,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-      setMessages((prev) => [...prev, newMessage]);
+
+      await streamDocumentAudit(
+        documentId,
+        userQuestion,
+        mode,
+        historyPayload,
+        lang,
+        {
+          onStatus: (st) => {
+            if (st.stage === "vector_search") {
+              setStreamStatus(
+                lang === "DE"
+                  ? "pgvector Kosinus-Prüfung der Wissensdatenbank..."
+                  : "pgvector Cosine Search in progress..."
+              );
+            } else if (st.stage === "generating") {
+              setStreamStatus(null);
+            }
+          },
+          onToken: (tok) => {
+            accumulatedText += tok;
+            tokenCounter += 1;
+            setStreamingText(accumulatedText);
+            setStreamTokenCount(tokenCounter);
+            setStreamStatus(null);
+          },
+          onCitations: (cits) => {
+            accumulatedCitations = cits;
+            setStreamingCitations(cits);
+          },
+          onDone: (result) => {
+            const finalSummary = result.full_text || accumulatedText;
+            const finalCits =
+              result.citations && result.citations.length > 0
+                ? result.citations
+                : accumulatedCitations;
+
+            if (finalSummary.trim()) {
+              const newMessage: AuditMessage = {
+                id: `msg-${messages.length + 1}`,
+                question: userQuestion,
+                framework: mode,
+                finding_summary: finalSummary,
+                citations: finalCits,
+                timestamp: new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              };
+              setMessages((prev) => [...prev, newMessage]);
+            }
+
+            setIsStreaming(false);
+            setStreamingQuestion("");
+            setStreamingTimestamp("");
+            setStreamingText("");
+            setStreamingCitations([]);
+            setStreamTokenCount(0);
+            setStreamStatus(null);
+            abortControllerRef.current = null;
+          },
+          onAbort: () => {
+            if (accumulatedText.trim()) {
+              const newMessage: AuditMessage = {
+                id: `msg-${messages.length + 1}`,
+                question: userQuestion,
+                framework: mode,
+                finding_summary:
+                  accumulatedText +
+                  (lang === "DE"
+                    ? "\n\n*(Übertragung durch Benutzer abgebrochen)*"
+                    : "\n\n*(Stream aborted by user)*"),
+                citations: accumulatedCitations,
+                timestamp: new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }),
+              };
+              setMessages((prev) => [...prev, newMessage]);
+            }
+            setIsStreaming(false);
+            setStreamingQuestion("");
+            setStreamingTimestamp("");
+            setStreamingText("");
+            setStreamingCitations([]);
+            setStreamTokenCount(0);
+            setStreamStatus(null);
+            abortControllerRef.current = null;
+          },
+          onError: (err) => {
+            console.error("Audit streaming error:", err);
+            setAuditError(err.message || "Failed to execute audit inquiry.");
+            setIsStreaming(false);
+            setStreamingQuestion("");
+            setStreamingTimestamp("");
+            setStreamingText("");
+            setStreamingCitations([]);
+            setStreamTokenCount(0);
+            setStreamStatus(null);
+            abortControllerRef.current = null;
+          },
+        },
+        controller.signal
+      );
     } catch (err: any) {
-      console.error("Audit error:", err);
-      setAuditError(err.message || "Failed to execute audit inquiry.");
+      if (err.name !== "AbortError") {
+        console.error("Audit error:", err);
+        setAuditError(err.message || "Failed to execute audit inquiry.");
+      }
     } finally {
       setLoading(false);
+      setIsStreaming(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -454,8 +592,112 @@ export function AuditPanel({
           );
         })}
 
+        {/* Live SSE Streaming Bubble (Day 32) */}
+        {isStreaming && (
+          <div className="space-y-2.5 animate-in fade-in duration-200">
+            {/* User Question */}
+            {streamingQuestion && (
+              <div className="flex items-start gap-2 justify-end">
+                <div className="bg-[var(--surface-card)] border border-[var(--accent-tangerine)]/40 text-[var(--foreground)] font-medium rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-xs max-w-[85%] shadow-sm leading-relaxed">
+                  <p>{streamingQuestion}</p>
+                  <span className="text-[9px] font-mono opacity-50 block text-right mt-1">
+                    {streamingTimestamp || ""}
+                  </span>
+                </div>
+                <div className="w-6 h-6 rounded-full bg-[var(--accent-tangerine)]/15 border border-[var(--accent-tangerine)]/40 flex items-center justify-center flex-shrink-0">
+                  <User className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+                </div>
+              </div>
+            )}
+
+            {/* AI Streaming Card */}
+            <div className="flex items-start gap-2">
+              <div className="w-6 h-6 rounded-full bg-[var(--surface-card)] border border-[var(--surface-border)] flex items-center justify-center flex-shrink-0 mt-1">
+                <Bot className="w-3.5 h-3.5 text-[var(--accent-tangerine)]" />
+              </div>
+              <div className="flex-1 p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--accent-tangerine)]/50 border-l-2 border-l-[var(--accent-tangerine)] space-y-2.5 shadow-lg">
+                <div className="flex items-center justify-between border-b border-[var(--surface-border)] pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5 font-mono">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      {mode} Auditing
+                    </span>
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[var(--surface-dark)] border border-emerald-500/30 font-bold text-emerald-400 flex items-center gap-1 shadow-sm">
+                      <Zap className="w-2.5 h-2.5 text-emerald-400 animate-bounce" />
+                      ⚡ SSE Live • {streamTokenCount} Tokens
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={handleAbort}
+                    className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/40 text-rose-400 hover:bg-rose-500/25 font-bold transition-all cursor-pointer shadow-sm"
+                    title={lang === "DE" ? "Generierung abbrechen" : "Abort generation"}
+                  >
+                    <Square className="w-2.5 h-2.5 fill-current" />
+                    <span>{lang === "DE" ? "Stopp" : "Stop"}</span>
+                  </button>
+                </div>
+
+                {/* Status or Streaming Text */}
+                {streamStatus && !streamingText && (
+                  <div className="flex items-center gap-2 text-xs font-mono text-[var(--foreground)] opacity-70 py-1">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--accent-tangerine)]" />
+                    <span>{streamStatus}</span>
+                  </div>
+                )}
+
+                {streamingText && (
+                  <div className="text-xs text-[var(--foreground)] leading-relaxed font-sans">
+                    {renderMarkdownFormattedText(streamingText)}
+                    <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-[var(--accent-tangerine)] animate-pulse align-middle" />
+                  </div>
+                )}
+
+                {/* Citations arriving live */}
+                {streamingCitations.length > 0 && (
+                  <div className="pt-2 space-y-1.5 border-t border-[var(--surface-border)]">
+                    <div className="flex items-center justify-between text-[10px] font-mono font-bold text-[var(--foreground)] opacity-60 uppercase tracking-wider">
+                      <span>{lang === "DE" ? "GEPRÜFTE BELEGE (AUDIT EVIDENCE)" : "VERIFIED AUDIT EVIDENCE"}</span>
+                      <span className="text-[9px] text-[var(--accent-cyan)] font-mono">Live {streamingCitations.length}</span>
+                    </div>
+                    {streamingCitations.map((citation, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() =>
+                          onSelectCitation({
+                            id: citation.chunk_id || `cit-${idx}`,
+                            source_tag: citation.source_tag,
+                            page_number: citation.page_number,
+                            box:
+                              (citation.bounding_box as [number, number, number, number]) || [
+                                40, 160, 560, 220,
+                              ],
+                            snippet: citation.content || "",
+                          })
+                        }
+                        className="group flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--accent-tangerine)]/10 border border-[var(--accent-tangerine)]/30 hover:border-[var(--accent-tangerine)] hover:bg-[var(--accent-tangerine)]/20 text-[var(--accent-tangerine)] text-xs transition-all w-full text-left shadow-sm cursor-pointer"
+                      >
+                        <span className="font-black font-mono text-[9px] bg-[var(--accent-tangerine)] text-[var(--accent-contrast)] px-1.5 py-0.5 rounded shadow">
+                          {citation.source_tag}
+                        </span>
+                        <span className="truncate flex-1 text-[11px] text-[var(--foreground)] opacity-80 group-hover:opacity-100 font-mono">
+                          Page {citation.page_number} • Reveal Laser Bounding Box
+                        </span>
+                        <ExternalLink className="w-3.5 h-3.5 text-[var(--accent-tangerine)] opacity-70 group-hover:opacity-100" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Loading Spinner */}
-        {loading && (
+        {loading && !isStreaming && (
           <div className="p-3.5 rounded-xl bg-[var(--surface-card)] border border-[var(--surface-border)] flex items-center gap-3 text-[var(--foreground)]">
             <Loader2 className="w-4 h-4 animate-spin text-[var(--accent-tangerine)]" />
             <p className="text-xs font-mono opacity-80">
@@ -516,17 +758,28 @@ export function AuditPanel({
                 : "border-[var(--surface-border)] focus:border-[var(--accent-tangerine)]"
             }`}
           />
-          <button
-            onClick={() => executeAudit(query)}
-            disabled={!query.trim() || loading}
-            className="absolute right-2.5 bottom-3.5 p-2 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-40 text-[var(--accent-contrast)] font-black transition-all shadow-sm cursor-pointer"
-          >
-            {loading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Send className="w-3.5 h-3.5 stroke-[2.5]" />
-            )}
-          </button>
+          {isStreaming ? (
+            <button
+              onClick={handleAbort}
+              className="absolute right-2.5 bottom-3.5 px-3 py-1.5 rounded-md bg-rose-600 hover:bg-rose-500 text-white font-mono font-bold text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer animate-pulse"
+              title={lang === "DE" ? "Generierung abbrechen" : "Stop generation"}
+            >
+              <Square className="w-3 h-3 fill-current" />
+              <span>{lang === "DE" ? "Stopp" : "Stop"}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => executeAudit(query)}
+              disabled={!query.trim() || loading}
+              className="absolute right-2.5 bottom-3.5 p-2 rounded-md bg-[var(--accent-tangerine)] hover:opacity-90 disabled:opacity-40 text-[var(--accent-contrast)] font-black transition-all shadow-sm cursor-pointer"
+            >
+              {loading ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Send className="w-3.5 h-3.5 stroke-[2.5]" />
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

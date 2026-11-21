@@ -14,6 +14,7 @@ from fastapi import (
     File,
     HTTPException,
     Query,
+    Request,
     Response,
     UploadFile,
     status,
@@ -90,6 +91,7 @@ from app.services.privacy import privacy_firewall
 from app.services.remediation_engine import RemediationEngine
 from app.services.reranker import reranker_service
 from app.services.storage import storage_service
+from app.services.streaming_auditor import stream_audit_response
 from app.services.subcontractor_engine import subcontractor_engine
 from app.services.table_extractor import TableExtractorService
 from app.services.tasks import (
@@ -956,6 +958,47 @@ async def audit_document(
         status="COMPLIANT",
         finding_summary=finding_summary,
         citations=citations,
+    )
+
+
+@router.post(
+    "/{document_id}/audit-stream",
+    summary="Real-Time Server-Sent Events (SSE) Token-Level Streaming Compliance Audit",
+)
+async def audit_document_stream(
+    request: Request,
+    document_id: UUID,
+    payload: AuditRequest,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> StreamingResponse:
+    """
+    Day 32: Real-time token-level Server-Sent Events (SSE) streaming compliance auditor.
+    Emits continuous token deltas, inline [SOURCE_X] citations, and supports client abort signals.
+    """
+    tenant, user = await get_or_create_default_tenant_and_user(db)
+    history_dicts = [h.model_dump() for h in payload.history] if payload.history else None
+
+    generator = stream_audit_response(
+        document_id=document_id,
+        query=payload.query,
+        framework=payload.framework,
+        lang=payload.lang,
+        history=history_dicts,
+        tenant_id=tenant.id,
+        user_id=user.id,
+        db=db,
+        request=request,
+    )
+
+    return StreamingResponse(
+        generator,
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+            "Content-Type": "text/event-stream; charset=utf-8",
+        },
     )
 
 
