@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  Activity,
   FileSpreadsheet,
   Lock,
   Building2,
@@ -41,6 +42,7 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
   onOpenCommandPalette?: () => void;
   onOpenTenantSelector?: () => void;
+  onOpenObservability?: () => void;
   activeTenantName?: string;
 }
 
@@ -60,6 +62,7 @@ export function Header({
   onToggleSidebar,
   onOpenCommandPalette,
   onOpenTenantSelector,
+  onOpenObservability,
   activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
@@ -201,6 +204,19 @@ export function Header({
             <Building2 className="w-3 h-3 text-amber-500" />
             <span className="hidden xl:inline">{activeTenantName || "Mandant: Siemens AG"}</span>
             <span className="xl:hidden">Mandant</span>
+          </button>
+        )}
+
+        {/* Day 34: Prometheus & OpenTelemetry Regulatory Observability Trigger */}
+        {onOpenObservability && (
+          <button
+            onClick={onOpenObservability}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-purple-500/30 hover:border-purple-500/70 text-purple-400 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
+            title="Prometheus Metrics & OpenTelemetry Distributed Tracing (DORA RTS / EU AI Act Art. 12)"
+          >
+            <Activity className="w-3 h-3 text-purple-400 animate-pulse" />
+            <span className="hidden xl:inline">Prometheus & OTel</span>
+            <span className="xl:hidden">OTel</span>
           </button>
         )}
 

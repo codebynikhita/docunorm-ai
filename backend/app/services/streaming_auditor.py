@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import re
+import time
 from collections.abc import AsyncGenerator
 from pathlib import Path
 from uuid import UUID, uuid4
@@ -11,6 +12,13 @@ from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
+from app.core.metrics import (
+    ACTIVE_AUDIT_STREAMS,
+    LLM_INFERENCE_DURATION_SECONDS,
+    LLM_TOKENS_TOTAL,
+    REGULATORY_AUDIT_EVENTS_TOTAL,
+)
+from app.core.tracing import get_current_trace_id
 from app.models.audit import AuditLog
 from app.models.document import Document, DocumentChunk
 from app.services.auditor import (
@@ -87,11 +95,19 @@ async def stream_audit_response(
                 "tokens_count": len(words),
                 "cache_type": cached_res.cache_type,
                 "similarity_score": cached_res.similarity_score,
+                "trace_id": get_current_trace_id(),
             },
         )
         db.add(audit_entry)
         await db.commit()
+        REGULATORY_AUDIT_EVENTS_TOTAL.labels(
+            event_type="DOCUMENT_AUDITED_STREAM_CACHE_HIT",
+            tenant=str(tenant_id),
+        ).inc()
         return
+
+    stream_start_time = time.perf_counter()
+    ACTIVE_AUDIT_STREAMS.labels(tenant=str(tenant_id)).inc()
 
     # 0. Self-healing: if document has 0 chunks, parse and ingest on-the-fly
     count_stmt = select(DocumentChunk).where(DocumentChunk.document_id == document_id)
@@ -361,6 +377,20 @@ async def stream_audit_response(
     }
     yield f"event: done\ndata: {json.dumps(done_payload)}\n\n"
 
+    # Day 34: Prometheus LLM Metrics Recording
+    elapsed_stream = time.perf_counter() - stream_start_time
+    LLM_TOKENS_TOTAL.labels(
+        framework=framework,
+        type="completion",
+        tenant=str(tenant_id),
+    ).inc(token_count)
+    LLM_INFERENCE_DURATION_SECONDS.labels(
+        framework=framework,
+        model="gemini-2.0-flash",
+        status="aborted" if is_aborted else "success",
+        tenant=str(tenant_id),
+    ).observe(elapsed_stream)
+
     # 5. Store into Redis Dynamic Semantic Cache if generation completed cleanly
     if not is_aborted and accumulated_text.strip():
         try:
@@ -382,7 +412,7 @@ async def stream_audit_response(
         except Exception as cache_err:
             print(f"Warning: Failed to cache streaming audit response: {cache_err}")
 
-    # 6. Log immutable GDPR audit record
+    # 6. Log immutable GDPR audit record with W3C Trace Correlation
     try:
         audit_entry = AuditLog(
             id=uuid4(),
@@ -397,9 +427,16 @@ async def stream_audit_response(
                 "citations_count": len(citations),
                 "tokens_count": token_count,
                 "aborted": is_aborted,
+                "trace_id": get_current_trace_id(),
             },
         )
         db.add(audit_entry)
         await db.commit()
+        REGULATORY_AUDIT_EVENTS_TOTAL.labels(
+            event_type="DOCUMENT_AUDITED_STREAM",
+            tenant=str(tenant_id),
+        ).inc()
     except Exception as log_err:
         print(f"Warning: Failed to persist streaming audit log: {log_err}")
+    finally:
+        ACTIVE_AUDIT_STREAMS.labels(tenant=str(tenant_id)).dec()

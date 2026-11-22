@@ -9,6 +9,7 @@ from typing import Any
 from uuid import UUID
 
 from app.core.config import get_settings
+from app.core.metrics import SEMANTIC_CACHE_OPERATIONS_TOTAL
 from app.schemas.cache import AuditCacheTelemetry, CacheStatsResponse
 from app.services.embedding import embedding_service
 
@@ -226,6 +227,7 @@ class SemanticCacheService:
                 if raw_json:
                     entry = json.loads(raw_json)
                     self._exact_hits += 1
+                    SEMANTIC_CACHE_OPERATIONS_TOTAL.labels(operation="lookup", result="exact_hit", tenant=tenant_str).inc()
                     return CacheResult(
                         hit=True,
                         response_data=entry["response"],
@@ -243,6 +245,7 @@ class SemanticCacheService:
             # Check TTL
             if time.time() - entry.get("created_at", 0) <= self.ttl:
                 self._exact_hits += 1
+                SEMANTIC_CACHE_OPERATIONS_TOTAL.labels(operation="lookup", result="exact_hit", tenant=tenant_str).inc()
                 return CacheResult(
                     hit=True,
                     response_data=entry["response"],
@@ -308,6 +311,7 @@ class SemanticCacheService:
 
         if best_entry and best_similarity >= self.threshold:
             self._semantic_hits += 1
+            SEMANTIC_CACHE_OPERATIONS_TOTAL.labels(operation="lookup", result="semantic_hit", tenant=tenant_str).inc()
             # Dynamic latency estimation scaled by similarity
             saved_ms = round(AVERAGE_LATENCY_MS_SAVED * (best_similarity**2), 1)
             return CacheResult(
@@ -323,6 +327,7 @@ class SemanticCacheService:
         # STEP 3: Cache Miss
         # -------------------------------------------------------------
         self._misses += 1
+        SEMANTIC_CACHE_OPERATIONS_TOTAL.labels(operation="lookup", result="miss", tenant=tenant_str).inc()
         return CacheResult(hit=False)
 
     async def set(
@@ -389,6 +394,7 @@ class SemanticCacheService:
         if doc_idx_key not in self._memory_doc_index:
             self._memory_doc_index[doc_idx_key] = set()
         self._memory_doc_index[doc_idx_key].add(exact_key)
+        SEMANTIC_CACHE_OPERATIONS_TOTAL.labels(operation="write", result="written", tenant=str(tenant_id)).inc()
 
     def _remove_memory_key(self, key: str) -> None:
         entry = self._memory_cache.pop(key, None)
@@ -420,6 +426,8 @@ class SemanticCacheService:
         for k in keys_to_delete:
             self._remove_memory_key(k)
             purged += 1
+
+        SEMANTIC_CACHE_OPERATIONS_TOTAL.labels(operation="evict", result="evicted", tenant=str(tenant_id or "all")).inc()
 
         # Redis purge
         redis = await self._get_redis()

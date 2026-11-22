@@ -1,3 +1,4 @@
+import re
 import time
 import uuid
 from collections.abc import AsyncGenerator
@@ -13,6 +14,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.v1.api import api_router
 from app.core.config import get_settings
 from app.core.db import async_session_factory, get_session, init_db
+from app.core.metrics import (
+    HTTP_REQUEST_DURATION_SECONDS,
+    HTTP_REQUESTS_TOTAL,
+    generate_prometheus_exposition,
+)
 from app.core.tenant import (
     ALLIANZ_TENANT_ID,
     BMW_TENANT_ID,
@@ -21,6 +27,14 @@ from app.core.tenant import (
     get_current_tenant_id,
     reset_current_tenant_id,
     set_current_tenant_id,
+)
+from app.core.tracing import (
+    format_traceparent,
+    generate_span_id,
+    generate_trace_id,
+    parse_traceparent,
+    reset_trace_context,
+    set_trace_context,
 )
 from app.services.tenant_service import tenant_service
 
@@ -89,14 +103,24 @@ app.add_middleware(
 @app.middleware("http")
 async def add_us_enterprise_telemetry(request: Request, call_next) -> Response:
     """
-    US Silicon Valley Tier-1 Telemetry & Tracing Middleware:
-    - Injects unique X-Request-ID (UUID4) for distributed tracing.
+    US Silicon Valley Tier-1 Telemetry, Prometheus & OpenTelemetry Middleware:
+    - Injects unique X-Request-ID (UUID4) and W3C Trace Context (traceparent, X-Trace-ID, X-Span-ID).
     - Resolves request-scoped X-Tenant-ID header for PostgreSQL RLS isolation.
-    - Measures high-precision execution latency in milliseconds.
+    - Observes Prometheus HTTP request counts and latency histograms with tenant dimension.
     - Certifies German sovereign cloud residency (Frankfurt eu-central-1) & Zero-Hallucination guarantees.
     """
     request_id = str(uuid.uuid4())
     start_time = time.perf_counter()
+
+    # W3C Distributed Tracing propagation
+    incoming_traceparent = request.headers.get("traceparent")
+    parsed_tp = parse_traceparent(incoming_traceparent)
+    if parsed_tp:
+        trace_id = parsed_tp[0]
+    else:
+        trace_id = generate_trace_id()
+    span_id = generate_span_id()
+    trace_tokens = set_trace_context(trace_id, span_id)
 
     # Extract and resolve Tenant Context
     raw_tenant = request.headers.get("x-tenant-id") or request.headers.get("X-Tenant-ID")
@@ -126,11 +150,31 @@ async def add_us_enterprise_telemetry(request: Request, call_next) -> Response:
     finally:
         if tenant_token:
             reset_current_tenant_id(tenant_token)
+        reset_trace_context(trace_tokens)
 
-    duration_ms = (time.perf_counter() - start_time) * 1000.0
+    duration_sec = time.perf_counter() - start_time
+    duration_ms = duration_sec * 1000.0
+
+    # Prometheus HTTP metrics recording (collapse UUIDs to avoid cardinality explosion)
+    norm_path = re.sub(r"/[0-9a-fA-F-]{32,36}", "/{id}", request.url.path)
+    tenant_str = str(resolved_tenant_id or "default")
+    HTTP_REQUESTS_TOTAL.labels(
+        method=request.method,
+        endpoint=norm_path,
+        status_code=str(response.status_code),
+        tenant=tenant_str,
+    ).inc()
+    HTTP_REQUEST_DURATION_SECONDS.labels(
+        method=request.method,
+        endpoint=norm_path,
+        tenant=tenant_str,
+    ).observe(duration_sec)
 
     active_tenant = get_current_tenant_id()
     response.headers["X-Request-ID"] = request_id
+    response.headers["traceparent"] = format_traceparent(trace_id, span_id)
+    response.headers["X-Trace-ID"] = trace_id
+    response.headers["X-Span-ID"] = span_id
     response.headers["X-Response-Time-Ms"] = f"{duration_ms:.2f}"
     response.headers["X-Sovereign-Region"] = "eu-central-1-fra (Germany)"
     response.headers["X-Auditor-Engine"] = "DocuNorm-Gemini-2.0-Flash-Sovereign"
@@ -139,6 +183,18 @@ async def add_us_enterprise_telemetry(request: Request, call_next) -> Response:
     response.headers["X-Multi-Tenant-Policy"] = "Row-Level-Security-Isolated"
 
     return response
+
+
+@app.get(
+    "/metrics",
+    tags=["System"],
+    summary="Scrapable Prometheus Exposition Endpoint",
+    description="Exposes real-time system, audit, and latency metrics in standard Prometheus text format.",
+)
+async def prometheus_metrics() -> Response:
+    """Standard root Prometheus scrape endpoint."""
+    content = generate_prometheus_exposition()
+    return Response(content=content, media_type="text/plain; version=0.0.4; charset=utf-8")
 
 
 # Register API v1 Endpoints (Documents, Search, Audit, Chat)

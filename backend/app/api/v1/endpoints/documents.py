@@ -24,7 +24,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.db import get_session
+from app.core.metrics import (
+    LLM_INFERENCE_DURATION_SECONDS,
+    LLM_TOKENS_TOTAL,
+    REGULATORY_AUDIT_EVENTS_TOTAL,
+)
 from app.core.tenant import apply_rls_session_context, get_current_tenant_id
+from app.core.tracing import get_current_trace_id, trace_span
 from app.models.audit import AuditLog
 from app.models.document import Document, DocumentChunk, DocumentStatus
 from app.models.tenant import Tenant
@@ -783,10 +789,15 @@ async def audit_document(
                 "cache_type": cached_res.cache_type,
                 "similarity_score": cached_res.similarity_score,
                 "saved_latency_ms": cached_res.saved_latency_ms,
+                "trace_id": get_current_trace_id(),
             },
         )
         db.add(audit_entry)
         await db.commit()
+        REGULATORY_AUDIT_EVENTS_TOTAL.labels(
+            event_type="DOCUMENT_AUDITED_CACHE_HIT",
+            tenant=str(tenant.id),
+        ).inc()
 
         return AuditResponse(
             document_id=document_id,
@@ -955,13 +966,25 @@ async def audit_document(
 
     # 3. Generate grounded regulatory LLM finding (Gemini 1.5 with deterministic fallback)
     history_dicts = [h.model_dump() for h in payload.history] if payload.history else None
-    finding_summary = await generate_llm_audit_finding(
-        query=payload.query,
-        retrieved_chunks=retrieved_chunks,
+    t_llm_start = time.perf_counter()
+    with trace_span("llm_audit_execution", {"framework": payload.framework, "document_id": str(document_id), "tenant_id": str(tenant.id)}):
+        finding_summary = await generate_llm_audit_finding(
+            query=payload.query,
+            retrieved_chunks=retrieved_chunks,
+            framework=payload.framework,
+            lang=payload.lang,
+            history=history_dicts,
+        )
+    t_llm_duration = time.perf_counter() - t_llm_start
+
+    LLM_TOKENS_TOTAL.labels(framework=payload.framework, type="prompt", tenant=str(tenant.id)).inc(len(payload.query.split()))
+    LLM_TOKENS_TOTAL.labels(framework=payload.framework, type="completion", tenant=str(tenant.id)).inc(len(finding_summary.split()))
+    LLM_INFERENCE_DURATION_SECONDS.labels(
         framework=payload.framework,
-        lang=payload.lang,
-        history=history_dicts,
-    )
+        model="gemini-2.0-flash",
+        status="success",
+        tenant=str(tenant.id),
+    ).observe(t_llm_duration)
 
     # 4. Extract citations and bounding boxes
     parsed_citations = parse_citations_from_response(finding_summary, chunk_map)
@@ -989,10 +1012,15 @@ async def audit_document(
             "query": payload.query,
             "framework": payload.framework,
             "citations_count": len(citations),
+            "trace_id": get_current_trace_id(),
         },
     )
     db.add(audit_entry)
     await db.commit()
+    REGULATORY_AUDIT_EVENTS_TOTAL.labels(
+        event_type="DOCUMENT_AUDITED",
+        tenant=str(tenant.id),
+    ).inc()
 
     # Store into Redis Dynamic Semantic Cache (Day 33)
     response_payload = {

@@ -24,6 +24,7 @@ import { LkSGAuditPanel } from "@/components/LkSGAuditPanel";
 import { NegotiationBattlecardModal } from "@/components/NegotiationBattlecardModal";
 import { PortfolioGovernanceCockpit } from "@/components/PortfolioGovernanceCockpit";
 import { TenantSelectorModal } from "@/components/TenantSelectorModal";
+import { SystemObservabilityModal } from "@/components/SystemObservabilityModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -61,6 +62,7 @@ export default function Home() {
   const [isNegotiationBattlecardOpen, setIsNegotiationBattlecardOpen] = useState(false);
   const [isPortfolioCockpitOpen, setIsPortfolioCockpitOpen] = useState(false);
   const [isTenantModalOpen, setIsTenantModalOpen] = useState(false);
+  const [isObservabilityOpen, setIsObservabilityOpen] = useState(false);
   const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -287,6 +289,7 @@ export default function Home() {
         onToggleSidebar={handleToggleSidebar}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenTenantSelector={() => setIsTenantModalOpen(true)}
+        onOpenObservability={() => setIsObservabilityOpen(true)}
         activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
@@ -690,6 +693,7 @@ export default function Home() {
         onOpenZugferd={handleOpenZugferdSingle}
         onOpenZugferdBatch={handleOpenZugferdBatch}
         onOpenCertificate={() => setIsCertificateOpen(true)}
+        onOpenObservability={() => setIsObservabilityOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
       />
@@ -712,6 +716,13 @@ export default function Home() {
             }
           });
         }}
+      />
+
+      {/* Day 34: Prometheus & OpenTelemetry Regulatory Performance Instrumentation Modal */}
+      <SystemObservabilityModal
+        isOpen={isObservabilityOpen}
+        onClose={() => setIsObservabilityOpen(false)}
+        lang={lang}
       />
     </div>
   );

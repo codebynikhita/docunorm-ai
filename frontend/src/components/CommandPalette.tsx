@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Activity,
   Search,
   Command,
   FileText,
@@ -52,6 +53,7 @@ interface CommandPaletteProps {
   onOpenZugferd: () => void;
   onOpenZugferdBatch?: () => void;
   onOpenCertificate: () => void;
+  onOpenObservability?: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
 }
@@ -74,6 +76,7 @@ export function CommandPalette({
   onOpenZugferd,
   onOpenZugferdBatch,
   onOpenCertificate,
+  onOpenObservability,
   availableDocuments = [],
   onSelectDocument,
 }: CommandPaletteProps) {
@@ -117,6 +120,22 @@ export function CommandPalette({
         onClose();
       },
     },
+    ...(onOpenObservability
+      ? [
+          {
+            id: "sys-observability",
+            title_de: "Prometheus & OpenTelemetry Aufsichts-Telemetrie & Traces",
+            title_en: "Prometheus & OpenTelemetry Regulatory Observability & Traces",
+            category: "regulatory" as const,
+            icon: Activity,
+            shortcut: "O T",
+            action: () => {
+              onOpenObservability();
+              onClose();
+            },
+          },
+        ]
+      : []),
     {
       id: "reg-dora-exit",
       title_de: "DORA Art. 30(2) Exit-Strategie & Fristen Inspektor",

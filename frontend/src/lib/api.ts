@@ -2156,6 +2156,104 @@ export async function getRerankerModelInfo(): Promise<CrossEncoderModelInfo> {
   return res.json();
 }
 
+// ---------------------------------------------------------------------------
+// Day 34: Prometheus & OpenTelemetry Regulatory Performance Instrumentation
+// ---------------------------------------------------------------------------
+
+export interface TrafficStats {
+  total_requests: number;
+  total_errors: number;
+  error_rate_pct: number;
+  requests_by_endpoint: Record<string, number>;
+  requests_by_status: Record<string, number>;
+}
+
+export interface LLMTelemetryStats {
+  total_prompt_tokens: number;
+  total_completion_tokens: number;
+  total_tokens: number;
+}
+
+export interface SemanticCacheMetricsStats {
+  total_queries: number;
+  exact_hits: number;
+  semantic_hits: number;
+  misses: number;
+  hit_ratio_pct: number;
+}
+
+export interface RegulatoryFindingsStats {
+  total_violations: number;
+  by_severity: Record<string, number>;
+  by_framework: Record<string, number>;
+}
+
+export interface MetricsSummaryResponse {
+  status: string;
+  uptime_seconds: number;
+  region: string;
+  traffic: TrafficStats;
+  llm_telemetry: LLMTelemetryStats;
+  semantic_cache: SemanticCacheMetricsStats;
+  active_sse_streams: number;
+  regulatory_findings: RegulatoryFindingsStats;
+}
+
+export interface TraceSpanItem {
+  name: string;
+  trace_id: string;
+  span_id: string;
+  parent_span_id: string | null;
+  status: string;
+  status_description: string | null;
+  duration_ms: number;
+  timestamp: string;
+  attributes: Record<string, any>;
+}
+
+export interface RecentTracesResponse {
+  total_spans: number;
+  active_trace_id: string | null;
+  spans: TraceSpanItem[];
+}
+
+export async function getMetricsSummary(): Promise<MetricsSummaryResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/metrics/summary`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load metrics summary (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getRecentTraces(limit: number = 30): Promise<RecentTracesResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/metrics/traces?limit=${limit}`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load recent trace spans (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getPrometheusRawMetrics(): Promise<string> {
+  const res = await fetch(`${API_BASE_URL}/metrics`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load Prometheus exposition (${res.status})`);
+  }
+  return res.text();
+}
+
+
 
 
 
