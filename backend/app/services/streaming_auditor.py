@@ -29,6 +29,7 @@ from app.services.auditor import (
 from app.services.embedding import embedding_service
 from app.services.parser import PDFParserService
 from app.services.privacy import privacy_firewall
+from app.services.reranker import reranker_service
 from app.services.semantic_cache import semantic_cache
 
 pdf_parser = PDFParserService()
@@ -218,24 +219,46 @@ async def stream_audit_response(
         yield f"event: done\ndata: {json.dumps({'full_text': inconclusive_msg, 'tokens_count': 1, 'citations_count': 0})}\n\n"
         return
 
-    # 2. Build retrieved chunks mapping for citations
+    # 2. Build retrieved chunks mapping for citations with Stage-2 Neural Cross-Encoder Re-Ranking
     retrieved_chunks = []
     chunk_map: dict[str, dict] = {}
     seen_chunk_ids = set()
 
-    for (chunk, _) in rows:
-        if str(chunk.id) in seen_chunk_ids:
-            continue
-        seen_chunk_ids.add(str(chunk.id))
-        source_key = f"SOURCE_{len(retrieved_chunks) + 1}"
-        chunk_data = {
-            "chunk_id": str(chunk.id),
-            "page_number": chunk.page_number,
-            "bounding_box": chunk.bounding_box or [50.0, 100.0, 500.0, 160.0],
-            "content": chunk.content,
-        }
-        retrieved_chunks.append(chunk_data)
-        chunk_map[source_key] = chunk_data
+    try:
+        reranked_chunks_res = reranker_service.rerank_document_chunks(
+            query=query,
+            candidates=rows,
+            top_k=min(8, len(rows)),
+            boost_legal_terms=True,
+        )
+        for r in reranked_chunks_res:
+            c_id = str(r.chunk_id)
+            if c_id in seen_chunk_ids:
+                continue
+            seen_chunk_ids.add(c_id)
+            source_key = f"SOURCE_{len(retrieved_chunks) + 1}"
+            chunk_data = {
+                "chunk_id": c_id,
+                "page_number": r.page_number,
+                "bounding_box": r.bounding_box or [50.0, 100.0, 500.0, 160.0],
+                "content": r.content,
+            }
+            retrieved_chunks.append(chunk_data)
+            chunk_map[source_key] = chunk_data
+    except Exception:
+        for (chunk, _) in rows:
+            if str(chunk.id) in seen_chunk_ids:
+                continue
+            seen_chunk_ids.add(str(chunk.id))
+            source_key = f"SOURCE_{len(retrieved_chunks) + 1}"
+            chunk_data = {
+                "chunk_id": str(chunk.id),
+                "page_number": chunk.page_number,
+                "bounding_box": chunk.bounding_box or [50.0, 100.0, 500.0, 160.0],
+                "content": chunk.content,
+            }
+            retrieved_chunks.append(chunk_data)
+            chunk_map[source_key] = chunk_data
 
     # Contextual expansion: sibling chunks from the same page
     top_pages = {c["page_number"] for c in retrieved_chunks[:3]}

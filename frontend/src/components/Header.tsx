@@ -18,6 +18,7 @@ import {
   Zap,
   Sun,
   Terminal,
+  ShieldCheck,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
@@ -43,6 +44,7 @@ interface HeaderProps {
   onOpenCommandPalette?: () => void;
   onOpenTenantSelector?: () => void;
   onOpenObservability?: () => void;
+  onOpenHardening?: () => void;
   activeTenantName?: string;
 }
 
@@ -63,6 +65,7 @@ export function Header({
   onOpenCommandPalette,
   onOpenTenantSelector,
   onOpenObservability,
+  onOpenHardening,
   activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
@@ -217,6 +220,19 @@ export function Header({
             <Activity className="w-3 h-3 text-purple-400 animate-pulse" />
             <span className="hidden xl:inline">Prometheus & OTel</span>
             <span className="xl:hidden">OTel</span>
+          </button>
+        )}
+
+        {/* Day 35: Week 5 Capstone Hardening Benchmark Trigger */}
+        {onOpenHardening && (
+          <button
+            onClick={onOpenHardening}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-emerald-500/30 hover:border-emerald-500/70 text-emerald-400 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
+            title="Week 5 Capstone: 100k-Token Stress Test & Enterprise Hardening Benchmark"
+          >
+            <ShieldCheck className="w-3 h-3 text-emerald-400" />
+            <span className="hidden xl:inline">100k Benchmark</span>
+            <span className="xl:hidden">100k</span>
           </button>
         )}
 

@@ -25,6 +25,7 @@ import { NegotiationBattlecardModal } from "@/components/NegotiationBattlecardMo
 import { PortfolioGovernanceCockpit } from "@/components/PortfolioGovernanceCockpit";
 import { TenantSelectorModal } from "@/components/TenantSelectorModal";
 import { SystemObservabilityModal } from "@/components/SystemObservabilityModal";
+import { EnterpriseHardeningModal } from "@/components/EnterpriseHardeningModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -63,6 +64,7 @@ export default function Home() {
   const [isPortfolioCockpitOpen, setIsPortfolioCockpitOpen] = useState(false);
   const [isTenantModalOpen, setIsTenantModalOpen] = useState(false);
   const [isObservabilityOpen, setIsObservabilityOpen] = useState(false);
+  const [isHardeningModalOpen, setIsHardeningModalOpen] = useState(false);
   const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -290,6 +292,7 @@ export default function Home() {
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onOpenTenantSelector={() => setIsTenantModalOpen(true)}
         onOpenObservability={() => setIsObservabilityOpen(true)}
+        onOpenHardening={() => setIsHardeningModalOpen(true)}
         activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
@@ -694,6 +697,7 @@ export default function Home() {
         onOpenZugferdBatch={handleOpenZugferdBatch}
         onOpenCertificate={() => setIsCertificateOpen(true)}
         onOpenObservability={() => setIsObservabilityOpen(true)}
+        onOpenHardening={() => setIsHardeningModalOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
       />
@@ -722,6 +726,13 @@ export default function Home() {
       <SystemObservabilityModal
         isOpen={isObservabilityOpen}
         onClose={() => setIsObservabilityOpen(false)}
+        lang={lang}
+      />
+
+      {/* Day 35: Week 5 Capstone Enterprise Hardening Benchmark Modal */}
+      <EnterpriseHardeningModal
+        isOpen={isHardeningModalOpen}
+        onClose={() => setIsHardeningModalOpen(false)}
         lang={lang}
       />
     </div>

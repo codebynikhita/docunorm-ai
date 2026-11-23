@@ -25,6 +25,7 @@ import {
   getClauseRiskHeatmap,
   generateAmendmentProposal,
   downloadAmendmentPdf,
+  applyAmendmentToDocument,
 } from "@/lib/api";
 import { Language } from "@/lib/i18n";
 
@@ -46,10 +47,13 @@ export function RemediationModal({
   const isDe = lang === "DE";
   const [heatmap, setHeatmap] = useState<DocumentRiskHeatmap | null>(null);
   const [selectedRuleId, setSelectedRuleId] = useState<string>("");
+  const [selectedChunkId, setSelectedChunkId] = useState<string>("");
   const [proposal, setProposal] = useState<AmendmentProposal | null>(null);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [appliedSuccess, setAppliedSuccess] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<"split" | "inline">("split");
 
@@ -75,6 +79,7 @@ export function RemediationModal({
         if (data.risk_items.length > 0) {
           const first = data.risk_items[0];
           setSelectedRuleId(first.statutory_ref);
+          setSelectedChunkId(first.chunk_id);
           loadProposal(documentId, first.statutory_ref, first.snippet);
         } else {
           loadProposal(documentId, "BAFIN-DORA-GENERIC", "Allgemeine Vertragsklausel ohne explizite Regelung");
@@ -86,6 +91,25 @@ export function RemediationModal({
         setLoading(false);
       });
   }, [isOpen, documentId]);
+
+  const handleApplyAmendment = async () => {
+    if (!documentId || !proposal) return;
+    setApplying(true);
+    try {
+      const res = await applyAmendmentToDocument(documentId, {
+        chunk_id: selectedChunkId || "c_1",
+        new_clause_text: proposal.compliant_replacement_de,
+        rule_id: selectedRuleId,
+        justification: `Heilung gem. § 311 BGB / ${proposal.dora_statutory_basis}`,
+      });
+      setAppliedSuccess(res.sha256_hash.slice(0, 12));
+      setTimeout(() => setAppliedSuccess(null), 4000);
+    } catch (err) {
+      console.error("Failed to apply amendment:", err);
+    } finally {
+      setApplying(false);
+    }
+  };
 
   const handleCopy = () => {
     if (!proposal) return;
@@ -136,6 +160,24 @@ export function RemediationModal({
 
           <div className="flex items-center gap-2">
             <button
+              onClick={handleApplyAmendment}
+              disabled={applying || !proposal}
+              className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition-all cursor-pointer uppercase tracking-wider disabled:opacity-50"
+            >
+              {applying ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : appliedSuccess ? (
+                <Check className="w-3.5 h-3.5 text-white" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {appliedSuccess
+                  ? isDe ? `Geheilt (${appliedSuccess})` : `Remediated (${appliedSuccess})`
+                  : isDe ? "Ersatzklausel anwenden" : "Apply Replacement"}
+              </span>
+            </button>
+            <button
               onClick={handleDownloadPdf}
               disabled={downloading}
               className="flex items-center gap-1.5 bg-[var(--foreground)] text-[var(--background)] hover:opacity-90 font-mono font-bold text-xs px-3.5 py-1.5 rounded-lg shadow transition-all cursor-pointer uppercase tracking-wider disabled:opacity-50"
@@ -179,6 +221,7 @@ export function RemediationModal({
                           key={i}
                           onClick={() => {
                             setSelectedRuleId(item.statutory_ref);
+                            setSelectedChunkId(item.chunk_id);
                             if (documentId) {
                               loadProposal(documentId, item.statutory_ref, item.snippet);
                             }

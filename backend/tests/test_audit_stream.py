@@ -1,5 +1,6 @@
 import json
 from uuid import uuid4
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlmodel import select
@@ -69,6 +70,7 @@ async def test_stream_audit_response_generator():
 
             assert len(events) > 0, "Generator must emit events"
             assert len(tokens) > 0, "Generator must emit token deltas"
+            assert citations is not None, "Citations list must be parsed"
             assert done_payload is not None, "Generator must conclude with done event"
             assert done_payload["tokens_count"] > 0
             assert "full_text" in done_payload

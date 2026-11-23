@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     auth,
+    benchmark,
     cache,
     documents,
     metrics,
@@ -14,6 +15,7 @@ from app.api.v1.endpoints import (
 
 api_router = APIRouter(prefix="/api/v1")
 api_router.include_router(auth.router)
+api_router.include_router(benchmark.router, prefix="/benchmark", tags=["Hardening Benchmark"])
 api_router.include_router(cache.router)
 api_router.include_router(documents.router)
 api_router.include_router(metrics.router, prefix="/metrics", tags=["Metrics & Observability"])

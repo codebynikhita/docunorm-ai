@@ -54,6 +54,7 @@ interface CommandPaletteProps {
   onOpenZugferdBatch?: () => void;
   onOpenCertificate: () => void;
   onOpenObservability?: () => void;
+  onOpenHardening?: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
 }
@@ -77,6 +78,7 @@ export function CommandPalette({
   onOpenZugferdBatch,
   onOpenCertificate,
   onOpenObservability,
+  onOpenHardening,
   availableDocuments = [],
   onSelectDocument,
 }: CommandPaletteProps) {
@@ -131,6 +133,22 @@ export function CommandPalette({
             shortcut: "O T",
             action: () => {
               onOpenObservability();
+              onClose();
+            },
+          },
+        ]
+      : []),
+    ...(onOpenHardening
+      ? [
+          {
+            id: "sys-hardening",
+            title_de: "Week 5 Capstone: Enterprise-Härtungsbenchmark (100k Tokens)",
+            title_en: "Week 5 Capstone: Enterprise Hardening Benchmark (100k Tokens)",
+            category: "regulatory" as const,
+            icon: ShieldCheck,
+            shortcut: "W 5",
+            action: () => {
+              onOpenHardening();
               onClose();
             },
           },

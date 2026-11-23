@@ -647,6 +647,101 @@ export async function generateAmendmentProposal(
   return res.json();
 }
 
+export interface RemediationSynthesisRequest {
+  rule_id: string;
+  original_clause: string;
+  target_framework?: string;
+  custom_parameters?: Record<string, string | number | boolean>;
+}
+
+export interface ApplyAmendmentRequest {
+  chunk_id: string;
+  new_clause_text: string;
+  rule_id?: string;
+  justification?: string;
+}
+
+export interface ApplyAmendmentResponse {
+  document_id: string;
+  chunk_id: string;
+  page_number: number;
+  new_content_preview: string;
+  reembedded: boolean;
+  audit_event_id: string;
+  sha256_hash: string;
+  message: string;
+}
+
+export interface LegalAmendmentAgreementResponse {
+  document_id: string;
+  document_filename: string;
+  statutory_framework: string;
+  total_amendments: number;
+  amendments: AmendmentProposal[];
+  signatory_authority: string;
+  sha256_seal: string;
+  status: string;
+}
+
+export async function synthesizeBespokeAmendment(
+  documentId: string,
+  payload: RemediationSynthesisRequest,
+): Promise<AmendmentProposal> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/synthesize-amendment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Failed to synthesize bespoke amendment (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function applyAmendmentToDocument(
+  documentId: string,
+  payload: ApplyAmendmentRequest,
+): Promise<ApplyAmendmentResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/apply-amendment`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Failed to apply amendment to document (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function synthesizeLegalAgreement(
+  documentId: string,
+  targetFramework: string = "DORA",
+): Promise<LegalAmendmentAgreementResponse> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/documents/${documentId}/synthesize-agreement?target_framework=${encodeURIComponent(targetFramework)}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Tenant-ID": getActiveTenantSlug(),
+      },
+    },
+  );
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || `Failed to synthesize agreement (${res.status})`);
+  }
+  return res.json();
+}
+
 export async function downloadAmendmentPdf(documentId: string, proposals?: AmendmentProposal[]): Promise<void> {
   const res = await fetch(`${API_BASE_URL}/api/v1/documents/${documentId}/export-amendment-pdf`, {
     method: "POST",
@@ -2156,6 +2251,70 @@ export async function getRerankerModelInfo(): Promise<CrossEncoderModelInfo> {
   return res.json();
 }
 
+export interface PrecisionEvaluationResult {
+  query: string;
+  mrr: number;
+  ndcg_at_5: number;
+  precision_at_3: number;
+  stage1_baseline_mrr: number;
+  precision_improvement_pct: number;
+  statutory_boost_active: boolean;
+  benchmark_verdict: string;
+}
+
+export interface ContextCompactorResponse {
+  original_token_count: number;
+  compacted_token_count: number;
+  tokens_saved: number;
+  compression_ratio_pct: number;
+  compacted_context: string;
+  statutory_citations_preserved: string[];
+}
+
+export async function evaluateRetrievalPrecision(
+  query: string,
+  candidates: string[],
+  relevantIndices?: number[],
+): Promise<PrecisionEvaluationResult> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rerank/evaluate-precision`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify({
+      query,
+      candidates,
+      relevant_indices: relevantIndices,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Precision evaluation failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function compactContextWindow(
+  passages: string[],
+  preserveCitations: boolean = true,
+): Promise<ContextCompactorResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rerank/compact-context`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify({
+      passages,
+      preserve_citations: preserveCitations,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Context window compaction failed (${res.status})`);
+  }
+  return res.json();
+}
+
 // ---------------------------------------------------------------------------
 // Day 34: Prometheus & OpenTelemetry Regulatory Performance Instrumentation
 // ---------------------------------------------------------------------------
@@ -2252,6 +2411,123 @@ export async function getPrometheusRawMetrics(): Promise<string> {
   }
   return res.text();
 }
+
+// ---------------------------------------------------------------------------
+// Day 35: Week 5 Capstone Hardening Benchmark & 100k-Token Stress Test
+// ---------------------------------------------------------------------------
+
+export interface CorpusBenchmarkStats {
+  total_documents: number;
+  total_pages: number;
+  total_tokens: number;
+  tenants_covered: string[];
+  ocr_scanned_pages: number;
+}
+
+export interface ThroughputBenchmarkStats {
+  total_inquiries: number;
+  concurrent_streams: number;
+  requests_per_second: number;
+  total_elapsed_seconds: number;
+}
+
+export interface LatencyPercentileStats {
+  p50_ms: number;
+  p95_ms: number;
+  p99_ms: number;
+  cached_p50_ms: number;
+  llm_p50_ms: number;
+}
+
+export interface CacheDeduplicationStats {
+  total_queries: number;
+  exact_hits: number;
+  semantic_hits: number;
+  misses: number;
+  deduplication_ratio_pct: number;
+  tokens_saved: number;
+  latency_saved_seconds: number;
+}
+
+export interface ResilienceCheckStats {
+  tenant_isolation_leakage_detected: boolean;
+  redis_fallback_successful: boolean;
+  sse_abort_cleanup_successful: boolean;
+  ocr_recovery_rate_pct: number;
+  memory_leak_detected: boolean;
+}
+
+export interface HardeningBenchmarkReport {
+  benchmark_id: string;
+  run_at: string;
+  status: string;
+  overall_score_pct: number;
+  corpus: CorpusBenchmarkStats;
+  throughput: ThroughputBenchmarkStats;
+  latencies: LatencyPercentileStats;
+  cache: CacheDeduplicationStats;
+  resilience: ResilienceCheckStats;
+  sla_compliance_met: boolean;
+  sha256_attestation: string;
+  certifying_authority: string;
+  details: Record<string, any>;
+}
+
+export async function runHardeningBenchmark(
+  totalInquiries: number = 60,
+  concurrentStreams: number = 15,
+): Promise<HardeningBenchmarkReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/benchmark/run`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify({
+      total_inquiries: totalInquiries,
+      concurrent_inquiries: concurrentStreams,
+      include_ocr_stress: true,
+      target_tenant: getActiveTenantSlug(),
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Hardening benchmark execution failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getLatestHardeningBenchmark(): Promise<HardeningBenchmarkReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/benchmark/latest`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load latest benchmark report (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadBenchmarkCertificatePdf(): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/benchmark/export-certificate-pdf`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to export Hardening Benchmark Certificate PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "DOCUNORM_ENTERPRISE_HARDENING_ZERTIFIKAT.pdf";
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
 
 
 

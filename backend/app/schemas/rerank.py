@@ -74,3 +74,35 @@ class CrossEncoderModelInfo(BaseModel):
     sovereign_fallback_active: bool
     supported_languages: list[str]
     specialized_taxonomies: list[str]
+
+
+class PrecisionEvaluationRequest(BaseModel):
+    query: str = Field(..., min_length=2, max_length=2000)
+    candidates: list[str] = Field(..., min_length=1, max_length=100)
+    relevant_indices: list[int] | None = Field(default=None)
+
+
+class ContextCompactRequest(BaseModel):
+    passages: list[str] = Field(..., min_length=1, max_length=100)
+    preserve_citations: bool = Field(default=True)
+
+
+class PrecisionEvaluationResult(BaseModel):
+    query: str
+    mrr: float = Field(..., description="Mean Reciprocal Rank (0.0 to 1.0)")
+    ndcg_at_5: float = Field(..., description="Normalized Discounted Cumulative Gain @ 5")
+    precision_at_3: float = Field(..., description="Top-3 Precision Ratio")
+    stage1_baseline_mrr: float
+    precision_improvement_pct: float
+    statutory_boost_active: bool = True
+    benchmark_verdict: str = "PRECISION_OPTIMIZED"
+
+
+class ContextCompactorResponse(BaseModel):
+    original_token_count: int
+    compacted_token_count: int
+    tokens_saved: int
+    compression_ratio_pct: float
+    compacted_context: str
+    statutory_citations_preserved: list[str] = Field(default_factory=list)
+
