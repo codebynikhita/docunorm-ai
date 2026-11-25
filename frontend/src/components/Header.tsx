@@ -19,6 +19,7 @@ import {
   Sun,
   Terminal,
   ShieldCheck,
+  Scale,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
@@ -45,6 +46,7 @@ interface HeaderProps {
   onOpenTenantSelector?: () => void;
   onOpenObservability?: () => void;
   onOpenHardening?: () => void;
+  onOpenConflictMatrix?: () => void;
   activeTenantName?: string;
 }
 
@@ -66,6 +68,7 @@ export function Header({
   onOpenTenantSelector,
   onOpenObservability,
   onOpenHardening,
+  onOpenConflictMatrix,
   activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
@@ -233,6 +236,19 @@ export function Header({
             <ShieldCheck className="w-3 h-3 text-emerald-400" />
             <span className="hidden xl:inline">100k Benchmark</span>
             <span className="xl:hidden">100k</span>
+          </button>
+        )}
+
+        {/* Day 38: Cross-Regulatory Conflict & Incompatibility Matrix Trigger */}
+        {onOpenConflictMatrix && (
+          <button
+            onClick={onOpenConflictMatrix}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-rose-500/30 hover:border-rose-500/70 text-rose-400 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
+            title="Normenkollisionsprüfung & Rechtsgutachten (DORA vs. CLOUD Act vs. DSGVO)"
+          >
+            <Scale className="w-3 h-3 text-rose-400" />
+            <span className="hidden xl:inline">Kollisionsprüfung</span>
+            <span className="xl:hidden">Kollision</span>
           </button>
         )}
 

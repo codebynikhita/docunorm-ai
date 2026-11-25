@@ -55,6 +55,7 @@ interface CommandPaletteProps {
   onOpenCertificate: () => void;
   onOpenObservability?: () => void;
   onOpenHardening?: () => void;
+  onOpenConflictMatrix?: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
 }
@@ -79,6 +80,7 @@ export function CommandPalette({
   onOpenCertificate,
   onOpenObservability,
   onOpenHardening,
+  onOpenConflictMatrix,
   availableDocuments = [],
   onSelectDocument,
 }: CommandPaletteProps) {
@@ -149,6 +151,22 @@ export function CommandPalette({
             shortcut: "W 5",
             action: () => {
               onOpenHardening();
+              onClose();
+            },
+          },
+        ]
+      : []),
+    ...(onOpenConflictMatrix
+      ? [
+          {
+            id: "reg-conflict-matrix",
+            title_de: "Aufsichtsrechtliche Normenkollisionsprüfung & Rechtsgutachten",
+            title_en: "Cross-Regulatory Conflict & Incompatibility Matrix",
+            category: "regulatory" as const,
+            icon: Scale,
+            shortcut: "K P",
+            action: () => {
+              onOpenConflictMatrix();
               onClose();
             },
           },

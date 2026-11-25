@@ -2528,6 +2528,117 @@ export async function downloadBenchmarkCertificatePdf(): Promise<void> {
   document.body.removeChild(a);
 }
 
+// ---------------------------------------------------------------------------
+// Day 38: Cross-Regulatory Conflict & Jurisdictional Incompatibility Matrix
+// ---------------------------------------------------------------------------
+
+export type RegulatoryStandard =
+  | "DORA"
+  | "GDPR"
+  | "KWG"
+  | "CLOUD_ACT"
+  | "BGB"
+  | "LKSG"
+  | "NIS2"
+  | "BAIT_VAIT";
+
+export type ConflictSeverity =
+  | "CRITICAL_BLOCKER"
+  | "HIGH_RISK"
+  | "MEDIUM_COLLISION"
+  | "HARMONIZED";
+
+export interface NormativeConflict {
+  conflict_id: string;
+  title_de: string;
+  title_en: string;
+  source_clause_text: string;
+  page_number: number;
+  bounding_box: number[];
+  standard_a: RegulatoryStandard;
+  standard_b: RegulatoryStandard;
+  severity: ConflictSeverity;
+  statutory_clash_summary_de: string;
+  statutory_clash_summary_en: string;
+  jurisdiction_clash: string;
+  legal_risk_score: number;
+  resolution_covenant_de: string;
+  resolution_covenant_en: string;
+  statutory_precedence_rule: string;
+}
+
+export interface DocumentConflictMatrix {
+  document_id: string;
+  document_filename: string;
+  analyzed_at: string;
+  overall_collision_index: number;
+  conflicts_detected: number;
+  critical_blockers: number;
+  high_risks: number;
+  medium_risks: number;
+  jurisdictional_exposure_map: Record<string, number>;
+  conflicts: NormativeConflict[];
+  compliance_verdict: "COMPATIBLE" | "CONDITIONALLY_RECONCILABLE" | "INCOMPATIBLE_BLOCKER";
+  sha256_hash: string;
+}
+
+export interface ClauseReconcileResponse {
+  has_conflicts: boolean;
+  detected_conflicts: NormativeConflict[];
+  reconciliation_covenant_de?: string;
+  reconciliation_covenant_en?: string;
+  jurisdiction_exposure: string;
+}
+
+export async function getDocumentConflictMatrix(documentId: string): Promise<DocumentConflictMatrix> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/collision/documents/${documentId}/matrix`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load regulatory conflict matrix (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadConflictMatrixPdf(documentId: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/collision/documents/${documentId}/export-matrix-pdf`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to download Conflict Matrix Legal Opinion PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `GUTACHTEN_KOLLISIONSPRUEFUNG_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function reconcileClauseSnippet(clauseText: string): Promise<ClauseReconcileResponse> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/collision/reconcile-clause`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify({
+      clause_text: clauseText,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Stateless clause reconciliation failed (${res.status})`);
+  }
+  return res.json();
+}
+
 
 
 

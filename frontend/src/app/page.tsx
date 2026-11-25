@@ -26,6 +26,7 @@ import { PortfolioGovernanceCockpit } from "@/components/PortfolioGovernanceCock
 import { TenantSelectorModal } from "@/components/TenantSelectorModal";
 import { SystemObservabilityModal } from "@/components/SystemObservabilityModal";
 import { EnterpriseHardeningModal } from "@/components/EnterpriseHardeningModal";
+import { RegulatoryConflictMatrixModal } from "@/components/RegulatoryConflictMatrixModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -65,6 +66,7 @@ export default function Home() {
   const [isTenantModalOpen, setIsTenantModalOpen] = useState(false);
   const [isObservabilityOpen, setIsObservabilityOpen] = useState(false);
   const [isHardeningModalOpen, setIsHardeningModalOpen] = useState(false);
+  const [isConflictMatrixOpen, setIsConflictMatrixOpen] = useState(false);
   const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -293,6 +295,7 @@ export default function Home() {
         onOpenTenantSelector={() => setIsTenantModalOpen(true)}
         onOpenObservability={() => setIsObservabilityOpen(true)}
         onOpenHardening={() => setIsHardeningModalOpen(true)}
+        onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
         activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
@@ -698,6 +701,7 @@ export default function Home() {
         onOpenCertificate={() => setIsCertificateOpen(true)}
         onOpenObservability={() => setIsObservabilityOpen(true)}
         onOpenHardening={() => setIsHardeningModalOpen(true)}
+        onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
       />
@@ -733,6 +737,15 @@ export default function Home() {
       <EnterpriseHardeningModal
         isOpen={isHardeningModalOpen}
         onClose={() => setIsHardeningModalOpen(false)}
+        lang={lang}
+      />
+
+      {/* Day 38: Cross-Regulatory Conflict & Jurisdictional Incompatibility Matrix Modal */}
+      <RegulatoryConflictMatrixModal
+        isOpen={isConflictMatrixOpen}
+        onClose={() => setIsConflictMatrixOpen(false)}
+        documentId={documentId}
+        documentName={documentName}
         lang={lang}
       />
     </div>
