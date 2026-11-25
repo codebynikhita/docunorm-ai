@@ -551,6 +551,31 @@ Month 2 Enterprise Hardening Active • All Unit Tests Passing (119/119) • Cro
     - **0 TypeScript compilation errors** (`tsc --noEmit`).
     - **0 ESLint warnings** (`eslint src/`).
     - **Next.js production build succeeded** (`npm run build`).
+* [x] **Day 39 (Wed, Nov 25):** RegTech Horizon Scanner & Contract Drift Auditor (Dynamic Statutory Versioning & Delta Impact Analysis across DORA RTS 2026, BaFin RS 10/2026, EU AI Act High-Risk Enforcement August 2026, EDPB 04/2026 Key Sovereignty, BAFA LkSG).
+  * **Architecture & Statutory Horizon Catalog (`backend/app/schemas/horizon.py`, `backend/app/services/horizon_scanner.py`):**
+    - `RegulatoryUpdate`, `ContractDriftItem`, `ContractDriftReport`: Models statutory milestones, issuing authorities (`BAFIN`, `EBA`, `EIOPA`, `EU_COMMISSION`, `BAFA`, `BSI`, `EDPB`), urgency levels, and days-to-enforcement countdown metrics.
+    - Statutory RegTech Horizon Timeline Catalog:
+      1. *EBA/EIOPA/ESMA Final RTS Sub-Outsourcing (JC 2024 28)*: Mandatory flow-through of supervisory audit rights to 4th-party subcontractors and 30-day objection veto.
+      2. *BaFin Circular 10/2026 (Auslagerungen & Notfall-Entflechtung)*: Mandatory emergency unwinding without prepayment penalties and 90-day transition support.
+      3. *EU AI Act High-Risk Enforcement (August 2026)*: Contractual technical documentation, automated logging, and post-market monitoring covenants (Art. 12 & 72).
+      4. *EDPB Guidelines 04/2026 (Cryptographic Sovereignty)*: Mandate for EU-resident HSM BYOK key sovereignty and legal appeal obligations against extraterritorial CLOUD Act orders.
+      5. *BAFA Guidance 2026 (§ 9 LkSG Tier-N)*: Ad-hoc risk assessments and preventive remediation for indirect upstream suppliers.
+    - `audit_contract_drift`: Analyzes contract chunks against statutory horizon, calculating overall drift score (0-100), retrofitting status (`UP_TO_DATE`, `ACTION_REQUIRED`, `NON_COMPLIANT_EXPIRED`), and specific gap remedies.
+    - `generate_drift_report_pdf`: Produces a certified 2-page DIN 5008 Legal Expert Opinion PDF (*Rechtsgutachten zur aufsichtsrechtlichen Vertragskonformität und Horizont-Drift*) with drift cards, statutory timeline, legal attestation, and cryptographic SHA-256 seal.
+  * **FastAPI REST Endpoints (`backend/app/api/v1/endpoints/horizon.py`):**
+    - `GET /api/v1/horizon/updates`: Active statutory updates catalog with authority filter.
+    - `GET/POST /api/v1/horizon/documents/{document_id}/drift-analysis`: Document contract drift evaluation against upcoming deadlines.
+    - `GET /api/v1/horizon/documents/{document_id}/export-drift-pdf`: Certified DIN 5008 PDF report generation and download.
+  * **Frontend Enterprise Radar (`frontend/src/components/RegTechHorizonModal.tsx`, `Header.tsx`, `CommandPalette.tsx`, `api.ts`):**
+    - Dual-view interface: "📊 Vertragsdrift-Analyse" (overall score gauge, status badge, clause drift cards with compliance gaps and 1-click retrofitting copy) and "🗓️ Aufsichtsrechtlicher Horizont" (statutory timeline with authority filters and official source links).
+    - Header trigger button (`📡 Horizon-Monitor`) and Command Palette shortcut (`R H`).
+    - 1-click `[ ⬇️ Vertragsdrift-Gutachten PDF ]` download button.
+  * **Quality Gates & Tests (`backend/tests/test_horizon_scanner.py`):**
+    - **162/162 backend Pytest tests passing (100%)** (9 new tests in `test_horizon_scanner.py`).
+    - **0 Ruff lint errors** across backend codebase.
+    - **0 TypeScript compilation errors** (`tsc --noEmit`).
+    - **0 ESLint warnings** (`eslint src/`).
+    - **Next.js production build succeeded** (`npm run build`).
 
 ---
 

@@ -2639,6 +2639,117 @@ export async function reconcileClauseSnippet(clauseText: string): Promise<Clause
   return res.json();
 }
 
+// ================= DAY 39: REGTECH HORIZON SCANNER & CONTRACT DRIFT =================
+
+export type IssuingAuthority =
+  | "BAFIN"
+  | "EBA"
+  | "EIOPA"
+  | "EU_COMMISSION"
+  | "BAFA"
+  | "BSI"
+  | "EDPB";
+
+export type UpdateUrgency = "IMMEDIATE" | "HIGH" | "SCHEDULED" | "INFORMATIONAL";
+
+export type DriftSeverity =
+  | "CRITICAL_DRIFT"
+  | "HIGH_RISK"
+  | "MODERATE_GAP"
+  | "COMPLIANT";
+
+export interface RegulatoryUpdate {
+  update_id: string;
+  title_de: string;
+  title_en: string;
+  issuing_authority: IssuingAuthority;
+  publication_date: string;
+  enforcement_deadline: string;
+  urgency: UpdateUrgency;
+  impacted_frameworks: string[];
+  summary_de: string;
+  summary_en: string;
+  affected_clause_domains: string[];
+  statutory_source_url: string;
+  days_until_enforcement: number;
+}
+
+export interface ContractDriftItem {
+  clause_id: string;
+  page_number: number;
+  current_clause_text: string;
+  associated_update_id: string;
+  drift_severity: DriftSeverity;
+  compliance_gap_de: string;
+  compliance_gap_en: string;
+  days_until_deadline: number;
+  retrofitting_action_required: string;
+}
+
+export interface ContractDriftReport {
+  document_id: string;
+  document_filename: string;
+  audited_at: string;
+  overall_drift_score: number;
+  total_clauses_analyzed: number;
+  drifting_clauses_count: number;
+  critical_enforcement_items: number;
+  earliest_enforcement_deadline?: string | null;
+  applicable_regulatory_updates: RegulatoryUpdate[];
+  drift_items: ContractDriftItem[];
+  retrofitting_status: "UP_TO_DATE" | "ACTION_REQUIRED" | "NON_COMPLIANT_EXPIRED";
+  sha256_seal: string;
+}
+
+export async function getRegulatoryUpdates(authority?: string): Promise<RegulatoryUpdate[]> {
+  const url = new URL(`${API_BASE_URL}/api/v1/horizon/updates`);
+  if (authority) {
+    url.searchParams.set("authority", authority);
+  }
+  const res = await fetch(url.toString(), {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load regulatory updates (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function getContractDriftAnalysis(documentId: string): Promise<ContractDriftReport> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/horizon/documents/${documentId}/drift-analysis`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load contract drift analysis (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadContractDriftPdf(documentId: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/horizon/documents/${documentId}/export-drift-pdf`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to download Contract Drift Legal Opinion PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `GUTACHTEN_VERTRAGSDRIFT_${documentId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 
 
 

@@ -27,6 +27,7 @@ import { TenantSelectorModal } from "@/components/TenantSelectorModal";
 import { SystemObservabilityModal } from "@/components/SystemObservabilityModal";
 import { EnterpriseHardeningModal } from "@/components/EnterpriseHardeningModal";
 import { RegulatoryConflictMatrixModal } from "@/components/RegulatoryConflictMatrixModal";
+import { RegTechHorizonModal } from "@/components/RegTechHorizonModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -67,6 +68,7 @@ export default function Home() {
   const [isObservabilityOpen, setIsObservabilityOpen] = useState(false);
   const [isHardeningModalOpen, setIsHardeningModalOpen] = useState(false);
   const [isConflictMatrixOpen, setIsConflictMatrixOpen] = useState(false);
+  const [isHorizonModalOpen, setIsHorizonModalOpen] = useState(false);
   const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -296,6 +298,7 @@ export default function Home() {
         onOpenObservability={() => setIsObservabilityOpen(true)}
         onOpenHardening={() => setIsHardeningModalOpen(true)}
         onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
+        onOpenHorizonScanner={() => setIsHorizonModalOpen(true)}
         activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
@@ -702,6 +705,7 @@ export default function Home() {
         onOpenObservability={() => setIsObservabilityOpen(true)}
         onOpenHardening={() => setIsHardeningModalOpen(true)}
         onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
+        onOpenHorizonScanner={() => setIsHorizonModalOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
       />
@@ -747,6 +751,14 @@ export default function Home() {
         documentId={documentId}
         documentName={documentName}
         lang={lang}
+      />
+
+      {/* Day 39: RegTech Horizon Scanner & Contract Drift Modal */}
+      <RegTechHorizonModal
+        isOpen={isHorizonModalOpen}
+        onClose={() => setIsHorizonModalOpen(false)}
+        documentId={documentId || undefined}
+        documentFilename={documentName || undefined}
       />
     </div>
   );

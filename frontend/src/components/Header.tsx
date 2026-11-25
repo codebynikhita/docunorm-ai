@@ -20,6 +20,7 @@ import {
   Terminal,
   ShieldCheck,
   Scale,
+  Radio,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
@@ -47,6 +48,7 @@ interface HeaderProps {
   onOpenObservability?: () => void;
   onOpenHardening?: () => void;
   onOpenConflictMatrix?: () => void;
+  onOpenHorizonScanner?: () => void;
   activeTenantName?: string;
 }
 
@@ -69,6 +71,7 @@ export function Header({
   onOpenObservability,
   onOpenHardening,
   onOpenConflictMatrix,
+  onOpenHorizonScanner,
   activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
@@ -249,6 +252,19 @@ export function Header({
             <Scale className="w-3 h-3 text-rose-400" />
             <span className="hidden xl:inline">Kollisionsprüfung</span>
             <span className="xl:hidden">Kollision</span>
+          </button>
+        )}
+
+        {/* Day 39: RegTech Horizon Scanner & Contract Drift Auditor Trigger */}
+        {onOpenHorizonScanner && (
+          <button
+            onClick={onOpenHorizonScanner}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-cyan-500/30 hover:border-cyan-500/70 text-cyan-400 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
+            title="RegTech Horizon-Scanner & Vertragsdrift (DORA RTS 2026, BaFin RS 10/2026, EU AI Act)"
+          >
+            <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
+            <span className="hidden xl:inline">Horizon-Monitor</span>
+            <span className="xl:hidden">Horizon</span>
           </button>
         )}
 

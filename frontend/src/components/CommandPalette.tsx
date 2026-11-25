@@ -18,6 +18,7 @@ import {
   ExternalLink,
   Table as TableIcon,
   Scale,
+  Radio,
   Flame,
   Landmark,
   Layers,
@@ -56,6 +57,7 @@ interface CommandPaletteProps {
   onOpenObservability?: () => void;
   onOpenHardening?: () => void;
   onOpenConflictMatrix?: () => void;
+  onOpenHorizonScanner?: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
 }
@@ -81,6 +83,7 @@ export function CommandPalette({
   onOpenObservability,
   onOpenHardening,
   onOpenConflictMatrix,
+  onOpenHorizonScanner,
   availableDocuments = [],
   onSelectDocument,
 }: CommandPaletteProps) {
@@ -167,6 +170,22 @@ export function CommandPalette({
             shortcut: "K P",
             action: () => {
               onOpenConflictMatrix();
+              onClose();
+            },
+          },
+        ]
+      : []),
+    ...(onOpenHorizonScanner
+      ? [
+          {
+            id: "reg-horizon-scanner",
+            title_de: "RegTech Horizon-Scanner & Vertragsdrift-Auditor (2026/2027)",
+            title_en: "RegTech Horizon Scanner & Contract Drift Auditor (2026/2027)",
+            category: "regulatory" as const,
+            icon: Radio,
+            shortcut: "R H",
+            action: () => {
+              onOpenHorizonScanner();
               onClose();
             },
           },
