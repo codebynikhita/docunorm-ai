@@ -19,6 +19,7 @@ import {
   Table as TableIcon,
   Scale,
   Radio,
+  ClipboardList,
   Flame,
   Landmark,
   Layers,
@@ -58,6 +59,7 @@ interface CommandPaletteProps {
   onOpenHardening?: () => void;
   onOpenConflictMatrix?: () => void;
   onOpenHorizonScanner?: () => void;
+  onOpenDoraRegister?: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
 }
@@ -84,6 +86,7 @@ export function CommandPalette({
   onOpenHardening,
   onOpenConflictMatrix,
   onOpenHorizonScanner,
+  onOpenDoraRegister,
   availableDocuments = [],
   onSelectDocument,
 }: CommandPaletteProps) {
@@ -186,6 +189,22 @@ export function CommandPalette({
             shortcut: "R H",
             action: () => {
               onOpenHorizonScanner();
+              onClose();
+            },
+          },
+        ]
+      : []),
+    ...(onOpenDoraRegister
+      ? [
+          {
+            id: "reg-dora-register",
+            title_de: "DORA Art. 28(3) Informationsregister & Portfolio-Massensanierung",
+            title_en: "DORA Art. 28(3) Register of Information & Portfolio Batch Remediation",
+            category: "regulatory" as const,
+            icon: ClipboardList,
+            shortcut: "D R",
+            action: () => {
+              onOpenDoraRegister();
               onClose();
             },
           },

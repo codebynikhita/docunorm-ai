@@ -6,6 +6,7 @@ from app.api.v1.endpoints import (
     cache,
     collision,
     documents,
+    dora_register,
     horizon,
     metrics,
     ocr,
@@ -21,6 +22,7 @@ api_router.include_router(benchmark.router, prefix="/benchmark", tags=["Hardenin
 api_router.include_router(cache.router)
 api_router.include_router(collision.router)
 api_router.include_router(documents.router)
+api_router.include_router(dora_register.router)
 api_router.include_router(horizon.router)
 api_router.include_router(metrics.router, prefix="/metrics", tags=["Metrics & Observability"])
 api_router.include_router(ocr.router)

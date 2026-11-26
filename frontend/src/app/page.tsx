@@ -28,6 +28,7 @@ import { SystemObservabilityModal } from "@/components/SystemObservabilityModal"
 import { EnterpriseHardeningModal } from "@/components/EnterpriseHardeningModal";
 import { RegulatoryConflictMatrixModal } from "@/components/RegulatoryConflictMatrixModal";
 import { RegTechHorizonModal } from "@/components/RegTechHorizonModal";
+import { DoraRegisterRemediationModal } from "@/components/DoraRegisterRemediationModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -69,6 +70,7 @@ export default function Home() {
   const [isHardeningModalOpen, setIsHardeningModalOpen] = useState(false);
   const [isConflictMatrixOpen, setIsConflictMatrixOpen] = useState(false);
   const [isHorizonModalOpen, setIsHorizonModalOpen] = useState(false);
+  const [isDoraRegisterModalOpen, setIsDoraRegisterModalOpen] = useState(false);
   const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -299,6 +301,7 @@ export default function Home() {
         onOpenHardening={() => setIsHardeningModalOpen(true)}
         onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
         onOpenHorizonScanner={() => setIsHorizonModalOpen(true)}
+        onOpenDoraRegister={() => setIsDoraRegisterModalOpen(true)}
         activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
@@ -706,6 +709,7 @@ export default function Home() {
         onOpenHardening={() => setIsHardeningModalOpen(true)}
         onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
         onOpenHorizonScanner={() => setIsHorizonModalOpen(true)}
+        onOpenDoraRegister={() => setIsDoraRegisterModalOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
       />
@@ -759,6 +763,12 @@ export default function Home() {
         onClose={() => setIsHorizonModalOpen(false)}
         documentId={documentId || undefined}
         documentFilename={documentName || undefined}
+      />
+
+      {/* Day 40: DORA Art. 28(3) Register of Information & Batch Remediation Modal */}
+      <DoraRegisterRemediationModal
+        isOpen={isDoraRegisterModalOpen}
+        onClose={() => setIsDoraRegisterModalOpen(false)}
       />
     </div>
   );

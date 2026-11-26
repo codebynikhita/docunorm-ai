@@ -2749,6 +2749,140 @@ export async function downloadContractDriftPdf(documentId: string): Promise<void
   document.body.removeChild(a);
 }
 
+// ================= DAY 40: DORA ART. 28(3) REGISTER & BATCH REMEDIATION =================
+
+export type ICTServiceCategory =
+  | "CLOUD_SAAS"
+  | "CLOUD_PAAS"
+  | "CLOUD_IAAS"
+  | "DATACENTER_COLOCATION"
+  | "SOFTWARE_LICENSE"
+  | "SECURITY_OPERATIONS"
+  | "CORE_BANKING";
+
+export type FunctionCriticality = "CRITICAL_IMPORTANT" | "NON_CRITICAL" | "SUPPORTING";
+
+export type DoraRemediationStatus = "CLEAN" | "REMEDIATION_REQUIRED" | "REMEDIATED_AUTOMATED";
+
+export interface DoraRegisterEntry {
+  contract_id: string;
+  contract_filename: string;
+  vendor_legal_name: string;
+  vendor_lei: string;
+  vendor_country: string;
+  service_category: ICTServiceCategory;
+  criticality: FunctionCriticality;
+  governing_law: string;
+  has_subcontracting: boolean;
+  subcontractor_depth: number;
+  audit_rights_compliant: boolean;
+  exit_notice_period_days: number;
+  substitution_time_months: number;
+  remediation_status: DoraRemediationStatus;
+  last_audited_at: string;
+}
+
+export interface DoraInformationRegister {
+  tenant_id: string;
+  reporting_entity_name: string;
+  reporting_date: string;
+  reporting_lei: string;
+  total_ict_contracts: number;
+  critical_ict_contracts: number;
+  overall_compliance_rate: number;
+  entries: DoraRegisterEntry[];
+  esa_template_version: string;
+  sha256_register_seal: string;
+}
+
+export interface BatchRemediationItem {
+  document_id: string;
+  document_filename: string;
+  vendor_name: string;
+  clauses_remediated_count: number;
+  pre_remediation_risk_score: number;
+  post_remediation_risk_score: number;
+  remediated_clause_types: string[];
+  synthesized_amendment_title: string;
+}
+
+export interface BatchRemediationResult {
+  tenant_id: string;
+  executed_at: string;
+  total_contracts_processed: number;
+  total_clauses_synthesized: number;
+  pre_risk_portfolio_average: number;
+  post_risk_portfolio_average: number;
+  risk_reduction_percentage: number;
+  remediation_items: BatchRemediationItem[];
+  sha256_batch_seal: string;
+}
+
+export async function getDoraInformationRegister(): Promise<DoraInformationRegister> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/dora-register/register`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load DORA Information Register (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadDoraRegisterPdf(): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/dora-register/export-pdf`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to download DORA Information Register PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "BAFIN_DORA_INFORMATIONSREGISTER.pdf";
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function downloadDoraRegisterJson(): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/dora-register/export-json`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to download ESA DORA Register JSON (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "ESA_DORA_REGISTER_JC202405.json";
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function executePortfolioBatchRemediation(): Promise<BatchRemediationResult> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/dora-register/batch-remediation`, {
+    method: "POST",
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Portfolio batch remediation failed (${res.status})`);
+  }
+  return res.json();
+}
+
 
 
 

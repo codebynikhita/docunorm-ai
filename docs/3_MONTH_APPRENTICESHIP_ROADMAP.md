@@ -576,6 +576,31 @@ Month 2 Enterprise Hardening Active • All Unit Tests Passing (119/119) • Cro
     - **0 TypeScript compilation errors** (`tsc --noEmit`).
     - **0 ESLint warnings** (`eslint src/`).
     - **Next.js production build succeeded** (`npm run build`).
+* [x] **Day 40 (Thu, Nov 26):** DORA Art. 28(3) Statutory Register of Information & Portfolio Batch Remediation Orchestrator (ESA JC 2024 05 / EBA/ITS/2024/01 Taxonomy, BaFin Circular 10/2026 Mandates, Automated Multi-Contract Harmonization & Certified 3-Page DIN 5008 PDF Exporter).
+  * **Architecture & Statutory Registry Engine (`backend/app/schemas/dora_register.py`, `backend/app/services/dora_register_engine.py`):**
+    - `DoraRegisterEntry`, `DoraInformationRegister`: Standardized electronic reporting model strictly aligned with the European Supervisory Authorities (ESA) Final Draft ITS on the Register of Information under DORA (JC 2024 05):
+      - Table B_01: Contractual arrangements (Vendor legal name, 20-character LEI, country code, service category, criticality classification, governing law, remediation status).
+      - Table B_04: Sub-outsourcing cascading depth (Tier-1 through Tier-4 flow-through), audit rights verification under DORA Art. 30(3)(e), notice periods, and substitution timeframe estimation.
+    - `execute_portfolio_batch_remediation`: Multi-contract batch harmonization engine synthesizing compliant covenants (Tier-4 veto rights, BaFin emergency unwinding, unannounced on-site audit access) across all deficient contracts simultaneously, computing mathematical Pre vs. Post Portfolio Risk metrics (`risk_reduction_percentage` > 70%).
+    - `generate_dora_register_pdf`: PyMuPDF generation engine producing official 3-page DIN 5008 BaFin & ESA Information Register Dossiers with scorecard gauges, Table B_01 and B_04 layouts, Executive Board Attestation block, and cryptographic SHA-256 seal.
+    - `export_esa_json`: Exports structured JSON matching EBA/ITS/2024/01 taxonomy.
+  * **FastAPI REST Endpoints (`backend/app/api/v1/endpoints/dora_register.py`):**
+    - `GET /api/v1/dora-register/register`: Generates/retrieves tenant-partitioned statutory Information Register.
+    - `GET /api/v1/dora-register/export-json`: Streams ESA JC 2024 05 compliant JSON attachment.
+    - `GET /api/v1/dora-register/export-pdf`: Generates and streams certified 3-page DIN 5008 BaFin Register PDF.
+    - `POST /api/v1/dora-register/batch-remediation`: Triggers portfolio-wide automated contract remediation with risk delta tracking.
+  * **Frontend Enterprise Cockpit (`DoraRegisterRemediationModal.tsx`, `Header.tsx`, `CommandPalette.tsx`, `api.ts`):**
+    - Visual scorecard dials: Total ICT Contracts, Critical Functions count, Compliance Rate dial, and Reporting LEI.
+    - Tab 1: "📋 Gesetzliches Register" with filterable table (Criticality, LEI, Category, Subcontracting depth, Audit Rights, Notice days, Remediation Status).
+    - Tab 2: "⚡ Portfolio-Massensanierung" with 1-click batch execution, Before vs. After risk reduction comparison bar, and per-contract synthesized amendment clause breakdowns.
+    - Export buttons: `[ ⬇️ BaFin Register PDF ]` and `[ ⬇️ ESA JSON ]`.
+    - Header trigger button (`📋 DORA-Register`) and Command Palette shortcut (`D R`).
+  * **Quality Gates & Tests (`backend/tests/test_dora_register_engine.py`):**
+    - **168/168 backend Pytest tests passing (100%)** (6 new tests in `test_dora_register_engine.py`).
+    - **0 Ruff lint errors** across backend codebase.
+    - **0 TypeScript compilation errors** (`tsc --noEmit`).
+    - **0 ESLint warnings** (`eslint src/`).
+    - **Next.js production build succeeded** (`npm run build`).
 
 ---
 

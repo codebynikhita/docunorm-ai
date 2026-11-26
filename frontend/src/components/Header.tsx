@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Scale,
   Radio,
+  ClipboardList,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
@@ -49,6 +50,7 @@ interface HeaderProps {
   onOpenHardening?: () => void;
   onOpenConflictMatrix?: () => void;
   onOpenHorizonScanner?: () => void;
+  onOpenDoraRegister?: () => void;
   activeTenantName?: string;
 }
 
@@ -72,6 +74,7 @@ export function Header({
   onOpenHardening,
   onOpenConflictMatrix,
   onOpenHorizonScanner,
+  onOpenDoraRegister,
   activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
@@ -265,6 +268,19 @@ export function Header({
             <Radio className="w-3 h-3 text-cyan-400 animate-pulse" />
             <span className="hidden xl:inline">Horizon-Monitor</span>
             <span className="xl:hidden">Horizon</span>
+          </button>
+        )}
+
+        {/* Day 40: DORA Art. 28(3) Register of Information & Portfolio Batch Remediation Trigger */}
+        {onOpenDoraRegister && (
+          <button
+            onClick={onOpenDoraRegister}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-indigo-500/30 hover:border-indigo-500/70 text-indigo-400 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
+            title="DORA Art. 28(3) Informationsregister & Portfolio-Massensanierung (ESA JC 2024 05 / BaFin)"
+          >
+            <ClipboardList className="w-3 h-3 text-indigo-400" />
+            <span className="hidden xl:inline">DORA-Register</span>
+            <span className="xl:hidden">Register</span>
           </button>
         )}
 
