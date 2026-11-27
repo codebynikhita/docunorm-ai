@@ -9,6 +9,7 @@ from app.api.v1.endpoints import (
     dora_register,
     horizon,
     metrics,
+    negotiation_sim,
     ocr,
     portfolio,
     rerank,
@@ -25,6 +26,7 @@ api_router.include_router(documents.router)
 api_router.include_router(dora_register.router)
 api_router.include_router(horizon.router)
 api_router.include_router(metrics.router, prefix="/metrics", tags=["Metrics & Observability"])
+api_router.include_router(negotiation_sim.router)
 api_router.include_router(ocr.router)
 api_router.include_router(portfolio.router)
 api_router.include_router(rerank.router)

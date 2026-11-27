@@ -22,6 +22,7 @@ import {
   Scale,
   Radio,
   ClipboardList,
+  Handshake,
 } from "lucide-react";
 import { Language, translations } from "@/lib/i18n";
 import { UserProfile } from "@/lib/api";
@@ -51,6 +52,7 @@ interface HeaderProps {
   onOpenConflictMatrix?: () => void;
   onOpenHorizonScanner?: () => void;
   onOpenDoraRegister?: () => void;
+  onOpenNegotiationSim?: () => void;
   activeTenantName?: string;
 }
 
@@ -75,6 +77,7 @@ export function Header({
   onOpenConflictMatrix,
   onOpenHorizonScanner,
   onOpenDoraRegister,
+  onOpenNegotiationSim,
   activeTenantName,
 }: HeaderProps) {
   const t = translations[lang];
@@ -281,6 +284,19 @@ export function Header({
             <ClipboardList className="w-3 h-3 text-indigo-400" />
             <span className="hidden xl:inline">DORA-Register</span>
             <span className="xl:hidden">Register</span>
+          </button>
+        )}
+
+        {/* Day 41: Autonomous AI Contract Negotiation Simulator Trigger */}
+        {onOpenNegotiationSim && (
+          <button
+            onClick={onOpenNegotiationSim}
+            className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[var(--surface-card)] border border-teal-500/30 hover:border-teal-500/70 text-teal-400 text-[10px] font-mono cursor-pointer transition-all shadow-sm font-bold shrink-0"
+            title="KI-Verhandlungs-Simulator & Stresstest (DORA Art. 30, BaFin RS 10/2026, CLOUD Act)"
+          >
+            <Handshake className="w-3 h-3 text-teal-400" />
+            <span className="hidden xl:inline">Verhandlungs-Simulator</span>
+            <span className="xl:hidden">Simulator</span>
           </button>
         )}
 

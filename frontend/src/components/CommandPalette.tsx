@@ -20,6 +20,7 @@ import {
   Scale,
   Radio,
   ClipboardList,
+  Handshake,
   Flame,
   Landmark,
   Layers,
@@ -60,6 +61,7 @@ interface CommandPaletteProps {
   onOpenConflictMatrix?: () => void;
   onOpenHorizonScanner?: () => void;
   onOpenDoraRegister?: () => void;
+  onOpenNegotiationSim?: () => void;
   availableDocuments?: any[];
   onSelectDocument?: (doc: any) => void;
 }
@@ -87,6 +89,7 @@ export function CommandPalette({
   onOpenConflictMatrix,
   onOpenHorizonScanner,
   onOpenDoraRegister,
+  onOpenNegotiationSim,
   availableDocuments = [],
   onSelectDocument,
 }: CommandPaletteProps) {
@@ -205,6 +208,22 @@ export function CommandPalette({
             shortcut: "D R",
             action: () => {
               onOpenDoraRegister();
+              onClose();
+            },
+          },
+        ]
+      : []),
+    ...(onOpenNegotiationSim
+      ? [
+          {
+            id: "reg-negotiation-sim",
+            title_de: "KI-Verhandlungs-Simulator & Gegenpartei-Stresstest (DORA / BaFin)",
+            title_en: "AI Negotiation Simulator & Counter-Party Stresstest (DORA / BaFin)",
+            category: "regulatory" as const,
+            icon: Handshake,
+            shortcut: "V S",
+            action: () => {
+              onOpenNegotiationSim();
               onClose();
             },
           },

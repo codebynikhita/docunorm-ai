@@ -2883,6 +2883,90 @@ export async function executePortfolioBatchRemediation(): Promise<BatchRemediati
   return res.json();
 }
 
+// ================= DAY 41: AI NEGOTIATION SIMULATOR & MULTI-TURN STRESSTEST =================
+
+export type NegotiationStance = "AGGRESSIVE_DEFENSE" | "BALANCED_PRAGMATIC" | "STRICT_REGULATORY_LINE";
+export type VendorArchetype = "US_HYPERSCALER" | "EU_SOVEREIGN_CLOUD" | "LEGACY_MAINFRAME_VENDOR" | "TIER4_SUBCONTRACTOR";
+export type ClauseDomain = "supervisory_audit_rights" | "emergency_exit_unwinding" | "subcontractor_veto" | "cloud_act_byok" | "sla_penalties";
+
+export interface NegotiationRound {
+  round_number: number;
+  speaker: "ENTERPRISE_BUYER" | "VENDOR_LEGAL_COUNSEL" | "SUPERVISORY_OBSERVER";
+  speaker_title: string;
+  argument_de: string;
+  argument_en: string;
+  cited_statutes: string[];
+  proposed_redline_snippet: string;
+  concession_score: number;
+  regulatory_risk_score: number;
+}
+
+export interface NegotiationSession {
+  session_id: string;
+  document_id: string;
+  document_filename: string;
+  clause_domain: ClauseDomain;
+  vendor_archetype: VendorArchetype;
+  enterprise_stance: NegotiationStance;
+  rounds: NegotiationRound[];
+  current_status: "IN_PROGRESS" | "CONSENSUS_REACHED" | "DEADLOCK_ESCALATED";
+  final_reconciled_clause: string | null;
+  bafin_audit_safe: boolean;
+  consensus_round_index: number | null;
+  initial_risk_score: number;
+  final_risk_score: number;
+  risk_reduction_percentage: number;
+  executed_at: string;
+  sha256_audit_trail: string;
+}
+
+export interface NegotiationStepRequest {
+  document_id: string;
+  document_filename?: string;
+  clause_domain?: ClauseDomain;
+  vendor_archetype?: VendorArchetype;
+  enterprise_stance?: NegotiationStance;
+  current_clause_text: string;
+  user_counter_argument?: string;
+  round_count?: number;
+}
+
+export async function simulateContractNegotiation(request: NegotiationStepRequest): Promise<NegotiationSession> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/negotiation-sim/simulate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+    body: JSON.stringify(request),
+  });
+  if (!res.ok) {
+    throw new Error(`Negotiation simulation failed (${res.status})`);
+  }
+  return res.json();
+}
+
+export async function downloadNegotiationProtocolPdf(sessionId: string): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/negotiation-sim/sessions/${sessionId}/export-protocol-pdf`, {
+    headers: {
+      "X-Tenant-ID": getActiveTenantSlug(),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to download Negotiation Protocol PDF (${res.status})`);
+  }
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `VERHANDLUNGSPROTOKOLL_${sessionId.slice(0, 8)}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+
 
 
 

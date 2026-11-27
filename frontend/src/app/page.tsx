@@ -29,6 +29,7 @@ import { EnterpriseHardeningModal } from "@/components/EnterpriseHardeningModal"
 import { RegulatoryConflictMatrixModal } from "@/components/RegulatoryConflictMatrixModal";
 import { RegTechHorizonModal } from "@/components/RegTechHorizonModal";
 import { DoraRegisterRemediationModal } from "@/components/DoraRegisterRemediationModal";
+import { NegotiationSimulatorModal } from "@/components/NegotiationSimulatorModal";
 import { Language } from "@/lib/i18n";
 import { uploadDocument, listDocuments, UserProfile, DocumentItem, TenantItem, getCurrentTenantContext } from "@/lib/api";
 import { Bot } from "lucide-react";
@@ -71,6 +72,7 @@ export default function Home() {
   const [isConflictMatrixOpen, setIsConflictMatrixOpen] = useState(false);
   const [isHorizonModalOpen, setIsHorizonModalOpen] = useState(false);
   const [isDoraRegisterModalOpen, setIsDoraRegisterModalOpen] = useState(false);
+  const [isNegotiationSimOpen, setIsNegotiationSimOpen] = useState(false);
   const [activeTenant, setActiveTenant] = useState<TenantItem | null>(null);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -302,6 +304,7 @@ export default function Home() {
         onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
         onOpenHorizonScanner={() => setIsHorizonModalOpen(true)}
         onOpenDoraRegister={() => setIsDoraRegisterModalOpen(true)}
+        onOpenNegotiationSim={() => setIsNegotiationSimOpen(true)}
         activeTenantName={activeTenant ? `Mandant: ${activeTenant.name.split(" ")[0]}` : undefined}
       />
 
@@ -710,6 +713,7 @@ export default function Home() {
         onOpenConflictMatrix={() => setIsConflictMatrixOpen(true)}
         onOpenHorizonScanner={() => setIsHorizonModalOpen(true)}
         onOpenDoraRegister={() => setIsDoraRegisterModalOpen(true)}
+        onOpenNegotiationSim={() => setIsNegotiationSimOpen(true)}
         availableDocuments={availableDocuments}
         onSelectDocument={handleSelectDocument}
       />
@@ -769,6 +773,14 @@ export default function Home() {
       <DoraRegisterRemediationModal
         isOpen={isDoraRegisterModalOpen}
         onClose={() => setIsDoraRegisterModalOpen(false)}
+      />
+
+      {/* Day 41: Autonomous AI Contract Negotiation Simulator Modal */}
+      <NegotiationSimulatorModal
+        isOpen={isNegotiationSimOpen}
+        onClose={() => setIsNegotiationSimOpen(false)}
+        documentId={documentId || undefined}
+        documentFilename={documentName || undefined}
       />
     </div>
   );
